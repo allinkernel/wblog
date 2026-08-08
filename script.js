@@ -68,10 +68,16 @@ cBg.addEventListener('input', (e) => {
 });
 
 
-// 3. 自动化大纲生成器
+// 3. 自动化大纲生成器（修复版）
 function generateTOC() {
     const tocContainer = document.getElementById('toc-container');
-    const headings = article.querySelectorAll('h2, h3');
+    if (!tocContainer) return;
+
+    // 1. 扩大匹配范围，包含 h1, h2, h3, h4
+    const rawHeadings = article.querySelectorAll('h1, h2, h3, h4');
+
+    // 2. 过滤掉 texi2html 文档总标题（通常带 settitle 类），其余全保留
+    const headings = Array.from(rawHeadings).filter(h => !h.classList.contains('settitle'));
     
     if (headings.length === 0) {
         tocContainer.innerHTML = "<span style='color:#999'>本文无大纲节点</span>";
@@ -84,11 +90,12 @@ function generateTOC() {
         heading.id = anchorId;
         
         const li = document.createElement('li');
-        li.className = heading.tagName.toLowerCase() === 'h2' ? 'toc-item-h2' : 'toc-item-h3';
+        // 动态匹配对应的 class：toc-item-h1, toc-item-h2, toc-item-h3 等
+        li.className = `toc-item-${heading.tagName.toLowerCase()}`;
         
         const a = document.createElement('a');
         a.href = `#${anchorId}`;
-        a.innerText = heading.innerText;
+        a.innerText = heading.innerText.trim();
         
         li.appendChild(a);
         ul.appendChild(li);
