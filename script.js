@@ -136,18 +136,45 @@ window.addEventListener('DOMContentLoaded', () => {
     initPanelMinimizers();
 
     // 载入正文与大纲
-    fetch('body.html')
-        .then(response => response.text())
+    // fetch('body.html')
+    //     .then(response => response.text())
+    //     .then(htmlData => {
+    //         article.innerHTML = htmlData;
+    //         generateTOC(); 
+    //     })
+    //     .catch(() => {
+    //         document.getElementById('toc-container').innerHTML = "<span style='color:red'>大纲加载失败</span>";
+    //     });
+
+    // 1. 获取当前 URL 路径（例如：/linux/linux.html）
+    const currentPath = window.location.pathname;
+
+    // 2. 拼接绝对 Fetch 路径
+    let fileToFetch;
+    if (currentPath === '/' || currentPath === '/index.html') {
+        fileToFetch = '/template/body.html'; 
+    } else {
+        // currentPath 自带开头的 '/'，例如 '/linux/linux.html'
+        // 拼接后得到 '/data/linux/linux.html'
+        fileToFetch = `/data${currentPath}`;
+    }
+
+    // 3. 请求文章正文
+    fetch(fileToFetch)
+        .then(response => {
+            if (!response.ok) throw new Error('文件不存在');
+            return response.text();
+        })
         .then(htmlData => {
             article.innerHTML = htmlData;
-            generateTOC(); 
+            generateTOC();
         })
         .catch(() => {
-            document.getElementById('toc-container').innerHTML = "<span style='color:red'>大纲加载失败</span>";
+            article.innerHTML = "<p style='color:red'>内容加载失败，请检查路径</p>";
         });
 
     // 载入归档树
-    fetch('tree.html')
+    fetch('/template/tree.html')
         .then(response => response.text())
         .then(htmlData => {
             document.getElementById('tree-container').innerHTML = htmlData;
