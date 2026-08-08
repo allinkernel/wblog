@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的极简内容平台</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- 1. 悬浮控制面板组 -->
+    <div id="dock-container">
+        
+        <!-- 方块一：排版调节面板 -->
+        <div class="panel-box" id="panel-config">
+            <div class="panel-header">
+                <span class="panel-icon">⚙️</span>
+                <span class="panel-title">版面调节</span>
+                <button class="min-btn">➖</button>
+            </div>
+            <div class="panel-content">
+                <div class="control-group">
+                    <label>字体样式：</label>
+                    <select id="font-select">
+                        <!-- 【新增核心项并作为默认】完全不干预原本的 HTML 结果 -->
+                        <option value="font-native" selected>文档原生 (Native)</option>
+                        <option value="font-serif">强制衬线 (Serif)</option>
+                        <option value="font-mono">强制等宽 (Mono)</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>版面宽度：</label>
+                    <input type="range" id="width-slider" min="400" max="1200" value="700">
+                    <span id="width-val">700px</span>
+                </div>
+                <div class="control-group">
+                    <label>文字大小：</label>
+                    <input type="range" id="size-slider" min="14" max="32" value="18">
+                    <span id="size-val">18px</span>
+                </div>
+                <div class="control-group">
+                    <label>版面位置：</label>
+                    <input type="range" id="position-slider" min="-100" max="100" value="0">
+                    <span id="position-val">居中</span>
+                </div>
+                <div class="control-group">
+                    <label>文本行距：</label>
+                    <input type="range" id="line-slider" min="1.2" max="2.5" step="0.1" value="1.7">
+                    <span id="line-val">1.7</span>
+                </div>
+                <div class="control-group">
+                    <label>文字颜色：</label>
+                    <input type="color" id="color-text" value="#222222">
+                    <label>背景：</label>
+                    <input type="color" id="color-bg" value="#fbfbfb">
+                </div>
+            </div>
+        </div>
+
+        <!-- 方块二：大纲目录面板 -->
+        <div class="panel-box" id="panel-toc">
+            <div class="panel-header">
+                <span class="panel-icon">📜</span>
+                <span class="panel-title">文章大纲</span>
+                <button class="min-btn">➖</button>
+            </div>
+            <div class="panel-content scrollable">
+                <div id="toc-container">正在加载大纲...</div>
+            </div>
+        </div>
+
+        <!-- 方块三：所有文章面板 -->
+        <div class="panel-box" id="panel-tree">
+            <div class="panel-header">
+                <span class="panel-icon">📁</span>
+                <span class="panel-title">文章列表</span>
+                <button class="min-btn">➖</button>
+            </div>
+            <div class="panel-content scrollable">
+                <div id="tree-container">正在载入归档...</div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 2. 正文核心包裹区 -->
+    <div id="article-wrapper">
+        <!-- 默认类改为 font-native -->
+        <main id="article-container" class="font-native">
+            <p>正在读取正文内容...</p>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
