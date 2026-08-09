@@ -65,6 +65,109 @@ function copyToClipboard(text) {
 }
 
 /* ==========================================================================
+   🖐️ PDF 风格画布小手平移功能 (Canvas Pan Tool)
+   ========================================================================== */
+function initCanvasPan() {
+    // 注入动态样式：定义画布光标与排他规则
+    const panStyle = document.createElement('style');
+    panStyle.innerHTML = `
+        body {
+            cursor: grab;
+        }
+        body.is-panning {
+            cursor: grabbing !important;
+            user-select: none !important;
+            -webkit-user-select: none !important;
+        }
+        /* 保持代码块、设置面板、交互控件的原生光标状态 */
+        .code-block-wrapper, code, pre, .code-lines,
+        input, select, button, textarea, a,
+        .panel-box, .toc-container, #code-lightbox-overlay, #lightbox-overlay {
+            cursor: auto;
+        }
+        button, select, a, input[type="range"], .tree-toggle, .toc-toggle {
+            cursor: pointer;
+        }
+        .code-lines, code:not(pre code) {
+            cursor: text;
+        }
+    `;
+    document.head.appendChild(panStyle);
+
+    let isPanning = false;
+    let startX = 0, startY = 0;
+    let startPercent = 0;
+    let startScrollTop = 0;
+
+    document.addEventListener('mousedown', (e) => {
+        // 仅响应鼠标左键点击
+        if (e.button !== 0) return;
+
+        // 如果点击在代码块、面板、输入控件或链接上，不触发小手画布拖拽
+        if (e.target.closest('.code-block-wrapper, code, pre, input, select, button, textarea, a, .panel-box, .lightbox-overlay, .code-lightbox-overlay')) {
+            return;
+        }
+
+        const pSlider = document.getElementById('position-slider');
+        if (!pSlider) return;
+
+        isPanning = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        startPercent = parseInt(pSlider.value) || 0;
+        startScrollTop = window.scrollY || document.documentElement.scrollTop;
+
+        document.body.classList.add('is-panning');
+    });
+
+    document.addEventListener('mousemove', (e) => {
+        if (!isPanning) return;
+
+        e.preventDefault();
+
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+
+        // 1. 上下拖拽 -> 平移页面垂直滚动
+        window.scrollTo({
+            top: startScrollTop - dy,
+            behavior: 'instant'
+        });
+
+        // 2. 左右拖拽 -> 更新版面位置滑块并实时重绘画布
+        const wrapper = document.getElementById('article-wrapper');
+        const pSlider = document.getElementById('position-slider');
+
+        if (wrapper && pSlider) {
+            const maxShift = (window.innerWidth - wrapper.offsetWidth) / 2;
+            // 兜底分母，确保任何分辨率下拖拽灵敏度均衡
+            const denom = Math.abs(maxShift) > 20 ? maxShift : (window.innerWidth / 2);
+            
+            const deltaPercent = (dx / denom) * 100;
+            
+            const minVal = pSlider.min ? parseInt(pSlider.min) : -100;
+            const maxVal = pSlider.max ? parseInt(pSlider.max) : 100;
+
+            let newPercent = Math.round(startPercent + deltaPercent);
+            newPercent = Math.max(minVal, Math.min(maxVal, newPercent));
+
+            pSlider.value = newPercent;
+            updatePosition(); // 触发页面更新及面板坐标值更新
+        }
+    });
+
+    const stopPanning = () => {
+        if (isPanning) {
+            isPanning = false;
+            document.body.classList.remove('is-panning');
+        }
+    };
+
+    document.addEventListener('mouseup', stopPanning);
+    window.addEventListener('blur', stopPanning);
+}
+
+/* ==========================================================================
    💡 光标与只读锁核心配置
    ========================================================================== */
 function makeReadOnlyEditable(el) {
@@ -73,29 +176,21 @@ function makeReadOnlyEditable(el) {
     el.setAttribute('spellcheck', 'false');
     el.setAttribute('tabindex', '0');
 
-    // 拦截输入/粘贴/拖拽：允许跳动光标与选中，但阻止篡改
     el.addEventListener('beforeinput', (e) => e.preventDefault());
     el.addEventListener('paste', (e) => e.preventDefault());
     el.addEventListener('drop', (e) => e.preventDefault());
 }
 
-/* ==========================================================================
-   💡 增强所有代码区域（行内代码 + 代码块容器）
-   ========================================================================== */
 function enhanceAllCode() {
     const article = document.getElementById('article-container');
     if (!article) return;
 
-    // 同时选中【行内代码】与【代码块容器】
     const targets = article.querySelectorAll('code:not(pre code), .code-lines');
     targets.forEach(el => {
         makeReadOnlyEditable(el);
     });
 }
 
-/* ==========================================================================
-   🎯 代码块内部 Ctrl+A / Cmd+A 局部全选逻辑
-   ========================================================================== */
 function initCodeSelectAll() {
     document.addEventListener('keydown', (e) => {
         if ((e.ctrlKey || e.metaKey) && (e.key === 'a' || e.key === 'A')) {
@@ -128,7 +223,6 @@ function initCodeSelectAll() {
 /* ==========================================================================
    全屏代码查看器 Lightbox 逻辑
    ========================================================================== */
-
 function initCodeLightbox() {
     if (document.getElementById('code-lightbox-overlay')) return;
 
@@ -203,7 +297,6 @@ function openCodeLightbox(lang, rawText, codeBlockWrapper) {
     if (linesContainer) {
         const clonedLines = linesContainer.cloneNode(true);
         body.appendChild(clonedLines);
-        // 关键修复：克隆节点会丢失 DOM 事件监听，在此重新绑定只读光标逻辑
         makeReadOnlyEditable(clonedLines);
     } else {
         body.textContent = rawText;
@@ -259,7 +352,6 @@ function enhanceCodeBlocks() {
         lineContentArray.forEach((lineText, idx) => {
             const lineNum = idx + 1;
             const content = lineText === '' ? ' ' : lineText;
-            // 💥 核心修复：为 .line-num 增加 contenteditable="false" 与 user-select: none，彻底隔绝选中高亮
             linesHtml += `
                 <div class="code-line">
                     <span class="line-num" contenteditable="false" style="min-width: ${numWidthPx}px; user-select: none; -webkit-user-select: none; -moz-user-select: none;">${lineNum}</span>
@@ -814,6 +906,9 @@ function renderTopicTree(manifest, topicKey) {
     treeContainer.appendChild(treeEl);
 }
 
+/* ==========================================================================
+   🖼️ 全屏图片查看器 Lightbox 逻辑 (基础灯箱功能)
+   ========================================================================== */
 function initImageLightbox() {
     if (!document.getElementById('lightbox-overlay')) {
         const overlay = document.createElement('div');
@@ -869,11 +964,12 @@ function initImageLightbox() {
 window.addEventListener('DOMContentLoaded', () => {
     const article = document.getElementById('article-container');
 
+    initCanvasPan();        // 初始化小手平移画布功能
     initPanelMinimizers();
     bindControls();
     initImageLightbox();
     initCodeLightbox();
-    initCodeSelectAll(); // 绑定 Ctrl+A 监听
+    initCodeSelectAll();
 
     const currentPath = window.location.pathname;
 
@@ -897,13 +993,12 @@ window.addEventListener('DOMContentLoaded', () => {
                     img.style.zoom = '';
                 });
 
-                // 核心：必须按顺序在 DOM 渲染后执行
                 try {
-                    enhanceCodeBlocks();  // 1. 转换代码块
+                    enhanceCodeBlocks();
                 } catch(e) { console.error("enhanceCodeBlocks 报错:", e); }
 
                 try {
-                    enhanceAllCode();     // 2. 统一为行内代码与代码块挂载跳动光标 + 防篡改锁
+                    enhanceAllCode();
                 } catch(e) { console.error("enhanceAllCode 报错:", e); }
 
                 generateTOC();
