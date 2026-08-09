@@ -41,43 +41,99 @@ function updatePosition() {
     localStorage.setItem('blog-pos', percent);
 }
 
-// 2. 自动化大纲生成器（修复版）
+// 2. 自动化大纲生成器（包含树状分级与点击收缩功能）
 function generateTOC() {
     const tocContainer = document.getElementById('toc-container');
     const article = document.getElementById('article-container');
     if (!tocContainer || !article) return;
 
-    // 1. 扩大匹配范围，包含 h1, h2, h3, h4
-    const rawHeadings = article.querySelectorAll('h1, h2, h3, h4');
-
-    // 2. 过滤掉 texi2html 文档总标题（通常带 settitle 类），其余全保留
+    // 匹配 h1 ~ h6 全部标题
+    const rawHeadings = article.querySelectorAll('h1, h2, h3, h4, h5, h6');
     const headings = Array.from(rawHeadings).filter(h => !h.classList.contains('settitle'));
     
     if (headings.length === 0) {
         tocContainer.innerHTML = "<span style='color:#999'>本文无大纲节点</span>";
         return;
     }
-    
-    const ul = document.createElement('ul');
+
+    // 构建嵌套层级树结构
+    const rootTree = { level: 0, children: [] };
+    const stack = [rootTree];
+
     headings.forEach((heading, index) => {
-        // 优先复用原节点已有 ID，无 ID 时才自动生成
+        const level = parseInt(heading.tagName.substring(1), 10);
         const anchorId = heading.id || `toc-anchor-${index}`;
         heading.id = anchorId;
-        
-        const li = document.createElement('li');
-        // 动态匹配对应的 class：toc-item-h1, toc-item-h2, toc-item-h3 等
-        li.className = `toc-item-${heading.tagName.toLowerCase()}`;
-        
-        const a = document.createElement('a');
-        a.href = `#${anchorId}`;
-        a.innerText = heading.innerText.trim();
-        
-        li.appendChild(a);
-        ul.appendChild(li);
+
+        const node = {
+            level: level,
+            id: anchorId,
+            text: heading.innerText.trim(),
+            children: []
+        };
+
+        while (stack.length > 1 && stack[stack.length - 1].level >= level) {
+            stack.pop();
+        }
+
+        stack[stack.length - 1].children.push(node);
+        stack.push(node);
     });
-    
+
+    // 递归渲染包含折叠箭头的 HTML 树
+    function buildTOCList(nodes) {
+        const ul = document.createElement('ul');
+        ul.className = 'toc-tree';
+
+        nodes.forEach(node => {
+            const li = document.createElement('li');
+            li.className = `toc-item toc-item-h${node.level}`;
+
+            const itemRow = document.createElement('div');
+            itemRow.className = 'toc-item-row';
+
+            // 若含有子节点，生成折叠/展开按钮
+            if (node.children.length > 0) {
+                const toggle = document.createElement('span');
+                toggle.className = 'toc-toggle';
+                toggle.innerText = '▼';
+                
+                toggle.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const subUl = li.querySelector(':scope > ul');
+                    if (subUl) {
+                        const isHidden = subUl.style.display === 'none';
+                        subUl.style.display = isHidden ? 'block' : 'none';
+                        toggle.innerText = isHidden ? '▼' : '▶';
+                    }
+                });
+                itemRow.appendChild(toggle);
+            } else {
+                const spacer = document.createElement('span');
+                spacer.className = 'toc-spacer';
+                itemRow.appendChild(spacer);
+            }
+
+            const a = document.createElement('a');
+            a.href = `#${node.id}`;
+            a.innerText = node.text;
+            itemRow.appendChild(a);
+
+            li.appendChild(itemRow);
+
+            if (node.children.length > 0) {
+                const subUl = buildTOCList(node.children);
+                li.appendChild(subUl);
+            }
+
+            ul.appendChild(li);
+        });
+
+        return ul;
+    }
+
     tocContainer.innerHTML = '';
-    tocContainer.appendChild(ul);
+    tocContainer.appendChild(buildTOCList(rootTree.children));
 }
 
 // 3. 初始化控制方块的“展开/最小化”状态流
@@ -112,9 +168,9 @@ function bindControls() {
     const wSlider = document.getElementById('width-slider');
     const sSlider = document.getElementById('size-slider');
     const pSlider = document.getElementById('position-slider');
-    const lSlider = document.getElementById('line-slider');     // 【新增】
-    const cText = document.getElementById('color-text');         // 【新增】
-    const cBg = document.getElementById('color-bg');             // 【新增】
+    const lSlider = document.getElementById('line-slider');
+    const cText = document.getElementById('color-text');
+    const cBg = document.getElementById('color-bg');
     const fSelect = document.getElementById('font-select');
 
     // 版面宽度
@@ -138,13 +194,13 @@ function bindControls() {
     pSlider?.addEventListener('input', updatePosition);
     window.addEventListener('resize', updatePosition);
 
-    // 兼容旧字体选择器（加 ?. 防空，不抛异常）
+    // 兼容旧字体选择器
     fSelect?.addEventListener('change', (e) => {
         if (article) article.className = e.target.value;
         localStorage.setItem('blog-font', e.target.value);
     });
 
-    // 【新增监听：字体 2D 矩阵配置】
+    // 字体 2D 矩阵配置
     document.querySelector('.font-matrix-table')?.addEventListener('change', (e) => {
         if (e.target.type === 'radio') {
             const groupName = e.target.name;
@@ -158,7 +214,7 @@ function bindControls() {
         }
     });
 
-    // 【新增监听：行间距】
+    // 行间距
     lSlider?.addEventListener('input', (e) => {
         root.style.setProperty('--line-height', e.target.value);
         const valEl = document.getElementById('line-val');
@@ -166,13 +222,13 @@ function bindControls() {
         localStorage.setItem('blog-line', e.target.value);
     });
 
-    // 【新增监听：文字颜色】
+    // 文字颜色
     cText?.addEventListener('input', (e) => {
         root.style.setProperty('--text-color', e.target.value);
         localStorage.setItem('blog-ctext', e.target.value);
     });
 
-    // 【新增监听：网页背景颜色】
+    // 网页背景颜色
     cBg?.addEventListener('input', (e) => {
         root.style.setProperty('--bg-color', e.target.value);
         localStorage.setItem('blog-cbg', e.target.value);
@@ -185,18 +241,18 @@ function restoreSavedSettings() {
     const wSlider = document.getElementById('width-slider');
     const sSlider = document.getElementById('size-slider');
     const pSlider = document.getElementById('position-slider');
-    const lSlider = document.getElementById('line-slider');     // 【新增】
-    const cText = document.getElementById('color-text');         // 【新增】
-    const cBg = document.getElementById('color-bg');             // 【新增】
+    const lSlider = document.getElementById('line-slider');
+    const cText = document.getElementById('color-text');
+    const cBg = document.getElementById('color-bg');
     const fSelect = document.getElementById('font-select');
 
     const savedWidth = localStorage.getItem('blog-width');
     const savedSize = localStorage.getItem('blog-size');
     const savedFont = localStorage.getItem('blog-font');
     const savedPos = localStorage.getItem('blog-pos');
-    const savedLine = localStorage.getItem('blog-line');   // 【新增】
-    const savedCText = localStorage.getItem('blog-ctext'); // 【新增】
-    const savedCBg = localStorage.getItem('blog-cbg');     // 【新增】
+    const savedLine = localStorage.getItem('blog-line');
+    const savedCText = localStorage.getItem('blog-ctext');
+    const savedCBg = localStorage.getItem('blog-cbg');
 
     if (savedWidth && wSlider) {
         wSlider.value = savedWidth;
@@ -217,25 +273,22 @@ function restoreSavedSettings() {
     if (savedPos && pSlider) {
         pSlider.value = savedPos;
     }
-    // 【还原行距控制】
     if (savedLine && lSlider) {
         lSlider.value = savedLine;
         root.style.setProperty('--line-height', savedLine);
         const valEl = document.getElementById('line-val');
         if (valEl) valEl.innerText = savedLine;
     }
-    // 【还原文字颜色控制】
     if (savedCText && cText) {
         cText.value = savedCText;
         root.style.setProperty('--text-color', savedCText);
     }
-    // 【还原网页背景控制】
     if (savedCBg && cBg) {
         cBg.value = savedCBg;
         root.style.setProperty('--bg-color', savedCBg);
     }
 
-    // 【还原字体 2D 矩阵配置】
+    // 还原字体 2D 矩阵配置
     const fontTable = document.querySelector('.font-matrix-table');
     if (fontTable) {
         Object.keys(radioVarMap).forEach((groupName) => {
@@ -245,7 +298,6 @@ function restoreSavedSettings() {
             if (savedValue) {
                 targetRadio = fontTable.querySelector(`input[name="${groupName}"][value="${savedValue}"]`);
             }
-            // 兜底读取 HTML 默认 checked 项
             if (!targetRadio) {
                 targetRadio = fontTable.querySelector(`input[name="${groupName}"]:checked`);
             }
@@ -270,20 +322,16 @@ window.addEventListener('DOMContentLoaded', () => {
     initPanelMinimizers();
     bindControls();
 
-    // 1. 获取当前 URL 路径（例如：/linux/linux.html）
     const currentPath = window.location.pathname;
 
-    // 2. 拼接绝对 Fetch 路径
     let fileToFetch;
     if (currentPath === '/' || currentPath === '/index.html') {
         fileToFetch = '/template/body.html'; 
     } else {
-        // currentPath 自带开头的 '/'，例如 '/linux/linux.html'
-        // 拼接后得到 '/data/linux/linux.html'
         fileToFetch = `/data${currentPath}`;
     }
 
-    // 3. 请求文章正文
+    // 请求文章正文
     fetch(fileToFetch)
         .then(response => {
             if (!response.ok) throw new Error('文件不存在');
@@ -313,6 +361,5 @@ window.addEventListener('DOMContentLoaded', () => {
             if (treeEl) treeEl.innerHTML = "<span style='color:red'>列表加载失败</span>";
         });
 
-    // 读取并还原历史配置
     restoreSavedSettings();
 });

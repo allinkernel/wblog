@@ -38,7 +38,6 @@ body {
    🎯 字体控制表格样式与精准映射
    ========================================================================== */
 
-/* 1. 矩阵基础字体映射 Stack */
 :root {
     --font-stack-sans-prop: sans-serif;
     --font-stack-serif-prop: serif;
@@ -53,7 +52,7 @@ body {
     --font-quote: inherit;
 }
 
-/* 2. 标签精确匹配应用 */
+/* 标签精确匹配应用 */
 #article-container { font-family: var(--font-body); }
 
 #article-container code,
@@ -77,13 +76,13 @@ body {
 #article-container sup,
 #article-container sub { font-family: var(--font-quote); }
 
-/* 3. Setting 中的 font-matrix 表格样式（适配 280px 侧边栏） */
+/* Setting 中的 font-matrix 表格样式 */
 .font-matrix-table {
     width: 100%;
     border-collapse: collapse;
     font-size: 10px;
     text-align: center;
-    table-layout: fixed; /* 严格按列宽约束，绝不撑开宽度 */
+    table-layout: fixed;
 }
 
 .font-matrix-table th, 
@@ -149,17 +148,15 @@ p { margin-bottom: 1.5em; text-align: justify; }
     right: 20px;
     display: flex;
     flex-direction: column;
+    align-items: flex-end; /* 🎯 2. 确保子面板/图标统一靠右对齐 */
     gap: 15px;
     z-index: 1000;
-    
-    /* 🎯 解决空间不够与滑动不出来的核心限制属性 */
     max-height: calc(100vh - 40px);
     overflow-y: auto;
     overflow-x: hidden;
-    padding-right: 4px; /* 留出美观的滚动条空间 */
+    padding-right: 4px;
 }
 
-/* 侧边栏独立滚动条视觉微调 */
 #dock-container::-webkit-scrollbar {
     width: 4px;
 }
@@ -174,14 +171,14 @@ p { margin-bottom: 1.5em; text-align: justify; }
     border-radius: 6px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     width: 280px;
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
     display: flex;
     flex-direction: column;
     overflow: hidden;
     font-family: monospace !important;
     color: #222 !important;
     line-height: 1.5 !important;
-    flex-shrink: 0; /* 防止子元素卡片在空间不够时被挤压变形 */
+    flex-shrink: 0;
 }
 
 .panel-box * {
@@ -196,6 +193,7 @@ p { margin-bottom: 1.5em; text-align: justify; }
     border-bottom: 1px solid #eee;
     cursor: pointer;
     user-select: none;
+    width: 100%;
 }
 
 .panel-icon { margin-right: 8px; font-size: 14px; }
@@ -220,19 +218,69 @@ p { margin-bottom: 1.5em; text-align: justify; }
     font-size: 12px;
 }
 
-.scrollable { max-height: 180px; overflow-y: auto; }
-.scrollable ul { margin: 0; padding-left: 15px; list-style-type: square; }
-.scrollable li { margin-bottom: 6px; }
-.scrollable a { color: var(--text-color); opacity: 0.75; text-decoration: none; }
+.scrollable { max-height: 220px; overflow-y: auto; }
+.scrollable a { color: var(--text-color); opacity: 0.85; text-decoration: none; font-weight: normal !important; }
 .scrollable a:hover { text-decoration: underline; opacity: 1; color: #ff6600; }
-.toc-item-h2 { padding-left: 0px; font-weight: bold;}
-.toc-item-h3 { padding-left: 12px; list-style-type: circle;}
+
+/* 🎯 1. 统一字体加粗：所有大纲层级全部不加粗 */
+.toc-item-h1, .toc-item-h2, .toc-item-h3, .toc-item-h4, .toc-item-h5, .toc-item-h6 {
+    font-weight: normal !important;
+}
+
+/* 🎯 1. 大纲树形折叠层级结构样式 */
+.toc-tree {
+    list-style: none !important;
+    padding-left: 0 !important;
+    margin: 0 !important;
+}
+
+.toc-tree .toc-tree {
+    padding-left: 12px !important; /* 子菜单层级缩进 */
+}
+
+.toc-item {
+    margin-bottom: 4px;
+}
+
+.toc-item-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    line-height: 1.4;
+}
+
+.toc-toggle {
+    cursor: pointer;
+    font-size: 8px;
+    color: #777;
+    user-select: none;
+    width: 12px;
+    height: 12px;
+    line-height: 12px;
+    text-align: center;
+    flex-shrink: 0;
+    transition: color 0.15s;
+}
+
+.toc-toggle:hover {
+    color: #ff6600;
+}
+
+.toc-spacer {
+    width: 12px;
+    flex-shrink: 0;
+}
 
 .control-group { display: flex; align-items: center; justify-content: space-between; gap: 5px;}
 .control-group input[type="range"] { flex-grow: 1; max-width: 110px;}
 .control-group input[type="color"] { border: 1px solid #ccc; background: none; width: 40px; height: 24px; cursor: pointer; padding: 0;}
 
-.panel-box.minimized { width: 42px; height: 38px; }
+/* 🎯 2. 最小化卡片状态：靠右放置 */
+.panel-box.minimized { 
+    width: 42px; 
+    height: 38px; 
+    margin-left: auto; /* 靠右贴紧 */
+}
 .panel-box.minimized .panel-title, .panel-box.minimized .panel-content { display: none; }
 .panel-box.minimized .panel-header { border-bottom: none; padding: 10px 0; justify-content: center; }
 .panel-box.minimized .panel-icon { margin-right: 0; font-size: 16px; }
