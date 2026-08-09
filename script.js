@@ -39,20 +39,49 @@ function updatePosition() {
     localStorage.setItem('blog-pos', percent);
 }
 
-/* 🎯 重构核心：生成逐行 Flex 结构的代码块，消除折叠换行时的行号错位问题 */
+/**
+ * 🎯 跨环境兼容性剪贴板复制工具函数 (支持 HTTP / 本地文件 / HTTPS)
+ */
+function copyToClipboard(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+        return navigator.clipboard.writeText(text);
+    } else {
+        return new Promise((resolve, reject) => {
+            try {
+                const textArea = document.createElement("textarea");
+                textArea.value = text;
+                textArea.style.position = "fixed";
+                textArea.style.left = "-9999px";
+                textArea.style.top = "-9999px";
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                const successful = document.execCommand('copy');
+                document.body.removeChild(textArea);
+                if (successful) resolve();
+                else reject(new Error("execCommand 复制失败"));
+            } catch (err) {
+                reject(err);
+            }
+        });
+    }
+}
+
+/* 🎯 重构核心：生成代码块，加入局部显示格式、局部主题选择框及通用复制函数 */
 function enhanceCodeBlocks() {
     const article = document.getElementById('article-container');
     if (!article) return;
 
     const preNodes = article.querySelectorAll('pre');
     preNodes.forEach((pre) => {
-        // 防止重复增强
         if (pre.closest('.code-block-wrapper')) return;
 
         const codeNode = pre.querySelector('code') || pre;
-        const rawText = codeNode.innerText;
+        
+        // 1. 准确提取纯净原代码文本（不受任何后期 DOM 修改影响）
+        const rawText = codeNode.textContent || codeNode.innerText || "";
 
-        // 提取代码语言/类型
+        // 2. 提取代码语言
         let lang = 'CODE';
         const classList = Array.from(pre.classList).concat(Array.from(codeNode.classList));
         for (const cls of classList) {
@@ -68,16 +97,14 @@ function enhanceCodeBlocks() {
             }
         }
 
-        // 按行切割 HTML 内容以保留转义和标签
+        // 3. 逐行包裹 HTML 渲染
         const lineContentArray = codeNode.innerHTML.replace(/\r\n/g, '\n').split('\n');
-        // 处理末尾空行
         if (lineContentArray.length > 1 && lineContentArray[lineContentArray.length - 1] === '') {
             lineContentArray.pop();
         }
 
         const lineCount = lineContentArray.length || 1;
         const maxDigitLen = String(lineCount).length;
-        // 计算行号宽度（支持大数字）
         const numWidthPx = Math.max(34, maxDigitLen * 10 + 12);
 
         let linesHtml = '';
@@ -92,7 +119,7 @@ function enhanceCodeBlocks() {
             `;
         });
 
-        // 构建 UI 框架
+        // 4. 构建外层组件与顶部 Header 控制栏
         const wrapper = document.createElement('div');
         wrapper.className = 'code-block-wrapper';
 
@@ -100,18 +127,66 @@ function enhanceCodeBlocks() {
         header.className = 'code-block-header';
         header.innerHTML = `
             <span class="code-lang-label">${lang}</span>
-            <button class="copy-code-btn" title="复制文本">复制</button>
+            <div class="code-header-actions">
+                <!-- 🎯 需求 1: 局部显示格式选择框 -->
+                <select class="local-code-select local-format-select" title="仅改变当前代码块格式">
+                    <option value="">格式: 跟随全局</option>
+                    <option value="scroll">同宽 + 横向滚动</option>
+                    <option value="wrap">同宽 + 自动换行</option>
+                    <option value="adaptive">自适应最长行</option>
+                </select>
+                <!-- 🎯 需求 2: 局部主题选择框 -->
+                <select class="local-code-select local-theme-select" title="仅改变当前代码块主题">
+                    <option value="">主题: 跟随全局</option>
+                    <option value="default">默认浅色</option>
+                    <option value="dark">暗黑极客</option>
+                    <option value="github-dark">GitHub Dark</option>
+                    <option value="solarized">Solarized Dark</option>
+                </select>
+                <!-- 🎯 需求 3: 兼容版复制按钮 -->
+                <button class="copy-code-btn" title="复制文本">复制</button>
+            </div>
         `;
 
-        // 一键复制原文本
+        // 监听局部显示格式变化
+        const localFormatSelect = header.querySelector('.local-format-select');
+        localFormatSelect.addEventListener('change', (e) => {
+            const val = e.target.value;
+            if (val) {
+                wrapper.setAttribute('data-code-format', val);
+            } else {
+                wrapper.removeAttribute('data-code-format');
+            }
+        });
+
+        // 监听局部主题变化
+        const localThemeSelect = header.querySelector('.local-theme-select');
+        localThemeSelect.addEventListener('change', (e) => {
+            const val = e.target.value;
+            if (val) {
+                wrapper.setAttribute('data-code-theme', val);
+            } else {
+                wrapper.removeAttribute('data-code-theme');
+            }
+        });
+
+        // 绑定坚固的复制事件处理
         const copyBtn = header.querySelector('.copy-code-btn');
         copyBtn.addEventListener('click', () => {
-            navigator.clipboard.writeText(rawText).then(() => {
-                copyBtn.innerText = '已复制!';
-                setTimeout(() => { copyBtn.innerText = '复制'; }, 2000);
-            }).catch(() => {
-                copyBtn.innerText = '失败';
-            });
+            copyToClipboard(rawText)
+                .then(() => {
+                    copyBtn.innerText = '已复制!';
+                    copyBtn.classList.add('copied');
+                    setTimeout(() => {
+                        copyBtn.innerText = '复制';
+                        copyBtn.classList.remove('copied');
+                    }, 2000);
+                })
+                .catch((err) => {
+                    console.error("复制失败:", err);
+                    copyBtn.innerText = '失败';
+                    setTimeout(() => { copyBtn.innerText = '复制'; }, 2000);
+                });
         });
 
         const body = document.createElement('div');
@@ -245,10 +320,9 @@ function bindControls() {
     const cText = document.getElementById('color-text');
     const cBg = document.getElementById('color-bg');
 
-    /* 代码控制元素 */
     const codeFormatSelect = document.getElementById('code-format-select');
     const codeThemeSelect = document.getElementById('code-theme-select');
-    const codeInlineThemeSelect = document.getElementById('code-inline-theme-select'); // 🎯 绑定的行内主题选择器
+    const codeInlineThemeSelect = document.getElementById('code-inline-theme-select');
     const codeInlineSlider = document.getElementById('code-inline-slider');
     const codeBlockSlider = document.getElementById('code-block-slider');
 
@@ -300,19 +374,16 @@ function bindControls() {
         localStorage.setItem('blog-cbg', e.target.value);
     });
 
-    /* 代码显示格式 */
     codeFormatSelect?.addEventListener('change', (e) => {
         if (article) article.setAttribute('data-code-format', e.target.value);
         localStorage.setItem('blog-code-format', e.target.value);
     });
 
-    /* 代码块主题 */
     codeThemeSelect?.addEventListener('change', (e) => {
         if (article) article.setAttribute('data-code-theme', e.target.value);
         localStorage.setItem('blog-code-theme', e.target.value);
     });
 
-    /* 🎯 代码行内主题监听器 */
     codeInlineThemeSelect?.addEventListener('change', (e) => {
         if (article) article.setAttribute('data-code-inline-theme', e.target.value);
         localStorage.setItem('blog-code-inline-theme', e.target.value);
@@ -355,7 +426,6 @@ function restoreSavedSettings() {
     const savedCText = localStorage.getItem('blog-ctext');
     const savedCBg = localStorage.getItem('blog-cbg');
 
-    /* 🎯 恢复代码全套主题与格式选项 */
     const savedCodeFormat = localStorage.getItem('blog-code-format') || 'scroll';
     const savedCodeTheme = localStorage.getItem('blog-code-theme') || 'default';
     const savedCodeInlineTheme = localStorage.getItem('blog-code-inline-theme') || 'default';
@@ -625,7 +695,6 @@ window.addEventListener('DOMContentLoaded', () => {
                     img.style.zoom = '';
                 });
 
-                // 🎯 触发增强重构
                 enhanceCodeBlocks();
                 generateTOC();
             }

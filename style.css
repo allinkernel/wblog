@@ -73,7 +73,7 @@ body {
 .font-matrix-table input[type="radio"] { cursor: pointer; margin: 0; vertical-align: middle; }
 
 /* ==========================================================================
-   🎯 行内代码基础与多主题样式
+   行内代码基础与多主题样式
    ========================================================================== */
 
 #article-container code:not(pre code),
@@ -120,9 +120,8 @@ body {
     border: 1px solid #fde68a;
 }
 
-
 /* ==========================================================================
-   🎯 代码块架构重构（逐行 Flex 包裹，彻底解决折叠换行时行号错位问题）
+   🎯 块级代码组件架构（新增顶部独立控制栏与局部优先级 override）
    ========================================================================== */
 
 /* 1. 外层卡片容器 */
@@ -136,22 +135,47 @@ body {
     transition: border-color 0.2s, background-color 0.2s;
 }
 
-/* 2. 顶部 Header Bar */
+/* 2. 顶部 Header Bar（新增 flex 操控组） */
 .code-block-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 6px 14px;
+    padding: 6px 12px;
     background-color: var(--code-header-bg, #eaeef2);
     border-bottom: 1px solid var(--code-border-color, #d0d7de);
     font-size: 12px;
     user-select: none;
+    gap: 8px;
+    flex-wrap: wrap;
 }
 
 .code-lang-label {
     font-weight: bold;
     color: var(--code-header-text, #57606a);
     letter-spacing: 0.5px;
+}
+
+/* 🎯 顶部局部按钮与下拉栏容器 */
+.code-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.local-code-select {
+    background-color: var(--code-bg-color, #ffffff);
+    color: var(--code-header-text, #57606a);
+    border: 1px solid var(--code-border-color, #d0d7de);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 11px;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.15s ease;
+}
+
+.local-code-select:hover {
+    border-color: #1890ff;
 }
 
 .copy-code-btn {
@@ -170,6 +194,11 @@ body {
     color: var(--text-color);
 }
 
+.copy-code-btn.copied {
+    color: #52c41a;
+    border-color: #52c41a;
+}
+
 /* 3. 代码主体与行布局 */
 .code-block-body {
     padding: 10px 0;
@@ -181,7 +210,6 @@ body {
     width: 100%;
 }
 
-/* 每一行代码作为一个 Flex 单元 */
 .code-line {
     display: flex;
     align-items: flex-start;
@@ -189,7 +217,6 @@ body {
     font-size: var(--code-block-size, 14px) !important;
 }
 
-/* 行号（贴在顶部，不能随行高变动拉伸） */
 .line-num {
     user-select: none;
     -webkit-user-select: none;
@@ -202,7 +229,6 @@ body {
     font-family: var(--font-code) !important;
 }
 
-/* 行内文本区域 */
 .line-code {
     flex: 1;
     min-width: 0;
@@ -213,50 +239,58 @@ body {
 }
 
 /* ==========================================================================
-   🎯 三种显示格式 CSS 控制
+   🎯 三种显示格式 CSS 控制（全面支持全局与局部独立覆盖）
    ========================================================================== */
 
-/* 1. 同宽 + 自动换行 (wrap) - 换行时下方的行号自动被推到下一自然行 */
-#article-container[data-code-format="wrap"] .code-block-wrapper {
+/* 1. 自动换行 (wrap) */
+#article-container[data-code-format="wrap"] .code-block-wrapper,
+#article-container .code-block-wrapper[data-code-format="wrap"] {
     width: 100%;
     max-width: 100%;
 }
-#article-container[data-code-format="wrap"] .line-code {
+#article-container[data-code-format="wrap"] .line-code,
+#article-container .code-block-wrapper[data-code-format="wrap"] .line-code {
     white-space: pre-wrap !important;
     word-break: break-all !important;
     overflow-wrap: anywhere !important;
 }
 
-/* 2. 同宽 + 横向滚动 (scroll) */
-#article-container[data-code-format="scroll"] .code-block-wrapper {
+/* 2. 横向滚动 (scroll) */
+#article-container[data-code-format="scroll"] .code-block-wrapper,
+#article-container .code-block-wrapper[data-code-format="scroll"] {
     width: 100%;
     max-width: 100%;
 }
-#article-container[data-code-format="scroll"] .code-block-body {
+#article-container[data-code-format="scroll"] .code-block-body,
+#article-container .code-block-wrapper[data-code-format="scroll"] .code-block-body {
     overflow-x: auto;
 }
-#article-container[data-code-format="scroll"] .line-code {
+#article-container[data-code-format="scroll"] .line-code,
+#article-container .code-block-wrapper[data-code-format="scroll"] .line-code {
     white-space: pre !important;
     word-break: normal !important;
 }
 
-/* 3. 自适应最长行展开 (adaptive) */
-#article-container[data-code-format="adaptive"] .code-block-wrapper {
+/* 3. 自适应最长行 (adaptive) */
+#article-container[data-code-format="adaptive"] .code-block-wrapper,
+#article-container .code-block-wrapper[data-code-format="adaptive"] {
     width: max-content;
     min-width: 100%;
     max-width: none;
 }
-#article-container[data-code-format="adaptive"] .line-code {
+#article-container[data-code-format="adaptive"] .line-code,
+#article-container .code-block-wrapper[data-code-format="adaptive"] .line-code {
     white-space: pre !important;
     word-break: normal !important;
 }
 
 /* ==========================================================================
-   🎯 代码块主题预设
+   🎯 代码块主题预设（支持全局与单个代码块独立局部选择）
    ========================================================================== */
 
 /* 1. 默认浅色 */
-#article-container[data-code-theme="default"] {
+#article-container[data-code-theme="default"] .code-block-wrapper,
+#article-container .code-block-wrapper[data-code-theme="default"] {
     --code-bg-color: #f6f8fa;
     --code-header-bg: #eaeef2;
     --code-border-color: #d0d7de;
@@ -267,7 +301,8 @@ body {
 }
 
 /* 2. 暗黑极客 (Monokai) */
-#article-container[data-code-theme="dark"] {
+#article-container[data-code-theme="dark"] .code-block-wrapper,
+#article-container .code-block-wrapper[data-code-theme="dark"] {
     --code-bg-color: #272822;
     --code-header-bg: #1e1f1c;
     --code-border-color: #3e3d32;
@@ -278,7 +313,8 @@ body {
 }
 
 /* 3. GitHub Dark */
-#article-container[data-code-theme="github-dark"] {
+#article-container[data-code-theme="github-dark"] .code-block-wrapper,
+#article-container .code-block-wrapper[data-code-theme="github-dark"] {
     --code-bg-color: #0d1117;
     --code-header-bg: #161b22;
     --code-border-color: #30363d;
@@ -289,7 +325,8 @@ body {
 }
 
 /* 4. Solarized Dark */
-#article-container[data-code-theme="solarized"] {
+#article-container[data-code-theme="solarized"] .code-block-wrapper,
+#article-container .code-block-wrapper[data-code-theme="solarized"] {
     --code-bg-color: #002b36;
     --code-header-bg: #073642;
     --code-border-color: #073642;
@@ -312,10 +349,7 @@ h2 { font-size: 1.5em; margin-top: 1.5em; margin-bottom: 0.6em; color: var(--tex
 h3 { font-size: 1.2em; margin-top: 1.2em; margin-bottom: 0.4em; color: var(--text-color); opacity: 0.8; }
 p { margin-bottom: 1.5em; text-align: justify; }
 
-/* ==========================================================================
-   🎯 左右双悬浮控制台坞 (Dock Containers)
-   ========================================================================== */
-
+/* 左右双悬浮控制台坞 */
 #left-dock-container {
     position: fixed;
     top: 20px;
@@ -379,9 +413,7 @@ p { margin-bottom: 1.5em; text-align: justify; }
     user-select: none;
     width: 100%;
 }
-.panel-header:hover {
-    background: #ebebeb;
-}
+.panel-header:hover { background: #ebebeb; }
 
 .panel-icon { margin-right: 8px; font-size: 15px; }
 .panel-title { font-size: 13px; font-weight: bold; flex-grow: 1; color: #444; }
@@ -429,7 +461,6 @@ p { margin-bottom: 1.5em; text-align: justify; }
     cursor: pointer;
 }
 
-/* 最小化正方形样式 */
 .panel-box.minimized {
     width: 42px !important;
     min-width: 42px !important;
@@ -459,7 +490,6 @@ p { margin-bottom: 1.5em; text-align: justify; }
 .panel-box.minimized .panel-content,
 .panel-box.minimized .min-btn { display: none !important; }
 
-/* 文章列表展开布局 */
 #panel-tree:not(.minimized) { width: auto !important; min-width: 280px; max-width: 550px; }
 #tree-container { white-space: nowrap !important; overflow-x: auto !important; max-height: 300px; overflow-y: auto; }
 
@@ -507,7 +537,7 @@ p { margin-bottom: 1.5em; text-align: justify; }
 .tree-link:hover { color: #ff6600; text-decoration: underline; }
 .tree-link.active { background-color: #ff6600 !important; color: #ffffff !important; font-weight: bold; }
 
-/* 文章图片放大 (Lightbox) */
+/* 文章图片 Lightbox */
 #article-container img {
     zoom: 1 !important; max-width: 80% !important; max-height: 60vh !important; width: auto; height: auto;
     object-fit: contain; display: block; margin: 1.8rem auto; border-radius: 6px; border: 1px solid rgba(0, 0, 0, 0.08);
