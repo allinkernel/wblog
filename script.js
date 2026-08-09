@@ -328,7 +328,7 @@ window.addEventListener('DOMContentLoaded', () => {
     if (currentPath === '/' || currentPath === '/index.html') {
         fileToFetch = '/template/body.html'; 
     } else {
-        fileToFetch = `/data${currentPath}`;
+        fileToFetch = `/articles${currentPath}`;
     }
 
     // 请求文章正文
