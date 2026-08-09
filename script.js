@@ -65,56 +65,140 @@ function copyToClipboard(text) {
 }
 
 /* ==========================================================================
-   🖐️ PDF 风格画布小手平移功能 (Canvas Pan Tool)
+   🖐️ 可控 PDF 风格画布小手平移功能 (Canvas Pan Tool + Ctrl 键反转)
    ========================================================================== */
 function initCanvasPan() {
-    // 注入动态样式：定义画布光标与排他规则
+    // 1. 注入动态 CSS 样式
     const panStyle = document.createElement('style');
     panStyle.innerHTML = `
-        body {
+        body.canvas-mode-active {
             cursor: grab;
-        }
-        body.is-panning {
-            cursor: grabbing !important;
             user-select: none !important;
             -webkit-user-select: none !important;
         }
-        /* 保持代码块、设置面板、交互控件的原生光标状态 */
-        .code-block-wrapper, code, pre, .code-lines,
-        input, select, button, textarea, a,
-        .panel-box, .toc-container, #code-lightbox-overlay, #lightbox-overlay {
-            cursor: auto;
+        body.canvas-mode-active.is-panning {
+            cursor: grabbing !important;
         }
-        button, select, a, input[type="range"], .tree-toggle, .toc-toggle {
+        /* 画布开启时，特定控件保持原生光标与交互 */
+        body.canvas-mode-active .code-block-wrapper, 
+        body.canvas-mode-active code, 
+        body.canvas-mode-active pre,
+        body.canvas-mode-active input, 
+        body.canvas-mode-active select, 
+        body.canvas-mode-active button, 
+        body.canvas-mode-active textarea, 
+        body.canvas-mode-active a,
+        body.canvas-mode-active .panel-box, 
+        body.canvas-mode-active #code-lightbox-overlay, 
+        body.canvas-mode-active #lightbox-overlay {
+            cursor: auto;
+            user-select: auto !important;
+            -webkit-user-select: auto !important;
+        }
+        body.canvas-mode-active button, 
+        body.canvas-mode-active select, 
+        body.canvas-mode-active a, 
+        body.canvas-mode-active input[type="range"], 
+        body.canvas-mode-active input[type="checkbox"], 
+        body.canvas-mode-active .tree-toggle, 
+        body.canvas-mode-active .toc-toggle {
             cursor: pointer;
         }
-        .code-lines, code:not(pre code) {
+        body.canvas-mode-active .code-lines, 
+        body.canvas-mode-active code:not(pre code) {
             cursor: text;
         }
     `;
     document.head.appendChild(panStyle);
 
+    let isCanvasActiveBase = localStorage.getItem('blog-canvas-toggle') === 'true';
+    let isCtrlPressed = false;
     let isPanning = false;
     let startX = 0, startY = 0;
     let startPercent = 0;
     let startScrollTop = 0;
 
-    document.addEventListener('mousedown', (e) => {
-        // 仅响应鼠标左键点击
-        if (e.button !== 0) return;
+    // 计算当前实际生效的画布状态 (如果按住 Ctrl 则反转状态)
+    const getEffectiveCanvasState = () => {
+        return isCtrlPressed ? !isCanvasActiveBase : isCanvasActiveBase;
+    };
 
-        // 如果点击在代码块、面板、输入控件或链接上，不触发小手画布拖拽
+    const updateCanvasUI = () => {
+        const active = getEffectiveCanvasState();
+        if (active) {
+            document.body.classList.add('canvas-mode-active');
+        } else {
+            document.body.classList.remove('canvas-mode-active');
+        }
+    };
+
+    // 2. 在面板中自动注入/绑定【画布开关】控件
+    const pSlider = document.getElementById('position-slider');
+    let toggleInput = document.getElementById('canvas-toggle');
+
+    if (!toggleInput && pSlider) {
+        const pRow = pSlider.closest('.control-row') || pSlider.parentElement;
+        if (pRow) {
+            const container = document.createElement('div');
+            container.className = 'control-row';
+            container.style.cssText = 'display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;';
+            container.innerHTML = `
+                <label for="canvas-toggle" style="font-size: 13px; font-weight: bold;">画布小手:</label>
+                <input type="checkbox" id="canvas-toggle" style="cursor: pointer;">
+            `;
+            pRow.parentNode.insertBefore(container, pRow);
+            toggleInput = container.querySelector('#canvas-toggle');
+        }
+    }
+
+    if (toggleInput) {
+        toggleInput.checked = isCanvasActiveBase;
+        toggleInput.addEventListener('change', (e) => {
+            isCanvasActiveBase = e.target.checked;
+            localStorage.setItem('blog-canvas-toggle', isCanvasActiveBase);
+            updateCanvasUI();
+        });
+    }
+
+    // 3. 监听 Ctrl 键实现临时状态反转
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Control' && !e.repeat) {
+            isCtrlPressed = true;
+            updateCanvasUI();
+        }
+    });
+
+    document.addEventListener('keyup', (e) => {
+        if (e.key === 'Control') {
+            isCtrlPressed = false;
+            updateCanvasUI();
+        }
+    });
+
+    window.addEventListener('blur', () => {
+        if (isCtrlPressed) {
+            isCtrlPressed = false;
+            updateCanvasUI();
+        }
+    });
+
+    // 4. 拖拽平移事件 Handling
+    document.addEventListener('mousedown', (e) => {
+        if (e.button !== 0) return;
+        if (!getEffectiveCanvasState()) return; // 未开启画布模式时，允许正常的文本选中
+
+        // 拦截不需要画布拖拽的区域
         if (e.target.closest('.code-block-wrapper, code, pre, input, select, button, textarea, a, .panel-box, .lightbox-overlay, .code-lightbox-overlay')) {
             return;
         }
 
-        const pSlider = document.getElementById('position-slider');
-        if (!pSlider) return;
+        const slider = document.getElementById('position-slider');
+        if (!slider) return;
 
         isPanning = true;
         startX = e.clientX;
         startY = e.clientY;
-        startPercent = parseInt(pSlider.value) || 0;
+        startPercent = parseInt(slider.value) || 0;
         startScrollTop = window.scrollY || document.documentElement.scrollTop;
 
         document.body.classList.add('is-panning');
@@ -128,31 +212,30 @@ function initCanvasPan() {
         const dx = e.clientX - startX;
         const dy = e.clientY - startY;
 
-        // 1. 上下拖拽 -> 平移页面垂直滚动
+        // 垂直平移
         window.scrollTo({
             top: startScrollTop - dy,
             behavior: 'instant'
         });
 
-        // 2. 左右拖拽 -> 更新版面位置滑块并实时重绘画布
+        // 水平平移 (更新版面位置滑块值)
         const wrapper = document.getElementById('article-wrapper');
-        const pSlider = document.getElementById('position-slider');
+        const slider = document.getElementById('position-slider');
 
-        if (wrapper && pSlider) {
+        if (wrapper && slider) {
             const maxShift = (window.innerWidth - wrapper.offsetWidth) / 2;
-            // 兜底分母，确保任何分辨率下拖拽灵敏度均衡
             const denom = Math.abs(maxShift) > 20 ? maxShift : (window.innerWidth / 2);
             
             const deltaPercent = (dx / denom) * 100;
             
-            const minVal = pSlider.min ? parseInt(pSlider.min) : -100;
-            const maxVal = pSlider.max ? parseInt(pSlider.max) : 100;
+            const minVal = slider.min ? parseInt(slider.min) : -100;
+            const maxVal = slider.max ? parseInt(slider.max) : 100;
 
             let newPercent = Math.round(startPercent + deltaPercent);
             newPercent = Math.max(minVal, Math.min(maxVal, newPercent));
 
-            pSlider.value = newPercent;
-            updatePosition(); // 触发页面更新及面板坐标值更新
+            slider.value = newPercent;
+            updatePosition();
         }
     });
 
@@ -164,7 +247,9 @@ function initCanvasPan() {
     };
 
     document.addEventListener('mouseup', stopPanning);
-    window.addEventListener('blur', stopPanning);
+
+    // 初始化渲染 UI 状态
+    updateCanvasUI();
 }
 
 /* ==========================================================================
@@ -907,7 +992,7 @@ function renderTopicTree(manifest, topicKey) {
 }
 
 /* ==========================================================================
-   🖼️ 全屏图片查看器 Lightbox 逻辑 (基础灯箱功能)
+   🖼️ 全屏图片查看器 Lightbox 逻辑 (基础灯箱)
    ========================================================================== */
 function initImageLightbox() {
     if (!document.getElementById('lightbox-overlay')) {
@@ -964,9 +1049,9 @@ function initImageLightbox() {
 window.addEventListener('DOMContentLoaded', () => {
     const article = document.getElementById('article-container');
 
-    initCanvasPan();        // 初始化小手平移画布功能
     initPanelMinimizers();
     bindControls();
+    initCanvasPan();        // 初始化带 Ctrl 快捷控制的画布小手功能
     initImageLightbox();
     initCodeLightbox();
     initCodeSelectAll();
