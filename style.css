@@ -346,7 +346,7 @@ p { margin-bottom: 1.5em; text-align: justify; }
 
 /* 1. 正文图片优雅约束 */
 #article-container img {
-    max-width: 100% !important;          /* 限制最大宽度，绝不超出文字版面 */
+    max-width: 80% !important;          /* 限制最大宽度，绝不超出文字版面 */
     max-height: 65vh;                    /* 限制最大高度为屏幕的 65%，保留上下文视线 */
     width: auto;
     height: auto;

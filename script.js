@@ -468,6 +468,12 @@ window.addEventListener('DOMContentLoaded', () => {
         .then(htmlData => {
             if (article) {
                 article.innerHTML = htmlData;
+
+                // 🖼️ 关键改动：清理渲染出的所有图片的行内 zoom 样式，恢复正常比例
+                article.querySelectorAll('img').forEach(img => {
+                    img.style.zoom = '';
+                });
+
                 generateTOC();
             }
         })
@@ -483,7 +489,6 @@ window.addEventListener('DOMContentLoaded', () => {
 
 // 7. 图片单击放大 (Lightbox) 交互控制
 function initImageLightbox() {
-    // 动态生成 Lightbox Modal HTML 元素，无需手动改动 index.html
     if (!document.getElementById('lightbox-overlay')) {
         const overlay = document.createElement('div');
         overlay.id = 'lightbox-overlay';
@@ -503,13 +508,11 @@ function initImageLightbox() {
     const captionEl = document.getElementById('lightbox-caption');
     const closeBtn = document.getElementById('lightbox-close');
 
-    // 关闭灯箱函数
     const closeLightbox = () => {
         overlay.classList.remove('active');
-        document.body.style.overflow = ''; // 还原背景滚动
+        document.body.style.overflow = '';
     };
 
-    // 事件委托：直接绑定在 #article-container 上，适应 fetch 异步加载的文章内容
     const article = document.getElementById('article-container');
     if (article) {
         article.addEventListener('click', (e) => {
@@ -517,22 +520,19 @@ function initImageLightbox() {
                 imgEl.src = e.target.src;
                 captionEl.innerText = e.target.alt || e.target.title || '';
                 overlay.classList.add('active');
-                document.body.style.overflow = 'hidden'; // 阻止背景滚屏
+                document.body.style.overflow = 'hidden';
             }
         });
     }
 
-    // 点击右侧 X 关闭
     closeBtn.addEventListener('click', closeLightbox);
 
-    // 点击非图片区域（暗色背景蒙层）退出
     overlay.addEventListener('click', (e) => {
         if (e.target === overlay || e.target.classList.contains('lightbox-content')) {
             closeLightbox();
         }
     });
 
-    // 支持 ESC 键关闭
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && overlay.classList.contains('active')) {
             closeLightbox();
