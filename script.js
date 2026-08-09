@@ -39,9 +39,6 @@ function updatePosition() {
     localStorage.setItem('blog-pos', percent);
 }
 
-/**
- * 🎯 跨环境兼容性剪贴板复制工具函数 (支持 HTTP / 本地文件 / HTTPS)
- */
 function copyToClipboard(text) {
     if (navigator.clipboard && window.isSecureContext) {
         return navigator.clipboard.writeText(text);
@@ -67,7 +64,162 @@ function copyToClipboard(text) {
     }
 }
 
-/* 🎯 重构核心：生成代码块，加入局部显示格式、局部主题选择框及通用复制函数 */
+/* ==========================================================================
+   💡 光标与只读锁核心配置
+   ========================================================================== */
+function makeReadOnlyEditable(el) {
+    if (!el) return;
+    el.setAttribute('contenteditable', 'true');
+    el.setAttribute('spellcheck', 'false');
+    el.setAttribute('tabindex', '0');
+
+    // 拦截输入/粘贴/拖拽：允许跳动光标与选中，但阻止篡改
+    el.addEventListener('beforeinput', (e) => e.preventDefault());
+    el.addEventListener('paste', (e) => e.preventDefault());
+    el.addEventListener('drop', (e) => e.preventDefault());
+}
+
+/* ==========================================================================
+   💡 增强所有代码区域（行内代码 + 代码块容器）
+   ========================================================================== */
+function enhanceAllCode() {
+    const article = document.getElementById('article-container');
+    if (!article) return;
+
+    // 同时选中【行内代码】与【代码块容器】
+    const targets = article.querySelectorAll('code:not(pre code), .code-lines');
+    targets.forEach(el => {
+        makeReadOnlyEditable(el);
+    });
+}
+
+/* ==========================================================================
+   🎯 代码块内部 Ctrl+A / Cmd+A 局部全选逻辑
+   ========================================================================== */
+function initCodeSelectAll() {
+    document.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && (e.key === 'a' || e.key === 'A')) {
+            const selection = window.getSelection();
+            if (!selection || !selection.rangeCount) return;
+
+            const anchorNode = selection.anchorNode;
+            if (!anchorNode) return;
+
+            const element = anchorNode.nodeType === Node.ELEMENT_NODE ? anchorNode : anchorNode.parentElement;
+            const codeWrapper = element?.closest('.code-block-wrapper, .code-lightbox-content');
+
+            if (codeWrapper) {
+                const targetContainer = codeWrapper.querySelector('.code-lines') || codeWrapper.querySelector('.code-lightbox-body');
+                
+                if (targetContainer) {
+                    e.preventDefault();
+
+                    const range = document.createRange();
+                    range.selectNodeContents(targetContainer);
+
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                }
+            }
+        }
+    });
+}
+
+/* ==========================================================================
+   全屏代码查看器 Lightbox 逻辑
+   ========================================================================== */
+
+function initCodeLightbox() {
+    if (document.getElementById('code-lightbox-overlay')) return;
+
+    const overlay = document.createElement('div');
+    overlay.id = 'code-lightbox-overlay';
+    overlay.className = 'code-lightbox-overlay';
+    overlay.innerHTML = `
+        <div class="code-lightbox-content" id="code-lightbox-content">
+            <div class="code-lightbox-header">
+                <span class="code-lightbox-title" id="code-lightbox-title">CODE</span>
+                <div class="code-lightbox-actions">
+                    <button class="copy-code-btn" id="code-lightbox-copy-btn">复制</button>
+                    <span class="code-lightbox-close" id="code-lightbox-close">&times;</span>
+                </div>
+            </div>
+            <div class="code-lightbox-body" id="code-lightbox-body"></div>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+
+    const closeBtn = document.getElementById('code-lightbox-close');
+    const closeLightbox = () => {
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
+    };
+
+    closeBtn.addEventListener('click', closeLightbox);
+
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+            closeLightbox();
+        }
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && overlay.classList.contains('active')) {
+            closeLightbox();
+        }
+    });
+}
+
+function openCodeLightbox(lang, rawText, codeBlockWrapper) {
+    initCodeLightbox();
+
+    const overlay = document.getElementById('code-lightbox-overlay');
+    const content = document.getElementById('code-lightbox-content');
+    const title = document.getElementById('code-lightbox-title');
+    const body = document.getElementById('code-lightbox-body');
+    const copyBtn = document.getElementById('code-lightbox-copy-btn');
+
+    title.innerText = lang;
+
+    const newCopyBtn = copyBtn.cloneNode(true);
+    copyBtn.parentNode.replaceChild(newCopyBtn, copyBtn);
+    newCopyBtn.addEventListener('click', () => {
+        copyToClipboard(rawText).then(() => {
+            newCopyBtn.innerText = '已复制!';
+            newCopyBtn.classList.add('copied');
+            setTimeout(() => {
+                newCopyBtn.innerText = '复制';
+                newCopyBtn.classList.remove('copied');
+            }, 2000);
+        });
+    });
+
+    const theme = codeBlockWrapper.getAttribute('data-code-theme') || 
+                  document.getElementById('article-container')?.getAttribute('data-code-theme') || 'default';
+    content.setAttribute('data-code-theme', theme);
+
+    body.innerHTML = '';
+    const linesContainer = codeBlockWrapper.querySelector('.code-lines');
+    if (linesContainer) {
+        const clonedLines = linesContainer.cloneNode(true);
+        body.appendChild(clonedLines);
+        // 关键修复：克隆节点会丢失 DOM 事件监听，在此重新绑定只读光标逻辑
+        makeReadOnlyEditable(clonedLines);
+    } else {
+        body.textContent = rawText;
+        makeReadOnlyEditable(body);
+    }
+
+    if (window.Prism) {
+        window.Prism.highlightAllUnder(body);
+    } else if (window.hljs) {
+        body.querySelectorAll('pre code').forEach((el) => window.hljs.highlightElement(el));
+    }
+
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
 function enhanceCodeBlocks() {
     const article = document.getElementById('article-container');
     if (!article) return;
@@ -77,11 +229,8 @@ function enhanceCodeBlocks() {
         if (pre.closest('.code-block-wrapper')) return;
 
         const codeNode = pre.querySelector('code') || pre;
-        
-        // 1. 准确提取纯净原代码文本（不受任何后期 DOM 修改影响）
         const rawText = codeNode.textContent || codeNode.innerText || "";
 
-        // 2. 提取代码语言
         let lang = 'CODE';
         const classList = Array.from(pre.classList).concat(Array.from(codeNode.classList));
         for (const cls of classList) {
@@ -97,7 +246,6 @@ function enhanceCodeBlocks() {
             }
         }
 
-        // 3. 逐行包裹 HTML 渲染
         const lineContentArray = codeNode.innerHTML.replace(/\r\n/g, '\n').split('\n');
         if (lineContentArray.length > 1 && lineContentArray[lineContentArray.length - 1] === '') {
             lineContentArray.pop();
@@ -111,15 +259,15 @@ function enhanceCodeBlocks() {
         lineContentArray.forEach((lineText, idx) => {
             const lineNum = idx + 1;
             const content = lineText === '' ? ' ' : lineText;
+            // 💥 核心修复：为 .line-num 增加 contenteditable="false" 与 user-select: none，彻底隔绝选中高亮
             linesHtml += `
                 <div class="code-line">
-                    <span class="line-num" style="min-width: ${numWidthPx}px;">${lineNum}</span>
+                    <span class="line-num" contenteditable="false" style="min-width: ${numWidthPx}px; user-select: none; -webkit-user-select: none; -moz-user-select: none;">${lineNum}</span>
                     <span class="line-code">${content}</span>
                 </div>
             `;
         });
 
-        // 4. 构建外层组件与顶部 Header 控制栏
         const wrapper = document.createElement('div');
         wrapper.className = 'code-block-wrapper';
 
@@ -128,14 +276,12 @@ function enhanceCodeBlocks() {
         header.innerHTML = `
             <span class="code-lang-label">${lang}</span>
             <div class="code-header-actions">
-                <!-- 🎯 需求 1: 局部显示格式选择框 -->
                 <select class="local-code-select local-format-select" title="仅改变当前代码块格式">
                     <option value="">格式: 跟随全局</option>
                     <option value="scroll">同宽 + 横向滚动</option>
                     <option value="wrap">同宽 + 自动换行</option>
                     <option value="adaptive">自适应最长行</option>
                 </select>
-                <!-- 🎯 需求 2: 局部主题选择框 -->
                 <select class="local-code-select local-theme-select" title="仅改变当前代码块主题">
                     <option value="">主题: 跟随全局</option>
                     <option value="default">默认浅色</option>
@@ -143,12 +289,11 @@ function enhanceCodeBlocks() {
                     <option value="github-dark">GitHub Dark</option>
                     <option value="solarized">Solarized Dark</option>
                 </select>
-                <!-- 🎯 需求 3: 兼容版复制按钮 -->
                 <button class="copy-code-btn" title="复制文本">复制</button>
+                <button class="fullscreen-code-btn" title="全屏查看代码">全屏</button>
             </div>
         `;
 
-        // 监听局部显示格式变化
         const localFormatSelect = header.querySelector('.local-format-select');
         localFormatSelect.addEventListener('change', (e) => {
             const val = e.target.value;
@@ -159,7 +304,6 @@ function enhanceCodeBlocks() {
             }
         });
 
-        // 监听局部主题变化
         const localThemeSelect = header.querySelector('.local-theme-select');
         localThemeSelect.addEventListener('change', (e) => {
             const val = e.target.value;
@@ -170,7 +314,6 @@ function enhanceCodeBlocks() {
             }
         });
 
-        // 绑定坚固的复制事件处理
         const copyBtn = header.querySelector('.copy-code-btn');
         copyBtn.addEventListener('click', () => {
             copyToClipboard(rawText)
@@ -187,6 +330,11 @@ function enhanceCodeBlocks() {
                     copyBtn.innerText = '失败';
                     setTimeout(() => { copyBtn.innerText = '复制'; }, 2000);
                 });
+        });
+
+        const fullscreenBtn = header.querySelector('.fullscreen-code-btn');
+        fullscreenBtn.addEventListener('click', () => {
+            openCodeLightbox(lang, rawText, wrapper);
         });
 
         const body = document.createElement('div');
@@ -666,49 +814,6 @@ function renderTopicTree(manifest, topicKey) {
     treeContainer.appendChild(treeEl);
 }
 
-window.addEventListener('DOMContentLoaded', () => {
-    const article = document.getElementById('article-container');
-
-    initPanelMinimizers();
-    bindControls();
-    initImageLightbox();
-
-    const currentPath = window.location.pathname;
-
-    let fileToFetch;
-    if (currentPath === '/' || currentPath === '/index.html') {
-        fileToFetch = '/template/body.html'; 
-    } else {
-        fileToFetch = `/articles${currentPath}`;
-    }
-
-    fetch(fileToFetch)
-        .then(response => {
-            if (!response.ok) throw new Error('文件不存在');
-            return response.text();
-        })
-        .then(htmlData => {
-            if (article) {
-                article.innerHTML = htmlData;
-
-                article.querySelectorAll('img').forEach(img => {
-                    img.style.zoom = '';
-                });
-
-                enhanceCodeBlocks();
-                generateTOC();
-            }
-        })
-        .catch(() => {
-            if (article) {
-                article.innerHTML = "<p style='color:red'>内容加载失败，请检查路径</p>";
-            }
-        });
-
-    initArticleTree();
-    restoreSavedSettings();
-});
-
 function initImageLightbox() {
     if (!document.getElementById('lightbox-overlay')) {
         const overlay = document.createElement('div');
@@ -760,3 +865,57 @@ function initImageLightbox() {
         }
     });
 }
+
+window.addEventListener('DOMContentLoaded', () => {
+    const article = document.getElementById('article-container');
+
+    initPanelMinimizers();
+    bindControls();
+    initImageLightbox();
+    initCodeLightbox();
+    initCodeSelectAll(); // 绑定 Ctrl+A 监听
+
+    const currentPath = window.location.pathname;
+
+    let fileToFetch;
+    if (currentPath === '/' || currentPath === '/index.html') {
+        fileToFetch = '/template/body.html'; 
+    } else {
+        fileToFetch = `/articles${currentPath}`;
+    }
+
+    fetch(fileToFetch)
+        .then(response => {
+            if (!response.ok) throw new Error('文件不存在');
+            return response.text();
+        })
+        .then(htmlData => {
+            if (article) {
+                article.innerHTML = htmlData;
+
+                article.querySelectorAll('img').forEach(img => {
+                    img.style.zoom = '';
+                });
+
+                // 核心：必须按顺序在 DOM 渲染后执行
+                try {
+                    enhanceCodeBlocks();  // 1. 转换代码块
+                } catch(e) { console.error("enhanceCodeBlocks 报错:", e); }
+
+                try {
+                    enhanceAllCode();     // 2. 统一为行内代码与代码块挂载跳动光标 + 防篡改锁
+                } catch(e) { console.error("enhanceAllCode 报错:", e); }
+
+                generateTOC();
+            }
+        })
+        .catch((err) => {
+            console.error("加载文章失败:", err);
+            if (article) {
+                article.innerHTML = "<p style='color:red'>内容加载失败，请检查路径</p>";
+            }
+        });
+
+    initArticleTree();
+    restoreSavedSettings();
+});

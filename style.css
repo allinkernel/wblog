@@ -121,7 +121,7 @@ body {
 }
 
 /* ==========================================================================
-   🎯 块级代码组件架构（新增顶部独立控制栏与局部优先级 override）
+   🎯 块级代码组件架构（已重构 Header 布局：统一左侧排列）
    ========================================================================== */
 
 /* 1. 外层卡片容器 */
@@ -135,17 +135,17 @@ body {
     transition: border-color 0.2s, background-color 0.2s;
 }
 
-/* 2. 顶部 Header Bar（新增 flex 操控组） */
+/* 2. 顶部 Header Bar（🎯 修改点：使用 flex-start，全部依靠左侧排列） */
 .code-block-header {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start; /* 靠左对齐 */
     align-items: center;
     padding: 6px 12px;
     background-color: var(--code-header-bg, #eaeef2);
     border-bottom: 1px solid var(--code-border-color, #d0d7de);
     font-size: 12px;
     user-select: none;
-    gap: 8px;
+    gap: 12px; /* 语言标识与按钮组之间的间距 */
     flex-wrap: wrap;
 }
 
@@ -153,6 +153,7 @@ body {
     font-weight: bold;
     color: var(--code-header-text, #57606a);
     letter-spacing: 0.5px;
+    flex-shrink: 0;
 }
 
 /* 🎯 顶部局部按钮与下拉栏容器 */
@@ -160,6 +161,7 @@ body {
     display: flex;
     align-items: center;
     gap: 8px;
+    flex-wrap: wrap;
 }
 
 .local-code-select {
@@ -239,7 +241,7 @@ body {
 }
 
 /* ==========================================================================
-   🎯 三种显示格式 CSS 控制（全面支持全局与局部独立覆盖）
+   三冲显示格式 CSS 控制
    ========================================================================== */
 
 /* 1. 自动换行 (wrap) */
@@ -285,7 +287,7 @@ body {
 }
 
 /* ==========================================================================
-   🎯 代码块主题预设（支持全局与单个代码块独立局部选择）
+   代码块主题预设
    ========================================================================== */
 
 /* 1. 默认浅色 */
@@ -556,3 +558,148 @@ p { margin-bottom: 1.5em; text-align: justify; }
 .lightbox-close { position: absolute; top: -38px; right: 0; color: #ffffff; font-size: 28px; cursor: pointer; line-height: 1; opacity: 0.8; transition: opacity 0.2s; }
 .lightbox-close:hover { opacity: 1; }
 .lightbox-caption { margin-top: 12px; color: rgba(255, 255, 255, 0.85); font-size: 14px; text-align: center; }
+
+/* ==========================================================================
+   全屏按钮与代码块 Lightbox 弹窗样式
+   ========================================================================== */
+
+/* 全屏按钮样式 (与复制按钮保持一致) */
+.fullscreen-code-btn {
+    background: transparent;
+    border: 1px solid var(--code-border-color, #d0d7de);
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 11px;
+    color: var(--code-header-text, #57606a);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.fullscreen-code-btn:hover {
+    background: rgba(0, 0, 0, 0.08);
+    color: var(--text-color);
+}
+
+/* 代码全屏 Lightbox 遮罩层 */
+.code-lightbox-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.82);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+}
+
+.code-lightbox-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* 代码全屏窗口主体 */
+.code-lightbox-content {
+    width: 90vw;
+    max-width: 1300px;
+    height: 85vh;
+    background-color: var(--code-bg-color, #f6f8fa);
+    border: 1px solid var(--code-border-color, #d0d7de);
+    border-radius: 10px;
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transform: scale(0.96);
+    transition: transform 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.code-lightbox-overlay.active .code-lightbox-content {
+    transform: scale(1);
+}
+
+/* 全屏 Header 头部栏 */
+.code-lightbox-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    background-color: var(--code-header-bg, #eaeef2);
+    border-bottom: 1px solid var(--code-border-color, #d0d7de);
+    user-select: none;
+}
+
+.code-lightbox-title {
+    font-size: 13px;
+    font-weight: bold;
+    color: var(--code-header-text, #57606a);
+    font-family: var(--font-code) !important;
+}
+
+.code-lightbox-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.code-lightbox-close {
+    font-size: 24px;
+    line-height: 1;
+    color: var(--code-header-text, #57606a);
+    cursor: pointer;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+
+.code-lightbox-close:hover {
+    opacity: 1;
+}
+
+/* 全屏代码内容区：支持双向自由滚动 */
+.code-lightbox-body {
+    flex: 1;
+    padding: 16px 0;
+    overflow: auto; /* 上下左右均可自由滚动 */
+    background-color: var(--code-bg-color, #f6f8fa);
+}
+
+.code-lightbox-body .code-line {
+    font-size: calc(var(--code-block-size, 14px) + 1px) !important;
+}
+
+.code-lightbox-body .line-code {
+    white-space: pre !important; /* 保持原格式不换行，方便横向滚动查看长代码 */
+    word-break: normal !important;
+}
+
+/* ==========================================================================
+   行内代码点击跳动光标与聚焦高亮
+   ========================================================================== */
+code:not(pre code) {
+    cursor: text;
+    transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+/* 获得焦点（即点击出现跳动光标 `|`）时的微高亮 */
+code:not(pre code)[contenteditable="true"]:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(9, 105, 218, 0.3); /* 蓝色聚焦外发光 */
+    border-radius: 3px;
+}
+
+/* 2. 块级代码容器：聚焦时样式 */
+.code-lines[contenteditable="true"]:focus,
+.code-lightbox-body[contenteditable="true"]:focus {
+    outline: none;
+}
+
+/* 确保行号完全不参与编辑与光标落点 */
+.line-num {
+    user-select: none;
+    -webkit-user-select: none;
+}
