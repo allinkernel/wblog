@@ -77,22 +77,7 @@ body {
 #article-container sup,
 #article-container sub { font-family: var(--font-quote); }
 
-/* 3. Setting 中的 font-block 表格样式（适配 280px 侧边栏） */
-.font-setting-block {
-    margin-top: 10px;
-    padding: 6px;
-    background: rgba(0, 0, 0, 0.02);
-    border-radius: 6px;
-    border: 1px solid #eee;
-}
-
-.font-setting-block .block-title {
-    font-weight: bold;
-    font-size: 12px;
-    margin-bottom: 6px;
-    color: #444;
-}
-
+/* 3. Setting 中的 font-matrix 表格样式（适配 280px 侧边栏） */
 .font-matrix-table {
     width: 100%;
     border-collapse: collapse;
@@ -166,6 +151,21 @@ p { margin-bottom: 1.5em; text-align: justify; }
     flex-direction: column;
     gap: 15px;
     z-index: 1000;
+    
+    /* 🎯 解决空间不够与滑动不出来的核心限制属性 */
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 4px; /* 留出美观的滚动条空间 */
+}
+
+/* 侧边栏独立滚动条视觉微调 */
+#dock-container::-webkit-scrollbar {
+    width: 4px;
+}
+#dock-container::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 4px;
 }
 
 .panel-box {
@@ -181,6 +181,7 @@ p { margin-bottom: 1.5em; text-align: justify; }
     font-family: monospace !important;
     color: #222 !important;
     line-height: 1.5 !important;
+    flex-shrink: 0; /* 防止子元素卡片在空间不够时被挤压变形 */
 }
 
 .panel-box * {

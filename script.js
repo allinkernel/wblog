@@ -1,15 +1,4 @@
 const root = document.documentElement;
-const wrapper = document.getElementById('article-wrapper');
-const article = document.getElementById('article-container');
-
-// 获取页面全部滑块与选择器元素
-const wSlider = document.getElementById('width-slider');
-const sSlider = document.getElementById('size-slider');
-const pSlider = document.getElementById('position-slider');
-const lSlider = document.getElementById('line-slider');     // 【新增】
-const cText = document.getElementById('color-text');         // 【新增】
-const cBg = document.getElementById('color-bg');             // 【新增】
-const fSelect = document.getElementById('font-select');
 
 // 🎯 字体 2D 矩阵配置映射
 const fontValueMap = {
@@ -30,7 +19,12 @@ const radioVarMap = {
 
 // 1. 位置计算函数（自适应贴边）
 function updatePosition() {
+    const wrapper = document.getElementById('article-wrapper');
+    const article = document.getElementById('article-container');
+    const pSlider = document.getElementById('position-slider');
+    
     if (!pSlider || !wrapper || !article) return;
+    
     const percent = parseInt(pSlider.value) || 0;
     const maxShift = (window.innerWidth - wrapper.offsetWidth) / 2;
     const targetX = (percent / 100) * maxShift;
@@ -47,69 +41,10 @@ function updatePosition() {
     localStorage.setItem('blog-pos', percent);
 }
 
-// 2. 原生事件流绑定（数据改动瞬间投喂给 CSS 变量，同时存盘）
-wSlider?.addEventListener('input', (e) => {
-    root.style.setProperty('--page-width', `${e.target.value}px`);
-    const valEl = document.getElementById('width-val');
-    if (valEl) valEl.innerText = `${e.target.value}px`;
-    localStorage.setItem('blog-width', e.target.value);
-    updatePosition(); 
-});
-
-sSlider?.addEventListener('input', (e) => {
-    root.style.setProperty('--font-size', `${e.target.value}px`);
-    const valEl = document.getElementById('size-val');
-    if (valEl) valEl.innerText = `${e.target.value}px`;
-    localStorage.setItem('blog-size', e.target.value);
-});
-
-pSlider?.addEventListener('input', updatePosition);
-window.addEventListener('resize', updatePosition);
-
-// 兼容旧字体选择器（加 ?. 防空，不抛异常）
-fSelect?.addEventListener('change', (e) => {
-    if (article) article.className = e.target.value;
-    localStorage.setItem('blog-font', e.target.value);
-});
-
-// 【新增监听：字体 2D 矩阵配置】
-document.querySelector('.font-matrix-table')?.addEventListener('change', (e) => {
-    if (e.target.type === 'radio') {
-        const groupName = e.target.name;
-        const fontType = e.target.value;
-        const varName = radioVarMap[groupName];
-
-        if (varName && fontValueMap[fontType]) {
-            root.style.setProperty(varName, fontValueMap[fontType]);
-            localStorage.setItem(`matrix-${groupName}`, fontType);
-        }
-    }
-});
-
-// 【新增监听：行间距】
-lSlider?.addEventListener('input', (e) => {
-    root.style.setProperty('--line-height', e.target.value);
-    const valEl = document.getElementById('line-val');
-    if (valEl) valEl.innerText = e.target.value;
-    localStorage.setItem('blog-line', e.target.value);
-});
-
-// 【新增监听：文字颜色】
-cText?.addEventListener('input', (e) => {
-    root.style.setProperty('--text-color', e.target.value);
-    localStorage.setItem('blog-ctext', e.target.value);
-});
-
-// 【新增监听：网页背景颜色】
-cBg?.addEventListener('input', (e) => {
-    root.style.setProperty('--bg-color', e.target.value);
-    localStorage.setItem('blog-cbg', e.target.value);
-});
-
-
-// 3. 自动化大纲生成器（修复版）
+// 2. 自动化大纲生成器（修复版）
 function generateTOC() {
     const tocContainer = document.getElementById('toc-container');
+    const article = document.getElementById('article-container');
     if (!tocContainer || !article) return;
 
     // 1. 扩大匹配范围，包含 h1, h2, h3, h4
@@ -125,7 +60,8 @@ function generateTOC() {
     
     const ul = document.createElement('ul');
     headings.forEach((heading, index) => {
-        const anchorId = `toc-anchor-${index}`;
+        // 优先复用原节点已有 ID，无 ID 时才自动生成
+        const anchorId = heading.id || `toc-anchor-${index}`;
         heading.id = anchorId;
         
         const li = document.createElement('li');
@@ -144,7 +80,7 @@ function generateTOC() {
     tocContainer.appendChild(ul);
 }
 
-// 4. 初始化控制方块的“展开/最小化”状态流
+// 3. 初始化控制方块的“展开/最小化”状态流
 function initPanelMinimizers() {
     document.querySelectorAll('.panel-box').forEach(box => {
         const header = box.querySelector('.panel-header');
@@ -170,65 +106,90 @@ function initPanelMinimizers() {
     });
 }
 
-// 5. 页面加载中心调度
-window.addEventListener('DOMContentLoaded', () => {
-    initPanelMinimizers();
+// 4. 绑定各面板控件事件监听
+function bindControls() {
+    const article = document.getElementById('article-container');
+    const wSlider = document.getElementById('width-slider');
+    const sSlider = document.getElementById('size-slider');
+    const pSlider = document.getElementById('position-slider');
+    const lSlider = document.getElementById('line-slider');     // 【新增】
+    const cText = document.getElementById('color-text');         // 【新增】
+    const cBg = document.getElementById('color-bg');             // 【新增】
+    const fSelect = document.getElementById('font-select');
 
-    // 载入正文与大纲
-    // fetch('body.html')
-    //     .then(response => response.text())
-    //     .then(htmlData => {
-    //         article.innerHTML = htmlData;
-    //         generateTOC(); 
-    //     })
-    //     .catch(() => {
-    //         document.getElementById('toc-container').innerHTML = "<span style='color:red'>大纲加载失败</span>";
-    //     });
+    // 版面宽度
+    wSlider?.addEventListener('input', (e) => {
+        root.style.setProperty('--page-width', `${e.target.value}px`);
+        const valEl = document.getElementById('width-val');
+        if (valEl) valEl.innerText = `${e.target.value}px`;
+        localStorage.setItem('blog-width', e.target.value);
+        updatePosition(); 
+    });
 
-    // 1. 获取当前 URL 路径（例如：/linux/linux.html）
-    const currentPath = window.location.pathname;
+    // 文字大小
+    sSlider?.addEventListener('input', (e) => {
+        root.style.setProperty('--font-size', `${e.target.value}px`);
+        const valEl = document.getElementById('size-val');
+        if (valEl) valEl.innerText = `${e.target.value}px`;
+        localStorage.setItem('blog-size', e.target.value);
+    });
 
-    // 2. 拼接绝对 Fetch 路径
-    let fileToFetch;
-    if (currentPath === '/' || currentPath === '/index.html') {
-        fileToFetch = '/template/body.html'; 
-    } else {
-        // currentPath 自带开头的 '/'，例如 '/linux/linux.html'
-        // 拼接后得到 '/data/linux/linux.html'
-        fileToFetch = `/data${currentPath}`;
-    }
+    // 版面位置
+    pSlider?.addEventListener('input', updatePosition);
+    window.addEventListener('resize', updatePosition);
 
-    // 3. 请求文章正文
-    fetch(fileToFetch)
-        .then(response => {
-            if (!response.ok) throw new Error('文件不存在');
-            return response.text();
-        })
-        .then(htmlData => {
-            if (article) {
-                article.innerHTML = htmlData;
-                generateTOC();
+    // 兼容旧字体选择器（加 ?. 防空，不抛异常）
+    fSelect?.addEventListener('change', (e) => {
+        if (article) article.className = e.target.value;
+        localStorage.setItem('blog-font', e.target.value);
+    });
+
+    // 【新增监听：字体 2D 矩阵配置】
+    document.querySelector('.font-matrix-table')?.addEventListener('change', (e) => {
+        if (e.target.type === 'radio') {
+            const groupName = e.target.name;
+            const fontType = e.target.value;
+            const varName = radioVarMap[groupName];
+
+            if (varName && fontValueMap[fontType]) {
+                root.style.setProperty(varName, fontValueMap[fontType]);
+                localStorage.setItem(`matrix-${groupName}`, fontType);
             }
-        })
-        .catch(() => {
-            if (article) {
-                article.innerHTML = "<p style='color:red'>内容加载失败，请检查路径</p>";
-            }
-        });
+        }
+    });
 
-    // 载入归档树
-    fetch('/template/tree.html')
-        .then(response => response.text())
-        .then(htmlData => {
-            const treeEl = document.getElementById('tree-container');
-            if (treeEl) treeEl.innerHTML = htmlData;
-        })
-        .catch(() => {
-            const treeEl = document.getElementById('tree-container');
-            if (treeEl) treeEl.innerHTML = "<span style='color:red'>列表加载失败</span>";
-        });
+    // 【新增监听：行间距】
+    lSlider?.addEventListener('input', (e) => {
+        root.style.setProperty('--line-height', e.target.value);
+        const valEl = document.getElementById('line-val');
+        if (valEl) valEl.innerText = e.target.value;
+        localStorage.setItem('blog-line', e.target.value);
+    });
 
-    // 读取并还原所有的历史配置数据（包含新增的行距与颜色）
+    // 【新增监听：文字颜色】
+    cText?.addEventListener('input', (e) => {
+        root.style.setProperty('--text-color', e.target.value);
+        localStorage.setItem('blog-ctext', e.target.value);
+    });
+
+    // 【新增监听：网页背景颜色】
+    cBg?.addEventListener('input', (e) => {
+        root.style.setProperty('--bg-color', e.target.value);
+        localStorage.setItem('blog-cbg', e.target.value);
+    });
+}
+
+// 5. 还原 LocalStorage 持久化状态
+function restoreSavedSettings() {
+    const article = document.getElementById('article-container');
+    const wSlider = document.getElementById('width-slider');
+    const sSlider = document.getElementById('size-slider');
+    const pSlider = document.getElementById('position-slider');
+    const lSlider = document.getElementById('line-slider');     // 【新增】
+    const cText = document.getElementById('color-text');         // 【新增】
+    const cBg = document.getElementById('color-bg');             // 【新增】
+    const fSelect = document.getElementById('font-select');
+
     const savedWidth = localStorage.getItem('blog-width');
     const savedSize = localStorage.getItem('blog-size');
     const savedFont = localStorage.getItem('blog-font');
@@ -300,4 +261,58 @@ window.addEventListener('DOMContentLoaded', () => {
     }
     
     updatePosition();
+}
+
+// 6. 页面加载中心调度
+window.addEventListener('DOMContentLoaded', () => {
+    const article = document.getElementById('article-container');
+
+    initPanelMinimizers();
+    bindControls();
+
+    // 1. 获取当前 URL 路径（例如：/linux/linux.html）
+    const currentPath = window.location.pathname;
+
+    // 2. 拼接绝对 Fetch 路径
+    let fileToFetch;
+    if (currentPath === '/' || currentPath === '/index.html') {
+        fileToFetch = '/template/body.html'; 
+    } else {
+        // currentPath 自带开头的 '/'，例如 '/linux/linux.html'
+        // 拼接后得到 '/data/linux/linux.html'
+        fileToFetch = `/data${currentPath}`;
+    }
+
+    // 3. 请求文章正文
+    fetch(fileToFetch)
+        .then(response => {
+            if (!response.ok) throw new Error('文件不存在');
+            return response.text();
+        })
+        .then(htmlData => {
+            if (article) {
+                article.innerHTML = htmlData;
+                generateTOC();
+            }
+        })
+        .catch(() => {
+            if (article) {
+                article.innerHTML = "<p style='color:red'>内容加载失败，请检查路径</p>";
+            }
+        });
+
+    // 载入归档树
+    fetch('/template/tree.html')
+        .then(response => response.text())
+        .then(htmlData => {
+            const treeEl = document.getElementById('tree-container');
+            if (treeEl) treeEl.innerHTML = htmlData;
+        })
+        .catch(() => {
+            const treeEl = document.getElementById('tree-container');
+            if (treeEl) treeEl.innerHTML = "<span style='color:red'>列表加载失败</span>";
+        });
+
+    // 读取并还原历史配置
+    restoreSavedSettings();
 });
