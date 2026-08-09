@@ -8,12 +8,41 @@
 </head>
 <body>
 
-    <!-- 1. 悬浮控制面板组 -->
-    <div id="dock-container">
+    <!-- 1. 左侧悬浮坞：导航与大纲 -->
+    <div id="left-dock-container">
 
-        <!-- 方块一：排版调节面板 -->
+        <!-- 方块一：文章列表（置于上方） -->
+        <div class="panel-box" id="panel-tree">
+            <div class="panel-header" title="点击展开/折叠">
+                <span class="panel-icon">📁</span>
+                <span class="panel-title">文章列表</span>
+                <button class="min-btn">➖</button>
+            </div>
+            <div class="panel-content">
+                <div id="tree-container">正在载入归档...</div>
+            </div>
+        </div>
+
+        <!-- 方块二：文章大纲（置于下方） -->
+        <div class="panel-box" id="panel-toc">
+            <div class="panel-header" title="点击展开/折叠">
+                <span class="panel-icon">📜</span>
+                <span class="panel-title">文章大纲</span>
+                <button class="min-btn">➖</button>
+            </div>
+            <div class="panel-content scrollable">
+                <div id="toc-container">正在加载大纲...</div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 2. 右侧悬浮坞：配置与调节 -->
+    <div id="right-dock-container">
+
+        <!-- 方块三：排版调节面板 -->
         <div class="panel-box" id="panel-config">
-            <div class="panel-header">
+            <div class="panel-header" title="点击展开/折叠">
                 <span class="panel-icon">⚙️</span>
                 <span class="panel-title">版面调节</span>
                 <button class="min-btn">➖</button>
@@ -48,9 +77,9 @@
             </div>
         </div>
 
-        <!-- 方块二：字体矩阵配置面板（抽离为独立卡片） -->
+        <!-- 方块四：字体矩阵配置面板 -->
         <div class="panel-box" id="panel-font-matrix">
-            <div class="panel-header">
+            <div class="panel-header" title="点击展开/折叠">
                 <span class="panel-icon">🔤</span>
                 <span class="panel-title">字体矩阵配置</span>
                 <button class="min-btn">➖</button>
@@ -68,7 +97,6 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- 1. 正文 -->
                         <tr>
                             <td class="row-label">正文</td>
                             <td><input type="radio" name="font-body" value="inherit" checked></td>
@@ -77,7 +105,6 @@
                             <td><input type="radio" name="font-body" value="sans-mono"></td>
                             <td><input type="radio" name="font-body" value="serif-mono"></td>
                         </tr>
-                        <!-- 2. 代码 -->
                         <tr>
                             <td class="row-label">代码</td>
                             <td><input type="radio" name="font-code" value="inherit"></td>
@@ -86,7 +113,6 @@
                             <td><input type="radio" name="font-code" value="sans-mono" checked></td>
                             <td><input type="radio" name="font-code" value="serif-mono"></td>
                         </tr>
-                        <!-- 3. 标题 -->
                         <tr>
                             <td class="row-label">标题</td>
                             <td><input type="radio" name="font-heading" value="inherit" checked></td>
@@ -95,7 +121,6 @@
                             <td><input type="radio" name="font-heading" value="sans-mono"></td>
                             <td><input type="radio" name="font-heading" value="serif-mono"></td>
                         </tr>
-                        <!-- 4. 链接 -->
                         <tr>
                             <td class="row-label">链接</td>
                             <td><input type="radio" name="font-link" value="inherit" checked></td>
@@ -104,7 +129,6 @@
                             <td><input type="radio" name="font-link" value="sans-mono"></td>
                             <td><input type="radio" name="font-link" value="serif-mono"></td>
                         </tr>
-                        <!-- 5. 引用/脚注 -->
                         <tr>
                             <td class="row-label">引用</td>
                             <td><input type="radio" name="font-quote" value="inherit" checked></td>
@@ -118,33 +142,9 @@
             </div>
         </div>
 
-        <!-- 方块三：大纲目录面板 -->
-        <div class="panel-box" id="panel-toc">
-            <div class="panel-header">
-                <span class="panel-icon">📜</span>
-                <span class="panel-title">文章大纲</span>
-                <button class="min-btn">➖</button>
-            </div>
-            <div class="panel-content scrollable">
-                <div id="toc-container">正在加载大纲...</div>
-            </div>
-        </div>
-
-        <!-- 方块四：所有文章面板 -->
-        <div class="panel-box" id="panel-tree">
-            <div class="panel-header">
-                <span class="panel-icon">📁</span>
-                <span class="panel-title">文章列表</span>
-                <button class="min-btn">➖</button>
-            </div>
-            <div class="panel-content scrollable">
-                <div id="tree-container">正在载入归档...</div>
-            </div>
-        </div>
-
     </div>
 
-    <!-- 2. 正文核心包裹区 -->
+    <!-- 3. 正文核心包裹区 -->
     <div id="article-wrapper">
         <main id="article-container">
             <p>正在读取正文内容...</p>

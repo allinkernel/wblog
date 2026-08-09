@@ -1,4 +1,3 @@
-/* 全局盒模型重置，防止盒模型 padding 撑开容器 */
 *, *::before, *::after {
     box-sizing: border-box;
 }
@@ -11,7 +10,6 @@
     --bg-color: #fbfbfb;   
 }
 
-/* 基础排版重置 */
 body {
     margin: 0;
     padding: 40px 0;
@@ -34,17 +32,12 @@ body {
     will-change: transform;
 }
 
-/* ==========================================================================
-   🎯 字体控制表格样式与精准映射
-   ========================================================================== */
-
 :root {
     --font-stack-sans-prop: sans-serif;
     --font-stack-serif-prop: serif;
     --font-stack-sans-mono: Consolas, "Fira Code", Monaco, monospace;
     --font-stack-serif-mono: "Courier New", Courier, "Iosevka Slab", monospace;
 
-    /* 5 独立区域 CSS 变量 */
     --font-body: inherit;
     --font-code: var(--font-stack-sans-mono);
     --font-heading: inherit;
@@ -52,31 +45,12 @@ body {
     --font-quote: inherit;
 }
 
-/* 标签精确匹配应用 */
 #article-container { font-family: var(--font-body); }
-
-#article-container code,
-#article-container pre,
-#article-container kbd,
-#article-container samp { font-family: var(--font-code) !important; }
-
-#article-container h1,
-#article-container h2,
-#article-container h3,
-#article-container h4,
-#article-container h5,
-#article-container h6 { font-family: var(--font-heading); }
-
+#article-container code, #article-container pre, #article-container kbd, #article-container samp { font-family: var(--font-code) !important; }
+#article-container h1, #article-container h2, #article-container h3, #article-container h4, #article-container h5, #article-container h6 { font-family: var(--font-heading); }
 #article-container a { font-family: var(--font-link); }
+#article-container blockquote, #article-container figcaption, #article-container cite, #article-container .footnote, #article-container sup, #article-container sub { font-family: var(--font-quote); }
 
-#article-container blockquote,
-#article-container figcaption,
-#article-container cite,
-#article-container .footnote,
-#article-container sup,
-#article-container sub { font-family: var(--font-quote); }
-
-/* Setting 中的 font-matrix 表格样式 */
 .font-matrix-table {
     width: 100%;
     border-collapse: collapse;
@@ -84,52 +58,22 @@ body {
     text-align: center;
     table-layout: fixed;
 }
-
-.font-matrix-table th, 
-.font-matrix-table td {
+.font-matrix-table th, .font-matrix-table td {
     padding: 4px 1px;
     border: 1px solid #e0e0e0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
+.font-matrix-table th { background-color: #f5f5f5; font-weight: 600; font-size: 9px; }
+.font-matrix-table .row-label { font-weight: bold; text-align: center; background-color: #fafafa; width: 32px; }
+.font-matrix-table input[type="radio"] { cursor: pointer; margin: 0; vertical-align: middle; }
 
-.font-matrix-table th {
-    background-color: #f5f5f5;
-    font-weight: 600;
-    font-size: 9px;
-}
-
-.font-matrix-table .row-label {
-    font-weight: bold;
-    text-align: center;
-    background-color: #fafafa;
-    width: 32px;
-}
-
-.font-matrix-table input[type="radio"] {
-    cursor: pointer;
-    margin: 0;
-    vertical-align: middle;
-}
-
-/* ==========================================================================
-   🎯 texi2html 结构美学复刻
-   ========================================================================== */
-
-code, pre, kbd, samp, var {
-    font-size: 0.9em; 
-    background: rgba(0, 0, 0, 0.04); 
-    padding: 2px 4px;
-    border-radius: 3px;
-}
-
+code, pre, kbd, samp, var { font-size: 0.9em; background: rgba(0, 0, 0, 0.04); padding: 2px 4px; border-radius: 3px; }
 kbd { font-style: oblique; }
-pre.display { font-family: inherit; }
-pre.format { font-family: inherit; }
+pre.display, pre.format { font-family: inherit; }
 div.display { margin-left: 3.2em; }
 div.example { margin-left: 3.2em; background: rgba(0,0,0,0.02); padding: 10px; border-left: 3px solid #ccc; }
-
 a.copiable-anchor { visibility: hidden; text-decoration: none; line-height: 0em; margin-left: 5px; }
 span:hover a.copiable-anchor { visibility: visible; }
 ul.no-bullet { list-style: none; }
@@ -140,15 +84,31 @@ h3 { font-size: 1.2em; margin-top: 1.2em; margin-bottom: 0.4em; color: var(--tex
 p { margin-bottom: 1.5em; text-align: justify; }
 
 /* ==========================================================================
-   右侧悬浮控制台坞 (Dock Container) 样式
+   🎯 左右双悬浮控制台坞 (Dock Containers)
    ========================================================================== */
-#dock-container {
+
+#left-dock-container {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+    z-index: 1000;
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-left: 4px;
+}
+
+#right-dock-container {
     position: fixed;
     top: 20px;
     right: 20px;
     display: flex;
     flex-direction: column;
-    align-items: flex-end; /* 🎯 2. 确保子面板/图标统一靠右对齐 */
+    align-items: flex-end;
     gap: 15px;
     z-index: 1000;
     max-height: calc(100vh - 40px);
@@ -157,18 +117,15 @@ p { margin-bottom: 1.5em; text-align: justify; }
     padding-right: 4px;
 }
 
-#dock-container::-webkit-scrollbar {
-    width: 4px;
-}
-#dock-container::-webkit-scrollbar-thumb {
-    background: #ccc;
-    border-radius: 4px;
-}
+#left-dock-container::-webkit-scrollbar,
+#right-dock-container::-webkit-scrollbar { width: 4px; }
+#left-dock-container::-webkit-scrollbar-thumb,
+#right-dock-container::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
 
 .panel-box {
     background: #ffffff;
     border: 1px solid #ddd;
-    border-radius: 6px;
+    border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     width: 280px;
     transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
@@ -181,9 +138,7 @@ p { margin-bottom: 1.5em; text-align: justify; }
     flex-shrink: 0;
 }
 
-.panel-box * {
-    font-family: monospace !important;
-}
+.panel-box * { font-family: monospace !important; }
 
 .panel-header {
     background: #f5f5f5;
@@ -195,20 +150,21 @@ p { margin-bottom: 1.5em; text-align: justify; }
     user-select: none;
     width: 100%;
 }
+.panel-header:hover {
+    background: #ebebeb;
+}
 
-.panel-icon { margin-right: 8px; font-size: 14px; }
+.panel-icon { margin-right: 8px; font-size: 15px; }
 .panel-title { font-size: 13px; font-weight: bold; flex-grow: 1; color: #444; }
 
 .min-btn {
     background: none;
     border: none;
-    cursor: pointer;
+    pointer-events: none; /* 让点击事件直接穿透至 panel-header */
     font-size: 10px;
     color: #888;
-    padding: 2px 6px;
-    border-radius: 3px;
+    padding: 2px 4px;
 }
-.min-btn:hover { background: #e0e0e0; color: #222; }
 
 .panel-content {
     padding: 12px;
@@ -222,66 +178,164 @@ p { margin-bottom: 1.5em; text-align: justify; }
 .scrollable a { color: var(--text-color); opacity: 0.85; text-decoration: none; font-weight: normal !important; }
 .scrollable a:hover { text-decoration: underline; opacity: 1; color: #ff6600; }
 
-/* 🎯 1. 统一字体加粗：所有大纲层级全部不加粗 */
-.toc-item-h1, .toc-item-h2, .toc-item-h3, .toc-item-h4, .toc-item-h5, .toc-item-h6 {
-    font-weight: normal !important;
-}
-
-/* 🎯 1. 大纲树形折叠层级结构样式 */
-.toc-tree {
-    list-style: none !important;
-    padding-left: 0 !important;
-    margin: 0 !important;
-}
-
-.toc-tree .toc-tree {
-    padding-left: 12px !important; /* 子菜单层级缩进 */
-}
-
-.toc-item {
-    margin-bottom: 4px;
-}
-
-.toc-item-row {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    line-height: 1.4;
-}
-
-.toc-toggle {
-    cursor: pointer;
-    font-size: 8px;
-    color: #777;
-    user-select: none;
-    width: 12px;
-    height: 12px;
-    line-height: 12px;
-    text-align: center;
-    flex-shrink: 0;
-    transition: color 0.15s;
-}
-
-.toc-toggle:hover {
-    color: #ff6600;
-}
-
-.toc-spacer {
-    width: 12px;
-    flex-shrink: 0;
-}
+.toc-item-h1, .toc-item-h2, .toc-item-h3, .toc-item-h4, .toc-item-h5, .toc-item-h6 { font-weight: normal !important; }
+.toc-tree { list-style: none !important; padding-left: 0 !important; margin: 0 !important; }
+.toc-tree .toc-tree { padding-left: 12px !important; }
+.toc-item { margin-bottom: 4px; }
+.toc-item-row { display: flex; align-items: center; gap: 4px; line-height: 1.4; }
+.toc-toggle { cursor: pointer; font-size: 8px; color: #777; user-select: none; width: 12px; height: 12px; line-height: 12px; text-align: center; flex-shrink: 0; }
+.toc-toggle:hover { color: #ff6600; }
+.toc-spacer { width: 12px; flex-shrink: 0; }
 
 .control-group { display: flex; align-items: center; justify-content: space-between; gap: 5px;}
 .control-group input[type="range"] { flex-grow: 1; max-width: 110px;}
 .control-group input[type="color"] { border: 1px solid #ccc; background: none; width: 40px; height: 24px; cursor: pointer; padding: 0;}
 
-/* 🎯 2. 最小化卡片状态：靠右放置 */
-.panel-box.minimized { 
-    width: 42px; 
-    height: 38px; 
-    margin-left: auto; /* 靠右贴紧 */
+/* ==========================================================================
+   🎯 强制正方形小方块 (42px x 42px) 最小化状态样式
+   ========================================================================== */
+
+.panel-box.minimized {
+    width: 42px !important;
+    min-width: 42px !important;
+    max-width: 42px !important;
+    height: 42px !important;
+    min-height: 42px !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    border-radius: 8px;
 }
-.panel-box.minimized .panel-title, .panel-box.minimized .panel-content { display: none; }
-.panel-box.minimized .panel-header { border-bottom: none; padding: 10px 0; justify-content: center; }
-.panel-box.minimized .panel-icon { margin-right: 0; font-size: 16px; }
-.panel-box.minimized .min-btn { display: none; }
+
+.panel-box.minimized .panel-header {
+    width: 100% !important;
+    height: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-bottom: none !important;
+    background: #ffffff;
+}
+
+.panel-box.minimized .panel-header:hover {
+    background: #f0f0f0;
+}
+
+.panel-box.minimized .panel-icon {
+    margin: 0 !important;
+    font-size: 18px !important;
+}
+
+.panel-box.minimized .panel-title,
+.panel-box.minimized .panel-content,
+.panel-box.minimized .min-btn {
+    display: none !important;
+}
+
+/* ==========================================================================
+   🎯 文章列表展开时的自适应布局
+   ========================================================================== */
+
+#panel-tree:not(.minimized) {
+    width: auto !important;
+    min-width: 280px;
+    max-width: 550px;
+}
+
+#tree-container {
+    white-space: nowrap !important;
+    overflow-x: auto !important;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.tree-nav-top {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 8px;
+    margin-bottom: 8px;
+    background: #f0f2f5;
+    border: 1px solid #d9d9d9;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 11px;
+    color: #1890ff;
+    user-select: none;
+}
+.tree-nav-top:hover {
+    background: #e6f7ff;
+    border-color: #91d5ff;
+}
+
+.topic-list {
+    list-style: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+.topic-item {
+    padding: 6px 10px;
+    margin-bottom: 4px;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: bold;
+    color: #333;
+}
+.topic-item:hover {
+    background: #f6f8fa;
+    color: #ff6600;
+}
+
+.article-tree, .article-tree ul {
+    list-style: none !important;
+    padding-left: 0 !important;
+    margin: 0 !important;
+}
+.article-tree ul {
+    padding-left: 14px !important;
+    border-left: 1px dashed #d9d9d9;
+    margin-top: 2px;
+    margin-bottom: 2px;
+}
+
+.tree-node-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 0;
+}
+
+.tree-toggle {
+    cursor: pointer;
+    font-size: 9px;
+    color: #777;
+    width: 12px;
+    text-align: center;
+    user-select: none;
+}
+.tree-toggle:hover { color: #ff6600; }
+.tree-spacer { width: 12px; display: inline-block; }
+
+.tree-link {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 2px 5px;
+    border-radius: 3px;
+    transition: background 0.15s, color 0.15s;
+}
+.tree-link:hover {
+    color: #ff6600;
+    text-decoration: underline;
+}
+
+.tree-link.active {
+    background-color: #ff6600 !important;
+    color: #ffffff !important;
+    font-weight: bold;
+}

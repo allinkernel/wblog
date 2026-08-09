@@ -1,6 +1,5 @@
 const root = document.documentElement;
 
-// 🎯 字体 2D 矩阵配置映射
 const fontValueMap = {
     'inherit': 'inherit',
     'sans-prop': 'var(--font-stack-sans-prop)',
@@ -17,7 +16,6 @@ const radioVarMap = {
     'font-quote': '--font-quote'
 };
 
-// 1. 位置计算函数（自适应贴边）
 function updatePosition() {
     const wrapper = document.getElementById('article-wrapper');
     const article = document.getElementById('article-container');
@@ -41,13 +39,11 @@ function updatePosition() {
     localStorage.setItem('blog-pos', percent);
 }
 
-// 2. 自动化大纲生成器（包含树状分级与点击收缩功能）
 function generateTOC() {
     const tocContainer = document.getElementById('toc-container');
     const article = document.getElementById('article-container');
     if (!tocContainer || !article) return;
 
-    // 匹配 h1 ~ h6 全部标题
     const rawHeadings = article.querySelectorAll('h1, h2, h3, h4, h5, h6');
     const headings = Array.from(rawHeadings).filter(h => !h.classList.contains('settitle'));
     
@@ -56,7 +52,6 @@ function generateTOC() {
         return;
     }
 
-    // 构建嵌套层级树结构
     const rootTree = { level: 0, children: [] };
     const stack = [rootTree];
 
@@ -80,7 +75,6 @@ function generateTOC() {
         stack.push(node);
     });
 
-    // 递归渲染包含折叠箭头的 HTML 树
     function buildTOCList(nodes) {
         const ul = document.createElement('ul');
         ul.className = 'toc-tree';
@@ -92,7 +86,6 @@ function generateTOC() {
             const itemRow = document.createElement('div');
             itemRow.className = 'toc-item-row';
 
-            // 若含有子节点，生成折叠/展开按钮
             if (node.children.length > 0) {
                 const toggle = document.createElement('span');
                 toggle.className = 'toc-toggle';
@@ -136,33 +129,24 @@ function generateTOC() {
     tocContainer.appendChild(buildTOCList(rootTree.children));
 }
 
-// 3. 初始化控制方块的“展开/最小化”状态流
+// 🎯 3. 拦截整个 panel-header 点击事件，支持完整标题区域任意位置点击缩放/展开
 function initPanelMinimizers() {
     document.querySelectorAll('.panel-box').forEach(box => {
         const header = box.querySelector('.panel-header');
-        const minBtn = box.querySelector('.min-btn');
         const boxId = box.id;
 
         if (boxId && localStorage.getItem(`min-${boxId}`) === 'true') {
             box.classList.add('minimized');
         }
 
-        minBtn?.addEventListener('click', (e) => {
-            e.stopPropagation(); 
-            box.classList.add('minimized');
-            if (boxId) localStorage.setItem(`min-${boxId}`, 'true');
-        });
-
         header?.addEventListener('click', () => {
-            if (box.classList.contains('minimized')) {
-                box.classList.remove('minimized');
-                if (boxId) localStorage.setItem(`min-${boxId}`, 'false');
-            }
+            box.classList.toggle('minimized');
+            const isMin = box.classList.contains('minimized');
+            if (boxId) localStorage.setItem(`min-${boxId}`, isMin ? 'true' : 'false');
         });
     });
 }
 
-// 4. 绑定各面板控件事件监听
 function bindControls() {
     const article = document.getElementById('article-container');
     const wSlider = document.getElementById('width-slider');
@@ -173,7 +157,6 @@ function bindControls() {
     const cBg = document.getElementById('color-bg');
     const fSelect = document.getElementById('font-select');
 
-    // 版面宽度
     wSlider?.addEventListener('input', (e) => {
         root.style.setProperty('--page-width', `${e.target.value}px`);
         const valEl = document.getElementById('width-val');
@@ -182,7 +165,6 @@ function bindControls() {
         updatePosition(); 
     });
 
-    // 文字大小
     sSlider?.addEventListener('input', (e) => {
         root.style.setProperty('--font-size', `${e.target.value}px`);
         const valEl = document.getElementById('size-val');
@@ -190,17 +172,14 @@ function bindControls() {
         localStorage.setItem('blog-size', e.target.value);
     });
 
-    // 版面位置
     pSlider?.addEventListener('input', updatePosition);
     window.addEventListener('resize', updatePosition);
 
-    // 兼容旧字体选择器
     fSelect?.addEventListener('change', (e) => {
         if (article) article.className = e.target.value;
         localStorage.setItem('blog-font', e.target.value);
     });
 
-    // 字体 2D 矩阵配置
     document.querySelector('.font-matrix-table')?.addEventListener('change', (e) => {
         if (e.target.type === 'radio') {
             const groupName = e.target.name;
@@ -214,7 +193,6 @@ function bindControls() {
         }
     });
 
-    // 行间距
     lSlider?.addEventListener('input', (e) => {
         root.style.setProperty('--line-height', e.target.value);
         const valEl = document.getElementById('line-val');
@@ -222,20 +200,17 @@ function bindControls() {
         localStorage.setItem('blog-line', e.target.value);
     });
 
-    // 文字颜色
     cText?.addEventListener('input', (e) => {
         root.style.setProperty('--text-color', e.target.value);
         localStorage.setItem('blog-ctext', e.target.value);
     });
 
-    // 网页背景颜色
     cBg?.addEventListener('input', (e) => {
         root.style.setProperty('--bg-color', e.target.value);
         localStorage.setItem('blog-cbg', e.target.value);
     });
 }
 
-// 5. 还原 LocalStorage 持久化状态
 function restoreSavedSettings() {
     const article = document.getElementById('article-container');
     const wSlider = document.getElementById('width-slider');
@@ -288,7 +263,6 @@ function restoreSavedSettings() {
         root.style.setProperty('--bg-color', savedCBg);
     }
 
-    // 还原字体 2D 矩阵配置
     const fontTable = document.querySelector('.font-matrix-table');
     if (fontTable) {
         Object.keys(radioVarMap).forEach((groupName) => {
@@ -315,7 +289,161 @@ function restoreSavedSettings() {
     updatePosition();
 }
 
-// 6. 页面加载中心调度
+function initArticleTree() {
+    const treeContainer = document.getElementById('tree-container');
+    if (!treeContainer) return;
+
+    fetch('/manifest.json')
+        .then(res => {
+            if (!res.ok) throw new Error("无法获取 manifest.json");
+            return res.json();
+        })
+        .then(manifest => {
+            renderManifestUI(manifest);
+        })
+        .catch(err => {
+            treeContainer.innerHTML = `<span style="color:red">加载文章树失败: ${err.message}</span>`;
+        });
+}
+
+function renderManifestUI(manifest) {
+    const currentPath = decodeURIComponent(window.location.pathname);
+
+    let activeTopicKey = null;
+
+    function searchNodes(nodes) {
+        for (const key in nodes) {
+            const node = nodes[key];
+            if (node.file) {
+                const nodeUrl = '/' + node.file.replace(/^articles\//, '');
+                if (nodeUrl === currentPath) return true;
+            }
+            if (node.children && searchNodes(node.children)) return true;
+        }
+        return false;
+    }
+
+    for (const topicKey in manifest) {
+        if (manifest[topicKey].nodes && searchNodes(manifest[topicKey].nodes)) {
+            activeTopicKey = topicKey;
+            break;
+        }
+    }
+
+    if (activeTopicKey) {
+        renderTopicTree(manifest, activeTopicKey);
+    } else {
+        renderTopicList(manifest);
+    }
+}
+
+function renderTopicList(manifest) {
+    const treeContainer = document.getElementById('tree-container');
+    treeContainer.innerHTML = '';
+
+    const ul = document.createElement('ul');
+    ul.className = 'topic-list';
+
+    Object.keys(manifest).forEach(topicKey => {
+        const li = document.createElement('li');
+        li.className = 'topic-item';
+        li.innerHTML = `<span>📦</span> <span>${topicKey}</span>`;
+        li.addEventListener('click', () => {
+            renderTopicTree(manifest, topicKey);
+        });
+        ul.appendChild(li);
+    });
+
+    treeContainer.appendChild(ul);
+}
+
+function renderTopicTree(manifest, topicKey) {
+    const treeContainer = document.getElementById('tree-container');
+    treeContainer.innerHTML = '';
+
+    const backBtn = document.createElement('div');
+    backBtn.className = 'tree-nav-top';
+    backBtn.innerHTML = `<span>⬅</span> <span>返回主题列表 (${topicKey})</span>`;
+    backBtn.addEventListener('click', () => {
+        renderTopicList(manifest);
+    });
+    treeContainer.appendChild(backBtn);
+
+    const topicData = manifest[topicKey];
+    if (!topicData || !topicData.nodes) {
+        treeContainer.appendChild(document.createTextNode('该主题无节点'));
+        return;
+    }
+
+    const currentPath = decodeURIComponent(window.location.pathname);
+
+    function buildTree(nodes) {
+        const ul = document.createElement('ul');
+        ul.className = 'article-tree';
+
+        Object.keys(nodes).forEach(nodeName => {
+            const node = nodes[nodeName];
+            const li = document.createElement('li');
+            const row = document.createElement('div');
+            row.className = 'tree-node-row';
+
+            const hasChildren = node.children && Object.keys(node.children).length > 0;
+
+            if (hasChildren) {
+                const toggle = document.createElement('span');
+                toggle.className = 'tree-toggle';
+                toggle.innerText = '▼';
+                toggle.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const subUl = li.querySelector(':scope > ul');
+                    if (subUl) {
+                        const isHidden = subUl.style.display === 'none';
+                        subUl.style.display = isHidden ? 'block' : 'none';
+                        toggle.innerText = isHidden ? '▼' : '▶';
+                    }
+                });
+                row.appendChild(toggle);
+            } else {
+                const spacer = document.createElement('span');
+                spacer.className = 'tree-spacer';
+                row.appendChild(spacer);
+            }
+
+            if (node.file) {
+                const nodeUrl = '/' + node.file.replace(/^articles\//, '');
+                const a = document.createElement('a');
+                a.className = 'tree-link';
+                a.href = nodeUrl;
+                a.innerText = nodeName;
+
+                if (nodeUrl === currentPath) {
+                    a.classList.add('active');
+                }
+                row.appendChild(a);
+            } else {
+                const span = document.createElement('span');
+                span.style.fontWeight = 'bold';
+                span.innerText = nodeName;
+                row.appendChild(span);
+            }
+
+            li.appendChild(row);
+
+            if (hasChildren) {
+                const subUl = buildTree(node.children);
+                li.appendChild(subUl);
+            }
+
+            ul.appendChild(li);
+        });
+
+        return ul;
+    }
+
+    const treeEl = buildTree(topicData.nodes);
+    treeContainer.appendChild(treeEl);
+}
+
 window.addEventListener('DOMContentLoaded', () => {
     const article = document.getElementById('article-container');
 
@@ -331,7 +459,6 @@ window.addEventListener('DOMContentLoaded', () => {
         fileToFetch = `/articles${currentPath}`;
     }
 
-    // 请求文章正文
     fetch(fileToFetch)
         .then(response => {
             if (!response.ok) throw new Error('文件不存在');
@@ -349,17 +476,6 @@ window.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-    // 载入归档树
-    fetch('/template/tree.html')
-        .then(response => response.text())
-        .then(htmlData => {
-            const treeEl = document.getElementById('tree-container');
-            if (treeEl) treeEl.innerHTML = htmlData;
-        })
-        .catch(() => {
-            const treeEl = document.getElementById('tree-container');
-            if (treeEl) treeEl.innerHTML = "<span style='color:red'>列表加载失败</span>";
-        });
-
+    initArticleTree();
     restoreSavedSettings();
 });
