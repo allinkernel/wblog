@@ -10,7 +10,7 @@
 
     <!-- 1. 悬浮控制面板组 -->
     <div id="dock-container">
-        
+
         <!-- 方块一：排版调节面板 -->
         <div class="panel-box" id="panel-config">
             <div class="panel-header">
@@ -19,15 +19,6 @@
                 <button class="min-btn">➖</button>
             </div>
             <div class="panel-content">
-                <div class="control-group">
-                    <label>字体样式：</label>
-                    <select id="font-select">
-                        <!-- 【新增核心项并作为默认】完全不干预原本的 HTML 结果 -->
-                        <option value="font-native" selected>文档原生 (Native)</option>
-                        <option value="font-serif">强制衬线 (Serif)</option>
-                        <option value="font-mono">强制等宽 (Mono)</option>
-                    </select>
-                </div>
                 <div class="control-group">
                     <label>版面宽度：</label>
                     <input type="range" id="width-slider" min="400" max="1200" value="700">
@@ -53,6 +44,70 @@
                     <input type="color" id="color-text" value="#222222">
                     <label>背景：</label>
                     <input type="color" id="color-bg" value="#fbfbfb">
+                </div>
+
+                <!-- 🎯 字体矩阵配置（正确收纳入面板内部） -->
+                <div class="font-setting-block">
+                    <div class="block-title">字体矩阵配置</div>
+                    <table class="font-matrix-table">
+                        <thead>
+                            <tr>
+                                <th>区域</th>
+                                <th title="原生/继承">继承</th>
+                                <th title="无衬线不等宽">比例无衬</th>
+                                <th title="衬线不等宽">比例衬线</th>
+                                <th title="无衬线等宽">等宽无衬</th>
+                                <th title="衬线等宽">等宽衬线</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- 1. 正文 -->
+                            <tr>
+                                <td class="row-label">正文</td>
+                                <td><input type="radio" name="font-body" value="inherit" checked></td>
+                                <td><input type="radio" name="font-body" value="sans-prop"></td>
+                                <td><input type="radio" name="font-body" value="serif-prop"></td>
+                                <td><input type="radio" name="font-body" value="sans-mono"></td>
+                                <td><input type="radio" name="font-body" value="serif-mono"></td>
+                            </tr>
+                            <!-- 2. 代码 -->
+                            <tr>
+                                <td class="row-label">代码</td>
+                                <td><input type="radio" name="font-code" value="inherit"></td>
+                                <td><input type="radio" name="font-code" value="sans-prop"></td>
+                                <td><input type="radio" name="font-code" value="serif-prop"></td>
+                                <td><input type="radio" name="font-code" value="sans-mono" checked></td>
+                                <td><input type="radio" name="font-code" value="serif-mono"></td>
+                            </tr>
+                            <!-- 3. 标题 -->
+                            <tr>
+                                <td class="row-label">标题</td>
+                                <td><input type="radio" name="font-heading" value="inherit" checked></td>
+                                <td><input type="radio" name="font-heading" value="sans-prop"></td>
+                                <td><input type="radio" name="font-heading" value="serif-prop"></td>
+                                <td><input type="radio" name="font-heading" value="sans-mono"></td>
+                                <td><input type="radio" name="font-heading" value="serif-mono"></td>
+                            </tr>
+                            <!-- 4. 链接 -->
+                            <tr>
+                                <td class="row-label">链接</td>
+                                <td><input type="radio" name="font-link" value="inherit" checked></td>
+                                <td><input type="radio" name="font-link" value="sans-prop"></td>
+                                <td><input type="radio" name="font-link" value="serif-prop"></td>
+                                <td><input type="radio" name="font-link" value="sans-mono"></td>
+                                <td><input type="radio" name="font-link" value="serif-mono"></td>
+                            </tr>
+                            <!-- 5. 引用/脚注 -->
+                            <tr>
+                                <td class="row-label">引用</td>
+                                <td><input type="radio" name="font-quote" value="inherit" checked></td>
+                                <td><input type="radio" name="font-quote" value="sans-prop"></td>
+                                <td><input type="radio" name="font-quote" value="serif-prop"></td>
+                                <td><input type="radio" name="font-quote" value="sans-mono"></td>
+                                <td><input type="radio" name="font-quote" value="serif-mono"></td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -85,8 +140,7 @@
 
     <!-- 2. 正文核心包裹区 -->
     <div id="article-wrapper">
-        <!-- 默认类改为 font-native -->
-        <main id="article-container" class="font-native">
+        <main id="article-container">
             <p>正在读取正文内容...</p>
         </main>
     </div>
