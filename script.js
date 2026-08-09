@@ -32,8 +32,8 @@ function updatePosition() {
     const posVal = document.getElementById('position-val');
     if (posVal) {
         if (percent === 0) posVal.innerText = "居中";
-        else if (percent < 0) posVal.innerText = `L ${Math.abs(percent)}%`;
-        else posVal.innerText = `R ${percent}%`;
+        else if (percent < 0) posVal.innerText = `L${Math.abs(percent)}%`;
+        else posVal.innerText = `R${percent}%`;
     }
     
     localStorage.setItem('blog-pos', percent);
@@ -607,7 +607,7 @@ function initPanelMinimizers() {
     });
 }
 
-/* 辅助函数：将逻辑数值转换为 calc(1em + Npx) 字符串及友好文本 */
+/* 辅助函数：格式化行内代码尺寸文本 */
 function formatInlineSize(val) {
     const num = parseInt(val, 10) || 0;
     let cssStr = '';
@@ -615,13 +615,13 @@ function formatInlineSize(val) {
 
     if (num === 0) {
         cssStr = '1em';
-        labelStr = '1em';
+        labelStr = '0px';
     } else if (num > 0) {
         cssStr = `calc(1em + ${num}px)`;
-        labelStr = `1em + ${num}px`;
+        labelStr = `+${num}px`;
     } else {
         cssStr = `calc(1em - ${Math.abs(num)}px)`;
-        labelStr = `1em - ${Math.abs(num)}px`;
+        labelStr = `${num}px`;
     }
 
     return { cssStr, labelStr };
@@ -641,6 +641,32 @@ function bindControls() {
     const codeInlineThemeSelect = document.getElementById('code-inline-theme-select');
     const codeInlineSlider = document.getElementById('code-inline-slider');
     const codeBlockSlider = document.getElementById('code-block-slider');
+
+    // 💡 监听左右 `-` 和 `+` 按钮微调 Slider
+    document.querySelectorAll('.slider-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const targetId = btn.getAttribute('data-target');
+            const step = parseFloat(btn.getAttribute('data-step')) || 0;
+            const slider = document.getElementById(targetId);
+            
+            if (slider) {
+                const min = parseFloat(slider.min) || 0;
+                const max = parseFloat(slider.max) || 100;
+                let curVal = parseFloat(slider.value) || 0;
+                
+                let newVal = curVal + step;
+                newVal = Math.max(min, Math.min(max, newVal));
+                
+                // 处理浮点精度
+                if (slider.step && slider.step.includes('.')) {
+                    newVal = parseFloat(newVal.toFixed(1));
+                }
+
+                slider.value = newVal;
+                slider.dispatchEvent(new Event('input'));
+            }
+        });
+    });
 
     wSlider?.addEventListener('input', (e) => {
         root.style.setProperty('--page-width', `${e.target.value}px`);
@@ -705,7 +731,6 @@ function bindControls() {
         localStorage.setItem('blog-code-inline-theme', e.target.value);
     });
 
-    /* 🖐️ 关键逻辑：相对行内字号 calc(1em +- Npx) 监听 */
     codeInlineSlider?.addEventListener('input', (e) => {
         const offsetVal = e.target.value;
         const { cssStr, labelStr } = formatInlineSize(offsetVal);
@@ -749,7 +774,7 @@ function restoreSavedSettings() {
     const savedCodeFormat = localStorage.getItem('blog-code-format') || 'scroll';
     const savedCodeTheme = localStorage.getItem('blog-code-theme') || 'default';
     const savedCodeInlineTheme = localStorage.getItem('blog-code-inline-theme') || 'default';
-    const savedCodeInlineOffset = localStorage.getItem('blog-code-inline-offset') ?? '-2'; // 默认 -2px
+    const savedCodeInlineOffset = localStorage.getItem('blog-code-inline-offset') ?? '-2';
     const savedCodeBlockSize = localStorage.getItem('blog-code-block-size');
 
     if (savedWidth && wSlider) {
@@ -791,7 +816,6 @@ function restoreSavedSettings() {
     if (codeThemeSelect) codeThemeSelect.value = savedCodeTheme;
     if (codeInlineThemeSelect) codeInlineThemeSelect.value = savedCodeInlineTheme;
 
-    /* 🖐️ 关键逻辑：还原保存的相对行内字号 */
     if (codeInlineSlider) {
         codeInlineSlider.value = savedCodeInlineOffset;
         const { cssStr, labelStr } = formatInlineSize(savedCodeInlineOffset);
@@ -1093,4 +1117,3 @@ window.addEventListener('DOMContentLoaded', () => {
     initArticleTree();
     restoreSavedSettings();
 });
-

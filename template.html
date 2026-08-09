@@ -60,30 +60,51 @@
                         </span>
                     </label>
                 </div>
+
                 <div class="control-group">
                     <label>版面宽度：</label>
-                    <input type="range" id="width-slider" min="400" max="1200" value="700">
-                    <span id="width-val">700px</span>
+                    <div class="slider-container">
+                        <button class="slider-btn" data-target="width-slider" data-step="-20">-</button>
+                        <input type="range" id="width-slider" min="400" max="1200" value="700" step="10">
+                        <button class="slider-btn" data-target="width-slider" data-step="20">+</button>
+                    </div>
+                    <span class="val-badge" id="width-val">700px</span>
                 </div>
+
                 <div class="control-group">
                     <label>文字大小：</label>
-                    <input type="range" id="size-slider" min="14" max="32" value="18">
-                    <span id="size-val">18px</span>
+                    <div class="slider-container">
+                        <button class="slider-btn" data-target="size-slider" data-step="-1">-</button>
+                        <input type="range" id="size-slider" min="14" max="32" value="18">
+                        <button class="slider-btn" data-target="size-slider" data-step="1">+</button>
+                    </div>
+                    <span class="val-badge" id="size-val">18px</span>
                 </div>
+
                 <div class="control-group">
                     <label>版面位置：</label>
-                    <input type="range" id="position-slider" min="-100" max="100" value="0">
-                    <span id="position-val">居中</span>
+                    <div class="slider-container">
+                        <button class="slider-btn" data-target="position-slider" data-step="-10">-</button>
+                        <input type="range" id="position-slider" min="-100" max="100" value="0">
+                        <button class="slider-btn" data-target="position-slider" data-step="10">+</button>
+                    </div>
+                    <span class="val-badge" id="position-val">居中</span>
                 </div>
+
                 <div class="control-group">
                     <label>文本行距：</label>
-                    <input type="range" id="line-slider" min="1.2" max="2.5" step="0.1" value="1.7">
-                    <span id="line-val">1.7</span>
+                    <div class="slider-container">
+                        <button class="slider-btn" data-target="line-slider" data-step="-0.1">-</button>
+                        <input type="range" id="line-slider" min="1.2" max="2.5" step="0.1" value="1.7">
+                        <button class="slider-btn" data-target="line-slider" data-step="0.1">+</button>
+                    </div>
+                    <span class="val-badge" id="line-val">1.7</span>
                 </div>
+
                 <div class="control-group">
                     <label>文字颜色：</label>
                     <input type="color" id="color-text" value="#222222">
-                    <label>背景：</label>
+                    <label style="margin-left: 6px;">背景：</label>
                     <input type="color" id="color-bg" value="#fbfbfb">
                 </div>
             </div>
@@ -105,6 +126,7 @@
                         <option value="adaptive">自适应最长行</option>
                     </select>
                 </div>
+
                 <div class="control-group">
                     <label>块级主题：</label>
                     <select id="code-theme-select">
@@ -114,6 +136,7 @@
                         <option value="solarized">Solarized Dark</option>
                     </select>
                 </div>
+
                 <div class="control-group">
                     <label>行内主题：</label>
                     <select id="code-inline-theme-select">
@@ -124,16 +147,25 @@
                         <option value="amber">琥珀黄</option>
                     </select>
                 </div>
+
                 <div class="control-group">
                     <label>行内字号：</label>
-                    <!-- 修改为以 1em 为基准的像素增减 slider -->
-                    <input type="range" id="code-inline-slider" min="-8" max="8" step="1" value="-2">
-                    <span id="code-inline-val">1em - 2px</span>
+                    <div class="slider-container">
+                        <button class="slider-btn" data-target="code-inline-slider" data-step="-1">-</button>
+                        <input type="range" id="code-inline-slider" min="-8" max="8" step="1" value="-2">
+                        <button class="slider-btn" data-target="code-inline-slider" data-step="1">+</button>
+                    </div>
+                    <span class="val-badge" id="code-inline-val">-2px</span>
                 </div>
+
                 <div class="control-group">
                     <label>块级字号：</label>
-                    <input type="range" id="code-block-slider" min="10" max="26" value="14">
-                    <span id="code-block-val">14px</span>
+                    <div class="slider-container">
+                        <button class="slider-btn" data-target="code-block-slider" data-step="-1">-</button>
+                        <input type="range" id="code-block-slider" min="10" max="26" value="14">
+                        <button class="slider-btn" data-target="code-block-slider" data-step="1">+</button>
+                    </div>
+                    <span class="val-badge" id="code-block-val">14px</span>
                 </div>
             </div>
         </div>
@@ -215,4 +247,3 @@
     <script src="/template/script.js"></script>
 </body>
 </html>
-

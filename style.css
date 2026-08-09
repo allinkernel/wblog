@@ -371,12 +371,15 @@ p { margin-bottom: 1.5em; text-align: justify; }
 #left-dock-container::-webkit-scrollbar-thumb,
 #right-dock-container::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
 
+/* 💡 面板宽度自适应调整 */
 .panel-box {
     background: #ffffff;
     border: 1px solid #ddd;
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    width: 280px;
+    width: fit-content;
+    min-width: 220px;
+    max-width: 320px;
     transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
     display: flex;
     flex-direction: column;
@@ -402,7 +405,7 @@ p { margin-bottom: 1.5em; text-align: justify; }
 .panel-header:hover { background: #ebebeb; }
 
 .panel-icon { margin-right: 8px; font-size: 15px; }
-.panel-title { font-size: 13px; font-weight: bold; flex-grow: 1; color: #444; }
+.panel-title { font-size: 13px; font-weight: bold; flex-grow: 1; color: #444; white-space: nowrap; }
 
 .min-btn {
     background: none;
@@ -434,28 +437,100 @@ p { margin-bottom: 1.5em; text-align: justify; }
 .toc-toggle:hover { color: #ff6600; }
 .toc-spacer { width: 12px; flex-shrink: 0; }
 
-.control-group { display: flex; align-items: center; justify-content: space-between; gap: 5px;}
-.control-group input[type="range"] { flex-grow: 1; max-width: 110px;}
-.control-group input[type="color"] { border: 1px solid #ccc; background: none; width: 40px; height: 24px; cursor: pointer; padding: 0;}
+/* 💡 控制项布局优化 */
+.control-group { 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.control-group label {
+    flex-shrink: 0;
+}
+
+/* Slider 组合区域与按钮 */
+.slider-container {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-grow: 1;
+}
+
+.slider-btn {
+    background: #f0f0f0;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    user-select: none;
+    flex-shrink: 0;
+    padding: 0;
+}
+
+.slider-btn:hover {
+    background: #e0e0e0;
+    border-color: #bbb;
+}
+
+.slider-btn:active {
+    background: #d0d0d0;
+}
+
+.control-group input[type="range"] { 
+    flex-grow: 1; 
+    width: 60px;
+    min-width: 40px;
+    margin: 0;
+}
+
+/* 💡 限制数字/数值框的大小 */
+.val-badge {
+    min-width: 38px;
+    text-align: right;
+    font-size: 11px;
+    color: #555;
+    flex-shrink: 0;
+}
+
+.control-group input[type="color"] { 
+    border: 1px solid #ccc; 
+    background: none; 
+    width: 32px; 
+    height: 22px; 
+    cursor: pointer; 
+    padding: 0;
+    flex-shrink: 0;
+}
+
 .control-group select {
     flex-grow: 1;
-    padding: 3px 6px;
+    padding: 2px 4px;
     border: 1px solid #ccc;
     border-radius: 4px;
     background: #fff;
     font-size: 11px;
     cursor: pointer;
+    max-width: 150px;
 }
 
 /* Switch 开关组件样式 */
 .switch {
     position: relative;
     display: inline-block;
-    width: 52px;
-    height: 24px;
+    width: 46px;
+    height: 22px;
     cursor: pointer;
     user-select: none;
     -webkit-user-select: none;
+    flex-shrink: 0;
 }
 
 .switch input {
@@ -470,18 +545,18 @@ p { margin-bottom: 1.5em; text-align: justify; }
     top: 0; left: 0; right: 0; bottom: 0;
     background-color: #dcdfe6;
     transition: background-color 0.25s ease;
-    border-radius: 24px;
+    border-radius: 22px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 7px;
+    padding: 0 5px;
     box-sizing: border-box;
 }
 
 .switch .knob {
     position: absolute;
-    height: 18px;
-    width: 18px;
+    height: 16px;
+    width: 16px;
     left: 3px;
     bottom: 3px;
     background-color: #ffffff;
@@ -492,7 +567,7 @@ p { margin-bottom: 1.5em; text-align: justify; }
 }
 
 .switch .slider-text {
-    font-size: 10px;
+    font-size: 9px;
     font-weight: bold;
     line-height: 1;
     z-index: 1;
@@ -516,7 +591,7 @@ p { margin-bottom: 1.5em; text-align: justify; }
 }
 
 .switch input:checked + .slider .knob {
-    transform: translateX(28px);
+    transform: translateX(24px);
 }
 
 .switch input:checked + .slider .text-on {
@@ -556,7 +631,7 @@ p { margin-bottom: 1.5em; text-align: justify; }
 .panel-box.minimized .panel-content,
 .panel-box.minimized .min-btn { display: none !important; }
 
-#panel-tree:not(.minimized) { width: auto !important; min-width: 280px; max-width: 550px; }
+#panel-tree:not(.minimized) { width: auto !important; min-width: 220px; max-width: 450px; }
 #tree-container { white-space: nowrap !important; overflow-x: auto !important; max-height: 300px; overflow-y: auto; }
 
 .tree-nav-top {
@@ -753,4 +828,3 @@ code:not(pre code)[contenteditable="true"]:focus {
     user-select: none;
     -webkit-user-select: none;
 }
-
