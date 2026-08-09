@@ -9,7 +9,6 @@
     --text-color: #222222; 
     --bg-color: #fbfbfb;   
     
-    /* 🎯 行内与块级代码字号 CSS 变量 */
     --code-inline-size: 14px;
     --code-block-size: 14px;
 }
@@ -74,69 +73,230 @@ body {
 .font-matrix-table input[type="radio"] { cursor: pointer; margin: 0; vertical-align: middle; }
 
 /* ==========================================================================
-   🎯 代码与输出标签控制（行内代码 + 块级代码）
+   🎯 行内代码基础与多主题样式
    ========================================================================== */
 
-/* 1. 基础行内代码字号绑定 */
 #article-container code:not(pre code),
 #article-container kbd,
-#article-container samp,
-#article-container var {
+#article-container samp {
     font-size: var(--code-inline-size, 14px) !important;
     padding: 2px 6px;
     border-radius: 4px;
-    transition: background 0.2s, color 0.2s, border 0.2s;
+    transition: all 0.2s ease;
 }
 
-/* 2. 非行内（块级）代码字号绑定 */
-#article-container pre,
-#article-container pre code {
-    font-size: var(--code-block-size, 14px) !important;
-}
-
-/* 3. 清除嵌套标签时的背景叠加、边距重复 */
-code code, code samp, code kbd,
-samp code, samp samp, samp kbd,
-kbd code, kbd samp {
-    background: transparent !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    font-size: 1em !important;
-    border-radius: 0 !important;
-    border: none !important;
-}
-
-/* 4. 行内代码高亮预设风格 (GitHub / GitLab / Dark / Default) */
-#article-container[data-code-theme="default"] code:not(pre code),
-#article-container[data-code-theme="default"] kbd,
-#article-container[data-code-theme="default"] samp {
-    background: rgba(0, 0, 0, 0.05);
-    color: inherit;
+/* 1. 默认灰色主题 */
+#article-container[data-code-inline-theme="default"] code:not(pre code) {
+    background: rgba(0, 0, 0, 0.06);
+    color: var(--text-color);
     border: 1px solid rgba(0, 0, 0, 0.08);
 }
 
-#article-container[data-code-theme="github"] code:not(pre code),
-#article-container[data-code-theme="github"] kbd,
-#article-container[data-code-theme="github"] samp {
-    background-color: #afb8c133;
+/* 2. 暗黑极客主题 */
+#article-container[data-code-inline-theme="dark"] code:not(pre code) {
+    background: #2d3748;
+    color: #f7fafc;
+    border: 1px solid #4a5568;
+}
+
+/* 3. GitHub 风格主题 */
+#article-container[data-code-inline-theme="github"] code:not(pre code) {
+    background: rgba(175, 184, 193, 0.2);
     color: #24292f;
-    border: 1px solid rgba(175, 184, 193, 0.2);
+    border: 1px solid rgba(175, 184, 193, 0.3);
 }
 
-#article-container[data-code-theme="gitlab"] code:not(pre code),
-#article-container[data-code-theme="gitlab"] kbd,
-#article-container[data-code-theme="gitlab"] samp {
-    background-color: #f3f4f5;
-    color: #c0392b;
-    border: 1px solid #e5e5e5;
+/* 4. 柔和暖红主题 */
+#article-container[data-code-inline-theme="warm"] code:not(pre code) {
+    background: #fff5f5;
+    color: #c53030;
+    border: 1px solid #feb2b2;
 }
 
-#article-container[data-code-theme="dark"] code:not(pre code),
-#article-container[data-code-theme="dark"] kbd,
-#article-container[data-code-theme="dark"] samp {
-    background-color: #272822;
-    color: #f8f8f2;
-    border: 1px solid #3e3d32;
+/* 5. 琥珀黄主题 */
+#article-container[data-code-inline-theme="amber"] code:not(pre code) {
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fde68a;
+}
+
+
+/* ==========================================================================
+   🎯 代码块架构重构（逐行 Flex 包裹，彻底解决折叠换行时行号错位问题）
+   ========================================================================== */
+
+/* 1. 外层卡片容器 */
+.code-block-wrapper {
+    margin: 1.5em 0;
+    border: 1px solid var(--code-border-color, #d0d7de);
+    border-radius: 8px;
+    background-color: var(--code-bg-color, #f6f8fa);
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    transition: border-color 0.2s, background-color 0.2s;
+}
+
+/* 2. 顶部 Header Bar */
+.code-block-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 14px;
+    background-color: var(--code-header-bg, #eaeef2);
+    border-bottom: 1px solid var(--code-border-color, #d0d7de);
+    font-size: 12px;
+    user-select: none;
+}
+
+.code-lang-label {
+    font-weight: bold;
+    color: var(--code-header-text, #57606a);
+    letter-spacing: 0.5px;
+}
+
+.copy-code-btn {
+    background: transparent;
+    border: 1px solid var(--code-border-color, #d0d7de);
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 11px;
+    color: var(--code-header-text, #57606a);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.copy-code-btn:hover {
+    background: rgba(0, 0, 0, 0.08);
+    color: var(--text-color);
+}
+
+/* 3. 代码主体与行布局 */
+.code-block-body {
+    padding: 10px 0;
+}
+
+.code-lines {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+/* 每一行代码作为一个 Flex 单元 */
+.code-line {
+    display: flex;
+    align-items: flex-start;
+    line-height: 1.5;
+    font-size: var(--code-block-size, 14px) !important;
+}
+
+/* 行号（贴在顶部，不能随行高变动拉伸） */
+.line-num {
+    user-select: none;
+    -webkit-user-select: none;
+    text-align: right;
+    padding: 0 12px 0 8px;
+    color: var(--code-linenum-color, #8c959f);
+    background-color: var(--code-linenum-bg, transparent);
+    flex-shrink: 0;
+    box-sizing: border-box;
+    font-family: var(--font-code) !important;
+}
+
+/* 行内文本区域 */
+.line-code {
+    flex: 1;
+    min-width: 0;
+    padding-right: 14px;
+    padding-left: 4px;
+    color: var(--code-text-color, #24292e);
+    font-family: var(--font-code) !important;
+}
+
+/* ==========================================================================
+   🎯 三种显示格式 CSS 控制
+   ========================================================================== */
+
+/* 1. 同宽 + 自动换行 (wrap) - 换行时下方的行号自动被推到下一自然行 */
+#article-container[data-code-format="wrap"] .code-block-wrapper {
+    width: 100%;
+    max-width: 100%;
+}
+#article-container[data-code-format="wrap"] .line-code {
+    white-space: pre-wrap !important;
+    word-break: break-all !important;
+    overflow-wrap: anywhere !important;
+}
+
+/* 2. 同宽 + 横向滚动 (scroll) */
+#article-container[data-code-format="scroll"] .code-block-wrapper {
+    width: 100%;
+    max-width: 100%;
+}
+#article-container[data-code-format="scroll"] .code-block-body {
+    overflow-x: auto;
+}
+#article-container[data-code-format="scroll"] .line-code {
+    white-space: pre !important;
+    word-break: normal !important;
+}
+
+/* 3. 自适应最长行展开 (adaptive) */
+#article-container[data-code-format="adaptive"] .code-block-wrapper {
+    width: max-content;
+    min-width: 100%;
+    max-width: none;
+}
+#article-container[data-code-format="adaptive"] .line-code {
+    white-space: pre !important;
+    word-break: normal !important;
+}
+
+/* ==========================================================================
+   🎯 代码块主题预设
+   ========================================================================== */
+
+/* 1. 默认浅色 */
+#article-container[data-code-theme="default"] {
+    --code-bg-color: #f6f8fa;
+    --code-header-bg: #eaeef2;
+    --code-border-color: #d0d7de;
+    --code-header-text: #57606a;
+    --code-linenum-bg: transparent;
+    --code-linenum-color: #8c959f;
+    --code-text-color: #24292e;
+}
+
+/* 2. 暗黑极客 (Monokai) */
+#article-container[data-code-theme="dark"] {
+    --code-bg-color: #272822;
+    --code-header-bg: #1e1f1c;
+    --code-border-color: #3e3d32;
+    --code-header-text: #a6e22e;
+    --code-linenum-bg: transparent;
+    --code-linenum-color: #75715e;
+    --code-text-color: #f8f8f2;
+}
+
+/* 3. GitHub Dark */
+#article-container[data-code-theme="github-dark"] {
+    --code-bg-color: #0d1117;
+    --code-header-bg: #161b22;
+    --code-border-color: #30363d;
+    --code-header-text: #8b949e;
+    --code-linenum-bg: transparent;
+    --code-linenum-color: #484f58;
+    --code-text-color: #c9d1d9;
+}
+
+/* 4. Solarized Dark */
+#article-container[data-code-theme="solarized"] {
+    --code-bg-color: #002b36;
+    --code-header-bg: #073642;
+    --code-border-color: #073642;
+    --code-header-text: #2aa198;
+    --code-linenum-bg: transparent;
+    --code-linenum-color: #586e75;
+    --code-text-color: #839496;
 }
 
 kbd { font-style: oblique; }
@@ -229,7 +389,7 @@ p { margin-bottom: 1.5em; text-align: justify; }
 .min-btn {
     background: none;
     border: none;
-    pointer-events: none; /* 让点击事件直接穿透至 panel-header */
+    pointer-events: none;
     font-size: 10px;
     color: #888;
     padding: 2px 4px;
@@ -269,10 +429,7 @@ p { margin-bottom: 1.5em; text-align: justify; }
     cursor: pointer;
 }
 
-/* ==========================================================================
-   🎯 强制正方形小方块 (42px x 42px) 最小化状态样式
-   ========================================================================== */
-
+/* 最小化正方形样式 */
 .panel-box.minimized {
     width: 42px !important;
     min-width: 42px !important;
@@ -296,37 +453,15 @@ p { margin-bottom: 1.5em; text-align: justify; }
     background: #ffffff;
 }
 
-.panel-box.minimized .panel-header:hover {
-    background: #f0f0f0;
-}
-
-.panel-box.minimized .panel-icon {
-    margin: 0 !important;
-    font-size: 18px !important;
-}
-
+.panel-box.minimized .panel-header:hover { background: #f0f0f0; }
+.panel-box.minimized .panel-icon { margin: 0 !important; font-size: 18px !important; }
 .panel-box.minimized .panel-title,
 .panel-box.minimized .panel-content,
-.panel-box.minimized .min-btn {
-    display: none !important;
-}
+.panel-box.minimized .min-btn { display: none !important; }
 
-/* ==========================================================================
-   🎯 文章列表展开时的自适应布局
-   ========================================================================== */
-
-#panel-tree:not(.minimized) {
-    width: auto !important;
-    min-width: 280px;
-    max-width: 550px;
-}
-
-#tree-container {
-    white-space: nowrap !important;
-    overflow-x: auto !important;
-    max-height: 300px;
-    overflow-y: auto;
-}
+/* 文章列表展开布局 */
+#panel-tree:not(.minimized) { width: auto !important; min-width: 280px; max-width: 550px; }
+#tree-container { white-space: nowrap !important; overflow-x: auto !important; max-height: 300px; overflow-y: auto; }
 
 .tree-nav-top {
     display: inline-flex;
@@ -343,16 +478,9 @@ p { margin-bottom: 1.5em; text-align: justify; }
     color: #1890ff;
     user-select: none;
 }
-.tree-nav-top:hover {
-    background: #e6f7ff;
-    border-color: #91d5ff;
-}
+.tree-nav-top:hover { background: #e6f7ff; border-color: #91d5ff; }
 
-.topic-list {
-    list-style: none !important;
-    padding: 0 !important;
-    margin: 0 !important;
-}
+.topic-list { list-style: none !important; padding: 0 !important; margin: 0 !important; }
 .topic-item {
     padding: 6px 10px;
     margin-bottom: 4px;
@@ -365,163 +493,36 @@ p { margin-bottom: 1.5em; text-align: justify; }
     font-weight: bold;
     color: #333;
 }
-.topic-item:hover {
-    background: #f6f8fa;
-    color: #ff6600;
-}
+.topic-item:hover { background: #f6f8fa; color: #ff6600; }
 
-.article-tree, .article-tree ul {
-    list-style: none !important;
-    padding-left: 0 !important;
-    margin: 0 !important;
-}
-.article-tree ul {
-    padding-left: 14px !important;
-    border-left: 1px dashed #d9d9d9;
-    margin-top: 2px;
-    margin-bottom: 2px;
-}
+.article-tree, .article-tree ul { list-style: none !important; padding-left: 0 !important; margin: 0 !important; }
+.article-tree ul { padding-left: 14px !important; border-left: 1px dashed #d9d9d9; margin-top: 2px; margin-bottom: 2px; }
 
-.tree-node-row {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 2px 0;
-}
-
-.tree-toggle {
-    cursor: pointer;
-    font-size: 9px;
-    color: #777;
-    width: 12px;
-    text-align: center;
-    user-select: none;
-}
+.tree-node-row { display: inline-flex; align-items: center; gap: 4px; padding: 2px 0; }
+.tree-toggle { cursor: pointer; font-size: 9px; color: #777; width: 12px; text-align: center; user-select: none; }
 .tree-toggle:hover { color: #ff6600; }
 .tree-spacer { width: 12px; display: inline-block; }
 
-.tree-link {
-    color: var(--text-color);
-    text-decoration: none;
-    padding: 2px 5px;
-    border-radius: 3px;
-    transition: background 0.15s, color 0.15s;
-}
-.tree-link:hover {
-    color: #ff6600;
-    text-decoration: underline;
-}
+.tree-link { color: var(--text-color); text-decoration: none; padding: 2px 5px; border-radius: 3px; transition: background 0.15s, color 0.15s; }
+.tree-link:hover { color: #ff6600; text-decoration: underline; }
+.tree-link.active { background-color: #ff6600 !important; color: #ffffff !important; font-weight: bold; }
 
-.tree-link.active {
-    background-color: #ff6600 !important;
-    color: #ffffff !important;
-    font-weight: bold;
-}
-
-/* ==========================================================================
-   🎯 文章图片排版优化与点击放大 (Lightbox)
-   ========================================================================== */
-
+/* 文章图片放大 (Lightbox) */
 #article-container img {
-    zoom: 1 !important;                  
-    max-width: 80% !important;          
-    max-height: 60vh !important;         
-    width: auto;
-    height: auto;
-    object-fit: contain;                 
-    display: block;
-    margin: 1.8rem auto;                 
-    border-radius: 6px;                  
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04); 
-    cursor: zoom-in;                     
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    zoom: 1 !important; max-width: 80% !important; max-height: 60vh !important; width: auto; height: auto;
+    object-fit: contain; display: block; margin: 1.8rem auto; border-radius: 6px; border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04); cursor: zoom-in; transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-
-#article-container img:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-}
-
-#article-container figure {
-    margin: 2rem 0;
-    text-align: center;
-}
-#article-container figure img {
-    margin-bottom: 0.5rem;
-}
-#article-container figcaption {
-    font-size: 0.85em;
-    color: #666;
-    margin-top: 6px;
-}
+#article-container img:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08); }
 
 .lightbox-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.82);    
-    backdrop-filter: blur(8px);          
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;                       
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.25s ease;
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.82); backdrop-filter: blur(8px);
+    display: flex; justify-content: center; align-items: center; z-index: 9999; opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
 }
-
-.lightbox-overlay.active {
-    opacity: 1;
-    pointer-events: auto;
-}
-
-.lightbox-content {
-    position: relative;
-    max-width: 92vw;
-    max-height: 92vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.lightbox-img {
-    max-width: 90vw;
-    max-height: 85vh;
-    object-fit: contain;
-    border-radius: 6px;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
-    transform: scale(0.96);
-    transition: transform 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
-}
-
-.lightbox-overlay.active .lightbox-img {
-    transform: scale(1);
-}
-
-.lightbox-close {
-    position: absolute;
-    top: -38px;
-    right: 0;
-    color: #ffffff;
-    font-size: 28px;
-    font-family: Arial, sans-serif;
-    cursor: pointer;
-    line-height: 1;
-    user-select: none;
-    opacity: 0.8;
-    transition: opacity 0.2s;
-}
-
-.lightbox-close:hover {
-    opacity: 1;
-}
-
-.lightbox-caption {
-    margin-top: 12px;
-    color: rgba(255, 255, 255, 0.85);
-    font-size: 14px;
-    text-align: center;
-}
+.lightbox-overlay.active { opacity: 1; pointer-events: auto; }
+.lightbox-content { position: relative; max-width: 92vw; max-height: 92vh; display: flex; flex-direction: column; align-items: center; }
+.lightbox-img { max-width: 90vw; max-height: 85vh; object-fit: contain; border-radius: 6px; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6); transform: scale(0.96); transition: transform 0.25s cubic-bezier(0.25, 0.8, 0.25, 1); }
+.lightbox-overlay.active .lightbox-img { transform: scale(1); }
+.lightbox-close { position: absolute; top: -38px; right: 0; color: #ffffff; font-size: 28px; cursor: pointer; line-height: 1; opacity: 0.8; transition: opacity 0.2s; }
+.lightbox-close:hover { opacity: 1; }
+.lightbox-caption { margin-top: 12px; color: rgba(255, 255, 255, 0.85); font-size: 14px; text-align: center; }

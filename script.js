@@ -39,6 +39,96 @@ function updatePosition() {
     localStorage.setItem('blog-pos', percent);
 }
 
+/* 🎯 重构核心：生成逐行 Flex 结构的代码块，消除折叠换行时的行号错位问题 */
+function enhanceCodeBlocks() {
+    const article = document.getElementById('article-container');
+    if (!article) return;
+
+    const preNodes = article.querySelectorAll('pre');
+    preNodes.forEach((pre) => {
+        // 防止重复增强
+        if (pre.closest('.code-block-wrapper')) return;
+
+        const codeNode = pre.querySelector('code') || pre;
+        const rawText = codeNode.innerText;
+
+        // 提取代码语言/类型
+        let lang = 'CODE';
+        const classList = Array.from(pre.classList).concat(Array.from(codeNode.classList));
+        for (const cls of classList) {
+            if (cls.startsWith('language-')) {
+                lang = cls.replace('language-', '').toUpperCase();
+                break;
+            } else if (cls.startsWith('lang-')) {
+                lang = cls.replace('lang-', '').toUpperCase();
+                break;
+            } else if (['diff', 'bash', 'c', 'cpp', 'python', 'javascript', 'js', 'html', 'css', 'json', 'shell', 'sh', 'make'].includes(cls.toLowerCase())) {
+                lang = cls.toUpperCase();
+                break;
+            }
+        }
+
+        // 按行切割 HTML 内容以保留转义和标签
+        const lineContentArray = codeNode.innerHTML.replace(/\r\n/g, '\n').split('\n');
+        // 处理末尾空行
+        if (lineContentArray.length > 1 && lineContentArray[lineContentArray.length - 1] === '') {
+            lineContentArray.pop();
+        }
+
+        const lineCount = lineContentArray.length || 1;
+        const maxDigitLen = String(lineCount).length;
+        // 计算行号宽度（支持大数字）
+        const numWidthPx = Math.max(34, maxDigitLen * 10 + 12);
+
+        let linesHtml = '';
+        lineContentArray.forEach((lineText, idx) => {
+            const lineNum = idx + 1;
+            const content = lineText === '' ? ' ' : lineText;
+            linesHtml += `
+                <div class="code-line">
+                    <span class="line-num" style="min-width: ${numWidthPx}px;">${lineNum}</span>
+                    <span class="line-code">${content}</span>
+                </div>
+            `;
+        });
+
+        // 构建 UI 框架
+        const wrapper = document.createElement('div');
+        wrapper.className = 'code-block-wrapper';
+
+        const header = document.createElement('div');
+        header.className = 'code-block-header';
+        header.innerHTML = `
+            <span class="code-lang-label">${lang}</span>
+            <button class="copy-code-btn" title="复制文本">复制</button>
+        `;
+
+        // 一键复制原文本
+        const copyBtn = header.querySelector('.copy-code-btn');
+        copyBtn.addEventListener('click', () => {
+            navigator.clipboard.writeText(rawText).then(() => {
+                copyBtn.innerText = '已复制!';
+                setTimeout(() => { copyBtn.innerText = '复制'; }, 2000);
+            }).catch(() => {
+                copyBtn.innerText = '失败';
+            });
+        });
+
+        const body = document.createElement('div');
+        body.className = 'code-block-body';
+
+        const linesContainer = document.createElement('div');
+        linesContainer.className = 'code-lines';
+        linesContainer.innerHTML = linesHtml;
+
+        body.appendChild(linesContainer);
+        wrapper.appendChild(header);
+        wrapper.appendChild(body);
+
+        pre.parentNode.replaceChild(wrapper, pre);
+    });
+}
+
 function generateTOC() {
     const tocContainer = document.getElementById('toc-container');
     const article = document.getElementById('article-container');
@@ -154,10 +244,11 @@ function bindControls() {
     const lSlider = document.getElementById('line-slider');
     const cText = document.getElementById('color-text');
     const cBg = document.getElementById('color-bg');
-    const fSelect = document.getElementById('font-select');
 
-    /* 🎯 新增代码样式相关 DOM 交互 */
+    /* 代码控制元素 */
+    const codeFormatSelect = document.getElementById('code-format-select');
     const codeThemeSelect = document.getElementById('code-theme-select');
+    const codeInlineThemeSelect = document.getElementById('code-inline-theme-select'); // 🎯 绑定的行内主题选择器
     const codeInlineSlider = document.getElementById('code-inline-slider');
     const codeBlockSlider = document.getElementById('code-block-slider');
 
@@ -178,11 +269,6 @@ function bindControls() {
 
     pSlider?.addEventListener('input', updatePosition);
     window.addEventListener('resize', updatePosition);
-
-    fSelect?.addEventListener('change', (e) => {
-        if (article) article.className = e.target.value;
-        localStorage.setItem('blog-font', e.target.value);
-    });
 
     document.querySelector('.font-matrix-table')?.addEventListener('change', (e) => {
         if (e.target.type === 'radio') {
@@ -214,10 +300,22 @@ function bindControls() {
         localStorage.setItem('blog-cbg', e.target.value);
     });
 
-    /* 🎯 绑定的代码控制逻辑 */
+    /* 代码显示格式 */
+    codeFormatSelect?.addEventListener('change', (e) => {
+        if (article) article.setAttribute('data-code-format', e.target.value);
+        localStorage.setItem('blog-code-format', e.target.value);
+    });
+
+    /* 代码块主题 */
     codeThemeSelect?.addEventListener('change', (e) => {
         if (article) article.setAttribute('data-code-theme', e.target.value);
         localStorage.setItem('blog-code-theme', e.target.value);
+    });
+
+    /* 🎯 代码行内主题监听器 */
+    codeInlineThemeSelect?.addEventListener('change', (e) => {
+        if (article) article.setAttribute('data-code-inline-theme', e.target.value);
+        localStorage.setItem('blog-code-inline-theme', e.target.value);
     });
 
     codeInlineSlider?.addEventListener('input', (e) => {
@@ -243,23 +341,24 @@ function restoreSavedSettings() {
     const lSlider = document.getElementById('line-slider');
     const cText = document.getElementById('color-text');
     const cBg = document.getElementById('color-bg');
-    const fSelect = document.getElementById('font-select');
 
-    /* 🎯 关联新增的 DOM 节点 */
+    const codeFormatSelect = document.getElementById('code-format-select');
     const codeThemeSelect = document.getElementById('code-theme-select');
+    const codeInlineThemeSelect = document.getElementById('code-inline-theme-select');
     const codeInlineSlider = document.getElementById('code-inline-slider');
     const codeBlockSlider = document.getElementById('code-block-slider');
 
     const savedWidth = localStorage.getItem('blog-width');
     const savedSize = localStorage.getItem('blog-size');
-    const savedFont = localStorage.getItem('blog-font');
     const savedPos = localStorage.getItem('blog-pos');
     const savedLine = localStorage.getItem('blog-line');
     const savedCText = localStorage.getItem('blog-ctext');
     const savedCBg = localStorage.getItem('blog-cbg');
 
-    /* 🎯 读取保存的代码设置 */
+    /* 🎯 恢复代码全套主题与格式选项 */
+    const savedCodeFormat = localStorage.getItem('blog-code-format') || 'scroll';
     const savedCodeTheme = localStorage.getItem('blog-code-theme') || 'default';
+    const savedCodeInlineTheme = localStorage.getItem('blog-code-inline-theme') || 'default';
     const savedCodeInlineSize = localStorage.getItem('blog-code-inline-size');
     const savedCodeBlockSize = localStorage.getItem('blog-code-block-size');
 
@@ -274,10 +373,6 @@ function restoreSavedSettings() {
         root.style.setProperty('--font-size', `${savedSize}px`);
         const valEl = document.getElementById('size-val');
         if (valEl) valEl.innerText = `${savedSize}px`;
-    }
-    if (savedFont && fSelect) {
-        fSelect.value = savedFont;
-        if (article) article.className = savedFont;
     }
     if (savedPos && pSlider) {
         pSlider.value = savedPos;
@@ -297,9 +392,14 @@ function restoreSavedSettings() {
         root.style.setProperty('--bg-color', savedCBg);
     }
 
-    /* 🎯 恢复代码相关属性 */
-    if (article) article.setAttribute('data-code-theme', savedCodeTheme);
+    if (article) {
+        article.setAttribute('data-code-format', savedCodeFormat);
+        article.setAttribute('data-code-theme', savedCodeTheme);
+        article.setAttribute('data-code-inline-theme', savedCodeInlineTheme);
+    }
+    if (codeFormatSelect) codeFormatSelect.value = savedCodeFormat;
     if (codeThemeSelect) codeThemeSelect.value = savedCodeTheme;
+    if (codeInlineThemeSelect) codeInlineThemeSelect.value = savedCodeInlineTheme;
 
     if (savedCodeInlineSize && codeInlineSlider) {
         codeInlineSlider.value = savedCodeInlineSize;
@@ -525,6 +625,8 @@ window.addEventListener('DOMContentLoaded', () => {
                     img.style.zoom = '';
                 });
 
+                // 🎯 触发增强重构
+                enhanceCodeBlocks();
                 generateTOC();
             }
         })

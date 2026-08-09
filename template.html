@@ -11,7 +11,7 @@
     <!-- 1. 左侧悬浮坞：导航与大纲 -->
     <div id="left-dock-container">
 
-        <!-- 方块一：文章列表（置于上方） -->
+        <!-- 方块一：文章列表 -->
         <div class="panel-box" id="panel-tree">
             <div class="panel-header" title="点击展开/折叠">
                 <span class="panel-icon">📁</span>
@@ -23,7 +23,7 @@
             </div>
         </div>
 
-        <!-- 方块二：文章大纲（置于下方） -->
+        <!-- 方块二：文章大纲 -->
         <div class="panel-box" id="panel-toc">
             <div class="panel-header" title="点击展开/折叠">
                 <span class="panel-icon">📜</span>
@@ -77,7 +77,7 @@
             </div>
         </div>
 
-        <!-- 🎯 新增方块：代码样式调节面板 -->
+        <!-- 🎯 代码样式调节面板（补回行内主题选项） -->
         <div class="panel-box" id="panel-code-style">
             <div class="panel-header" title="点击展开/折叠">
                 <span class="panel-icon">💻</span>
@@ -86,12 +86,31 @@
             </div>
             <div class="panel-content">
                 <div class="control-group">
-                    <label>行内风格：</label>
+                    <label>显示格式：</label>
+                    <select id="code-format-select">
+                        <option value="scroll">同宽 + 横向滚动</option>
+                        <option value="wrap">同宽 + 自动换行</option>
+                        <option value="adaptive">自适应最长行</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>块级主题：</label>
                     <select id="code-theme-select">
-                        <option value="default">默认浅灰</option>
+                        <option value="default">默认浅色</option>
+                        <option value="dark">暗黑极客</option>
+                        <option value="github-dark">GitHub Dark</option>
+                        <option value="solarized">Solarized Dark</option>
+                    </select>
+                </div>
+                <!-- 🎯 补回：行内代码主题色选择 -->
+                <div class="control-group">
+                    <label>行内主题：</label>
+                    <select id="code-inline-theme-select">
+                        <option value="default">默认灰色</option>
+                        <option value="dark">暗黑极客</option>
                         <option value="github">GitHub 风格</option>
-                        <option value="gitlab">GitLab 风格</option>
-                        <option value="dark">暗色高亮</option>
+                        <option value="warm">柔和暖红</option>
+                        <option value="amber">琥珀黄</option>
                     </select>
                 </div>
                 <div class="control-group">
