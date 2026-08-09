@@ -65,10 +65,9 @@ function copyToClipboard(text) {
 }
 
 /* ==========================================================================
-   🖐️ 可控 PDF 风格画布小手平移功能 (Canvas Pan Tool + Ctrl 键反转)
+   🖐️ 可控 PDF 风格画布小手平移功能 (Canvas Pan Tool + Alt 键反转)
    ========================================================================== */
 function initCanvasPan() {
-    // 1. 注入动态 CSS 样式
     const panStyle = document.createElement('style');
     panStyle.innerHTML = `
         body.canvas-mode-active {
@@ -79,7 +78,6 @@ function initCanvasPan() {
         body.canvas-mode-active.is-panning {
             cursor: grabbing !important;
         }
-        /* 画布开启时，特定控件保持原生光标与交互 */
         body.canvas-mode-active .code-block-wrapper, 
         body.canvas-mode-active code, 
         body.canvas-mode-active pre,
@@ -101,7 +99,8 @@ function initCanvasPan() {
         body.canvas-mode-active input[type="range"], 
         body.canvas-mode-active input[type="checkbox"], 
         body.canvas-mode-active .tree-toggle, 
-        body.canvas-mode-active .toc-toggle {
+        body.canvas-mode-active .toc-toggle,
+        body.canvas-mode-active .switch {
             cursor: pointer;
         }
         body.canvas-mode-active .code-lines, 
@@ -112,15 +111,14 @@ function initCanvasPan() {
     document.head.appendChild(panStyle);
 
     let isCanvasActiveBase = localStorage.getItem('blog-canvas-toggle') === 'true';
-    let isCtrlPressed = false;
+    let isAltPressed = false;
     let isPanning = false;
     let startX = 0, startY = 0;
     let startPercent = 0;
     let startScrollTop = 0;
 
-    // 计算当前实际生效的画布状态 (如果按住 Ctrl 则反转状态)
     const getEffectiveCanvasState = () => {
-        return isCtrlPressed ? !isCanvasActiveBase : isCanvasActiveBase;
+        return isAltPressed ? !isCanvasActiveBase : isCanvasActiveBase;
     };
 
     const updateCanvasUI = () => {
@@ -132,24 +130,7 @@ function initCanvasPan() {
         }
     };
 
-    // 2. 在面板中自动注入/绑定【画布开关】控件
-    const pSlider = document.getElementById('position-slider');
-    let toggleInput = document.getElementById('canvas-toggle');
-
-    if (!toggleInput && pSlider) {
-        const pRow = pSlider.closest('.control-row') || pSlider.parentElement;
-        if (pRow) {
-            const container = document.createElement('div');
-            container.className = 'control-row';
-            container.style.cssText = 'display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;';
-            container.innerHTML = `
-                <label for="canvas-toggle" style="font-size: 13px; font-weight: bold;">画布小手:</label>
-                <input type="checkbox" id="canvas-toggle" style="cursor: pointer;">
-            `;
-            pRow.parentNode.insertBefore(container, pRow);
-            toggleInput = container.querySelector('#canvas-toggle');
-        }
-    }
+    const toggleInput = document.getElementById('canvas-toggle');
 
     if (toggleInput) {
         toggleInput.checked = isCanvasActiveBase;
@@ -160,34 +141,33 @@ function initCanvasPan() {
         });
     }
 
-    // 3. 监听 Ctrl 键实现临时状态反转
     document.addEventListener('keydown', (e) => {
-        if (e.key === 'Control' && !e.repeat) {
-            isCtrlPressed = true;
+        if (e.key === 'Alt' && !e.repeat) {
+            e.preventDefault();
+            isAltPressed = true;
             updateCanvasUI();
         }
     });
 
     document.addEventListener('keyup', (e) => {
-        if (e.key === 'Control') {
-            isCtrlPressed = false;
+        if (e.key === 'Alt') {
+            e.preventDefault();
+            isAltPressed = false;
             updateCanvasUI();
         }
     });
 
     window.addEventListener('blur', () => {
-        if (isCtrlPressed) {
-            isCtrlPressed = false;
+        if (isAltPressed) {
+            isAltPressed = false;
             updateCanvasUI();
         }
     });
 
-    // 4. 拖拽平移事件 Handling
     document.addEventListener('mousedown', (e) => {
         if (e.button !== 0) return;
-        if (!getEffectiveCanvasState()) return; // 未开启画布模式时，允许正常的文本选中
+        if (!getEffectiveCanvasState()) return;
 
-        // 拦截不需要画布拖拽的区域
         if (e.target.closest('.code-block-wrapper, code, pre, input, select, button, textarea, a, .panel-box, .lightbox-overlay, .code-lightbox-overlay')) {
             return;
         }
@@ -212,13 +192,11 @@ function initCanvasPan() {
         const dx = e.clientX - startX;
         const dy = e.clientY - startY;
 
-        // 垂直平移
         window.scrollTo({
             top: startScrollTop - dy,
             behavior: 'instant'
         });
 
-        // 水平平移 (更新版面位置滑块值)
         const wrapper = document.getElementById('article-wrapper');
         const slider = document.getElementById('position-slider');
 
@@ -248,13 +226,9 @@ function initCanvasPan() {
 
     document.addEventListener('mouseup', stopPanning);
 
-    // 初始化渲染 UI 状态
     updateCanvasUI();
 }
 
-/* ==========================================================================
-   💡 光标与只读锁核心配置
-   ========================================================================== */
 function makeReadOnlyEditable(el) {
     if (!el) return;
     el.setAttribute('contenteditable', 'true');
@@ -305,9 +279,6 @@ function initCodeSelectAll() {
     });
 }
 
-/* ==========================================================================
-   全屏代码查看器 Lightbox 逻辑
-   ========================================================================== */
 function initCodeLightbox() {
     if (document.getElementById('code-lightbox-overlay')) return;
 
@@ -636,6 +607,26 @@ function initPanelMinimizers() {
     });
 }
 
+/* 辅助函数：将逻辑数值转换为 calc(1em + Npx) 字符串及友好文本 */
+function formatInlineSize(val) {
+    const num = parseInt(val, 10) || 0;
+    let cssStr = '';
+    let labelStr = '';
+
+    if (num === 0) {
+        cssStr = '1em';
+        labelStr = '1em';
+    } else if (num > 0) {
+        cssStr = `calc(1em + ${num}px)`;
+        labelStr = `1em + ${num}px`;
+    } else {
+        cssStr = `calc(1em - ${Math.abs(num)}px)`;
+        labelStr = `1em - ${Math.abs(num)}px`;
+    }
+
+    return { cssStr, labelStr };
+}
+
 function bindControls() {
     const article = document.getElementById('article-container');
     const wSlider = document.getElementById('width-slider');
@@ -714,11 +705,15 @@ function bindControls() {
         localStorage.setItem('blog-code-inline-theme', e.target.value);
     });
 
+    /* 🖐️ 关键逻辑：相对行内字号 calc(1em +- Npx) 监听 */
     codeInlineSlider?.addEventListener('input', (e) => {
-        root.style.setProperty('--code-inline-size', `${e.target.value}px`);
+        const offsetVal = e.target.value;
+        const { cssStr, labelStr } = formatInlineSize(offsetVal);
+
+        root.style.setProperty('--code-inline-size', cssStr);
         const valEl = document.getElementById('code-inline-val');
-        if (valEl) valEl.innerText = `${e.target.value}px`;
-        localStorage.setItem('blog-code-inline-size', e.target.value);
+        if (valEl) valEl.innerText = labelStr;
+        localStorage.setItem('blog-code-inline-offset', offsetVal);
     });
 
     codeBlockSlider?.addEventListener('input', (e) => {
@@ -754,7 +749,7 @@ function restoreSavedSettings() {
     const savedCodeFormat = localStorage.getItem('blog-code-format') || 'scroll';
     const savedCodeTheme = localStorage.getItem('blog-code-theme') || 'default';
     const savedCodeInlineTheme = localStorage.getItem('blog-code-inline-theme') || 'default';
-    const savedCodeInlineSize = localStorage.getItem('blog-code-inline-size');
+    const savedCodeInlineOffset = localStorage.getItem('blog-code-inline-offset') ?? '-2'; // 默认 -2px
     const savedCodeBlockSize = localStorage.getItem('blog-code-block-size');
 
     if (savedWidth && wSlider) {
@@ -796,11 +791,13 @@ function restoreSavedSettings() {
     if (codeThemeSelect) codeThemeSelect.value = savedCodeTheme;
     if (codeInlineThemeSelect) codeInlineThemeSelect.value = savedCodeInlineTheme;
 
-    if (savedCodeInlineSize && codeInlineSlider) {
-        codeInlineSlider.value = savedCodeInlineSize;
-        root.style.setProperty('--code-inline-size', `${savedCodeInlineSize}px`);
+    /* 🖐️ 关键逻辑：还原保存的相对行内字号 */
+    if (codeInlineSlider) {
+        codeInlineSlider.value = savedCodeInlineOffset;
+        const { cssStr, labelStr } = formatInlineSize(savedCodeInlineOffset);
+        root.style.setProperty('--code-inline-size', cssStr);
         const valEl = document.getElementById('code-inline-val');
-        if (valEl) valEl.innerText = `${savedCodeInlineSize}px`;
+        if (valEl) valEl.innerText = labelStr;
     }
 
     if (savedCodeBlockSize && codeBlockSlider) {
@@ -991,9 +988,6 @@ function renderTopicTree(manifest, topicKey) {
     treeContainer.appendChild(treeEl);
 }
 
-/* ==========================================================================
-   🖼️ 全屏图片查看器 Lightbox 逻辑 (基础灯箱)
-   ========================================================================== */
 function initImageLightbox() {
     if (!document.getElementById('lightbox-overlay')) {
         const overlay = document.createElement('div');
@@ -1051,7 +1045,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
     initPanelMinimizers();
     bindControls();
-    initCanvasPan();        // 初始化带 Ctrl 快捷控制的画布小手功能
+    initCanvasPan();
     initImageLightbox();
     initCodeLightbox();
     initCodeSelectAll();
@@ -1099,3 +1093,4 @@ window.addEventListener('DOMContentLoaded', () => {
     initArticleTree();
     restoreSavedSettings();
 });
+

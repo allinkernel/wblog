@@ -9,7 +9,8 @@
     --text-color: #222222; 
     --bg-color: #fbfbfb;   
     
-    --code-inline-size: 14px;
+    /* 默认设置为 calc(1em - 2px) 相对基准 */
+    --code-inline-size: calc(1em - 2px);
     --code-block-size: 14px;
 }
 
@@ -79,7 +80,7 @@ body {
 #article-container code:not(pre code),
 #article-container kbd,
 #article-container samp {
-    font-size: var(--code-inline-size, 14px) !important;
+    font-size: var(--code-inline-size, calc(1em - 2px)) !important;
     padding: 2px 6px;
     border-radius: 4px;
     transition: all 0.2s ease;
@@ -121,10 +122,9 @@ body {
 }
 
 /* ==========================================================================
-   🎯 块级代码组件架构（已重构 Header 布局：统一左侧排列）
+   🎯 块级代码组件架构
    ========================================================================== */
 
-/* 1. 外层卡片容器 */
 .code-block-wrapper {
     margin: 1.5em 0;
     border: 1px solid var(--code-border-color, #d0d7de);
@@ -135,17 +135,16 @@ body {
     transition: border-color 0.2s, background-color 0.2s;
 }
 
-/* 2. 顶部 Header Bar（🎯 修改点：使用 flex-start，全部依靠左侧排列） */
 .code-block-header {
     display: flex;
-    justify-content: flex-start; /* 靠左对齐 */
+    justify-content: flex-start;
     align-items: center;
     padding: 6px 12px;
     background-color: var(--code-header-bg, #eaeef2);
     border-bottom: 1px solid var(--code-border-color, #d0d7de);
     font-size: 12px;
     user-select: none;
-    gap: 12px; /* 语言标识与按钮组之间的间距 */
+    gap: 12px;
     flex-wrap: wrap;
 }
 
@@ -156,7 +155,6 @@ body {
     flex-shrink: 0;
 }
 
-/* 🎯 顶部局部按钮与下拉栏容器 */
 .code-header-actions {
     display: flex;
     align-items: center;
@@ -201,7 +199,6 @@ body {
     border-color: #52c41a;
 }
 
-/* 3. 代码主体与行布局 */
 .code-block-body {
     padding: 10px 0;
 }
@@ -240,11 +237,7 @@ body {
     font-family: var(--font-code) !important;
 }
 
-/* ==========================================================================
-   三冲显示格式 CSS 控制
-   ========================================================================== */
-
-/* 1. 自动换行 (wrap) */
+/* 三冲显示格式 CSS 控制 */
 #article-container[data-code-format="wrap"] .code-block-wrapper,
 #article-container .code-block-wrapper[data-code-format="wrap"] {
     width: 100%;
@@ -257,7 +250,6 @@ body {
     overflow-wrap: anywhere !important;
 }
 
-/* 2. 横向滚动 (scroll) */
 #article-container[data-code-format="scroll"] .code-block-wrapper,
 #article-container .code-block-wrapper[data-code-format="scroll"] {
     width: 100%;
@@ -273,7 +265,6 @@ body {
     word-break: normal !important;
 }
 
-/* 3. 自适应最长行 (adaptive) */
 #article-container[data-code-format="adaptive"] .code-block-wrapper,
 #article-container .code-block-wrapper[data-code-format="adaptive"] {
     width: max-content;
@@ -286,11 +277,7 @@ body {
     word-break: normal !important;
 }
 
-/* ==========================================================================
-   代码块主题预设
-   ========================================================================== */
-
-/* 1. 默认浅色 */
+/* 代码块主题预设 */
 #article-container[data-code-theme="default"] .code-block-wrapper,
 #article-container .code-block-wrapper[data-code-theme="default"] {
     --code-bg-color: #f6f8fa;
@@ -302,7 +289,6 @@ body {
     --code-text-color: #24292e;
 }
 
-/* 2. 暗黑极客 (Monokai) */
 #article-container[data-code-theme="dark"] .code-block-wrapper,
 #article-container .code-block-wrapper[data-code-theme="dark"] {
     --code-bg-color: #272822;
@@ -314,7 +300,6 @@ body {
     --code-text-color: #f8f8f2;
 }
 
-/* 3. GitHub Dark */
 #article-container[data-code-theme="github-dark"] .code-block-wrapper,
 #article-container .code-block-wrapper[data-code-theme="github-dark"] {
     --code-bg-color: #0d1117;
@@ -326,7 +311,6 @@ body {
     --code-text-color: #c9d1d9;
 }
 
-/* 4. Solarized Dark */
 #article-container[data-code-theme="solarized"] .code-block-wrapper,
 #article-container .code-block-wrapper[data-code-theme="solarized"] {
     --code-bg-color: #002b36;
@@ -463,6 +447,86 @@ p { margin-bottom: 1.5em; text-align: justify; }
     cursor: pointer;
 }
 
+/* Switch 开关组件样式 */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 52px;
+    height: 24px;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    position: absolute;
+}
+
+.switch .slider {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #dcdfe6;
+    transition: background-color 0.25s ease;
+    border-radius: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 7px;
+    box-sizing: border-box;
+}
+
+.switch .knob {
+    position: absolute;
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: #ffffff;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    z-index: 2;
+}
+
+.switch .slider-text {
+    font-size: 10px;
+    font-weight: bold;
+    line-height: 1;
+    z-index: 1;
+    transition: opacity 0.2s ease;
+    font-family: monospace, sans-serif !important;
+}
+
+.switch .text-on {
+    color: #ffffff;
+    opacity: 0;
+}
+
+.switch .text-off {
+    color: #8c959f;
+    opacity: 1;
+    margin-left: auto;
+}
+
+.switch input:checked + .slider {
+    background-color: #1890ff;
+}
+
+.switch input:checked + .slider .knob {
+    transform: translateX(28px);
+}
+
+.switch input:checked + .slider .text-on {
+    opacity: 1;
+}
+
+.switch input:checked + .slider .text-off {
+    opacity: 0;
+}
+
 .panel-box.minimized {
     width: 42px !important;
     min-width: 42px !important;
@@ -559,11 +623,7 @@ p { margin-bottom: 1.5em; text-align: justify; }
 .lightbox-close:hover { opacity: 1; }
 .lightbox-caption { margin-top: 12px; color: rgba(255, 255, 255, 0.85); font-size: 14px; text-align: center; }
 
-/* ==========================================================================
-   全屏按钮与代码块 Lightbox 弹窗样式
-   ========================================================================== */
-
-/* 全屏按钮样式 (与复制按钮保持一致) */
+/* 全屏按钮与代码块 Lightbox 弹窗样式 */
 .fullscreen-code-btn {
     background: transparent;
     border: 1px solid var(--code-border-color, #d0d7de);
@@ -580,7 +640,6 @@ p { margin-bottom: 1.5em; text-align: justify; }
     color: var(--text-color);
 }
 
-/* 代码全屏 Lightbox 遮罩层 */
 .code-lightbox-overlay {
     position: fixed;
     top: 0;
@@ -603,7 +662,6 @@ p { margin-bottom: 1.5em; text-align: justify; }
     pointer-events: auto;
 }
 
-/* 代码全屏窗口主体 */
 .code-lightbox-content {
     width: 90vw;
     max-width: 1300px;
@@ -623,7 +681,6 @@ p { margin-bottom: 1.5em; text-align: justify; }
     transform: scale(1);
 }
 
-/* 全屏 Header 头部栏 */
 .code-lightbox-header {
     display: flex;
     align-items: center;
@@ -660,11 +717,10 @@ p { margin-bottom: 1.5em; text-align: justify; }
     opacity: 1;
 }
 
-/* 全屏代码内容区：支持双向自由滚动 */
 .code-lightbox-body {
     flex: 1;
     padding: 16px 0;
-    overflow: auto; /* 上下左右均可自由滚动 */
+    overflow: auto;
     background-color: var(--code-bg-color, #f6f8fa);
 }
 
@@ -673,33 +729,28 @@ p { margin-bottom: 1.5em; text-align: justify; }
 }
 
 .code-lightbox-body .line-code {
-    white-space: pre !important; /* 保持原格式不换行，方便横向滚动查看长代码 */
+    white-space: pre !important;
     word-break: normal !important;
 }
 
-/* ==========================================================================
-   行内代码点击跳动光标与聚焦高亮
-   ========================================================================== */
 code:not(pre code) {
     cursor: text;
     transition: box-shadow 0.15s ease, border-color 0.15s ease;
 }
 
-/* 获得焦点（即点击出现跳动光标 `|`）时的微高亮 */
 code:not(pre code)[contenteditable="true"]:focus {
     outline: none;
-    box-shadow: 0 0 0 2px rgba(9, 105, 218, 0.3); /* 蓝色聚焦外发光 */
+    box-shadow: 0 0 0 2px rgba(9, 105, 218, 0.3);
     border-radius: 3px;
 }
 
-/* 2. 块级代码容器：聚焦时样式 */
 .code-lines[contenteditable="true"]:focus,
 .code-lightbox-body[contenteditable="true"]:focus {
     outline: none;
 }
 
-/* 确保行号完全不参与编辑与光标落点 */
 .line-num {
     user-select: none;
     -webkit-user-select: none;
 }
+
