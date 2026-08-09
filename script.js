@@ -449,6 +449,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
     initPanelMinimizers();
     bindControls();
+    initImageLightbox();
 
     const currentPath = window.location.pathname;
 
@@ -479,3 +480,62 @@ window.addEventListener('DOMContentLoaded', () => {
     initArticleTree();
     restoreSavedSettings();
 });
+
+// 7. 图片单击放大 (Lightbox) 交互控制
+function initImageLightbox() {
+    // 动态生成 Lightbox Modal HTML 元素，无需手动改动 index.html
+    if (!document.getElementById('lightbox-overlay')) {
+        const overlay = document.createElement('div');
+        overlay.id = 'lightbox-overlay';
+        overlay.className = 'lightbox-overlay';
+        overlay.innerHTML = `
+            <div class="lightbox-content">
+                <span class="lightbox-close" id="lightbox-close">&times;</span>
+                <img class="lightbox-img" id="lightbox-img" src="" alt="放大视图">
+                <div class="lightbox-caption" id="lightbox-caption"></div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+    }
+
+    const overlay = document.getElementById('lightbox-overlay');
+    const imgEl = document.getElementById('lightbox-img');
+    const captionEl = document.getElementById('lightbox-caption');
+    const closeBtn = document.getElementById('lightbox-close');
+
+    // 关闭灯箱函数
+    const closeLightbox = () => {
+        overlay.classList.remove('active');
+        document.body.style.overflow = ''; // 还原背景滚动
+    };
+
+    // 事件委托：直接绑定在 #article-container 上，适应 fetch 异步加载的文章内容
+    const article = document.getElementById('article-container');
+    if (article) {
+        article.addEventListener('click', (e) => {
+            if (e.target.tagName === 'IMG') {
+                imgEl.src = e.target.src;
+                captionEl.innerText = e.target.alt || e.target.title || '';
+                overlay.classList.add('active');
+                document.body.style.overflow = 'hidden'; // 阻止背景滚屏
+            }
+        });
+    }
+
+    // 点击右侧 X 关闭
+    closeBtn.addEventListener('click', closeLightbox);
+
+    // 点击非图片区域（暗色背景蒙层）退出
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay || e.target.classList.contains('lightbox-content')) {
+            closeLightbox();
+        }
+    });
+
+    // 支持 ESC 键关闭
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && overlay.classList.contains('active')) {
+            closeLightbox();
+        }
+    });
+}

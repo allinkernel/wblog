@@ -339,3 +339,113 @@ p { margin-bottom: 1.5em; text-align: justify; }
     color: #ffffff !important;
     font-weight: bold;
 }
+
+/* ==========================================================================
+   🎯 文章图片排版优化与点击放大 (Lightbox)
+   ========================================================================== */
+
+/* 1. 正文图片优雅约束 */
+#article-container img {
+    max-width: 100% !important;          /* 限制最大宽度，绝不超出文字版面 */
+    max-height: 65vh;                    /* 限制最大高度为屏幕的 65%，保留上下文视线 */
+    width: auto;
+    height: auto;
+    object-fit: contain;                 /* 保持比例等比缩放 */
+    display: block;
+    margin: 1.8rem auto;                 /* 居中排列并保持与上下段落间距 */
+    border-radius: 6px;                  /* 圆角边框 */
+    border: 1px solid rgba(0, 0, 0, 0.08);/* 浅色边缘界限，防止白底图与网页背景混淆 */
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04); /* 软微阴影 */
+    cursor: zoom-in;                     /* 鼠标悬停提示可放大 */
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+#article-container img:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+/* 2. 支持带有 caption 的 figure 结构 */
+#article-container figure {
+    margin: 2rem 0;
+    text-align: center;
+}
+#article-container figure img {
+    margin-bottom: 0.5rem;
+}
+#article-container figcaption {
+    font-size: 0.85em;
+    color: #666;
+    margin-top: 6px;
+}
+
+/* 3. 单击放大灯箱 (Lightbox) 蒙层样式 */
+.lightbox-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.82);    /* 深色磨砂半透明背景 */
+    backdrop-filter: blur(8px);          /* 现代毛玻璃柔化背景 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;                       /* 确保位于右侧 Dock 悬浮窗上方 */
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+}
+
+.lightbox-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.lightbox-content {
+    position: relative;
+    max-width: 92vw;
+    max-height: 92vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.lightbox-img {
+    max-width: 90vw;
+    max-height: 85vh;
+    object-fit: contain;
+    border-radius: 6px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+    transform: scale(0.96);
+    transition: transform 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.lightbox-overlay.active .lightbox-img {
+    transform: scale(1);
+}
+
+.lightbox-close {
+    position: absolute;
+    top: -38px;
+    right: 0;
+    color: #ffffff;
+    font-size: 28px;
+    font-family: Arial, sans-serif;
+    cursor: pointer;
+    line-height: 1;
+    user-select: none;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+
+.lightbox-close:hover {
+    opacity: 1;
+}
+
+.lightbox-caption {
+    margin-top: 12px;
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 14px;
+    text-align: center;
+}
