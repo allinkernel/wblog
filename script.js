@@ -129,7 +129,6 @@ function generateTOC() {
     tocContainer.appendChild(buildTOCList(rootTree.children));
 }
 
-// 🎯 3. 拦截整个 panel-header 点击事件，支持完整标题区域任意位置点击缩放/展开
 function initPanelMinimizers() {
     document.querySelectorAll('.panel-box').forEach(box => {
         const header = box.querySelector('.panel-header');
@@ -156,6 +155,11 @@ function bindControls() {
     const cText = document.getElementById('color-text');
     const cBg = document.getElementById('color-bg');
     const fSelect = document.getElementById('font-select');
+
+    /* 🎯 新增代码样式相关 DOM 交互 */
+    const codeThemeSelect = document.getElementById('code-theme-select');
+    const codeInlineSlider = document.getElementById('code-inline-slider');
+    const codeBlockSlider = document.getElementById('code-block-slider');
 
     wSlider?.addEventListener('input', (e) => {
         root.style.setProperty('--page-width', `${e.target.value}px`);
@@ -209,6 +213,26 @@ function bindControls() {
         root.style.setProperty('--bg-color', e.target.value);
         localStorage.setItem('blog-cbg', e.target.value);
     });
+
+    /* 🎯 绑定的代码控制逻辑 */
+    codeThemeSelect?.addEventListener('change', (e) => {
+        if (article) article.setAttribute('data-code-theme', e.target.value);
+        localStorage.setItem('blog-code-theme', e.target.value);
+    });
+
+    codeInlineSlider?.addEventListener('input', (e) => {
+        root.style.setProperty('--code-inline-size', `${e.target.value}px`);
+        const valEl = document.getElementById('code-inline-val');
+        if (valEl) valEl.innerText = `${e.target.value}px`;
+        localStorage.setItem('blog-code-inline-size', e.target.value);
+    });
+
+    codeBlockSlider?.addEventListener('input', (e) => {
+        root.style.setProperty('--code-block-size', `${e.target.value}px`);
+        const valEl = document.getElementById('code-block-val');
+        if (valEl) valEl.innerText = `${e.target.value}px`;
+        localStorage.setItem('blog-code-block-size', e.target.value);
+    });
 }
 
 function restoreSavedSettings() {
@@ -221,6 +245,11 @@ function restoreSavedSettings() {
     const cBg = document.getElementById('color-bg');
     const fSelect = document.getElementById('font-select');
 
+    /* 🎯 关联新增的 DOM 节点 */
+    const codeThemeSelect = document.getElementById('code-theme-select');
+    const codeInlineSlider = document.getElementById('code-inline-slider');
+    const codeBlockSlider = document.getElementById('code-block-slider');
+
     const savedWidth = localStorage.getItem('blog-width');
     const savedSize = localStorage.getItem('blog-size');
     const savedFont = localStorage.getItem('blog-font');
@@ -228,6 +257,11 @@ function restoreSavedSettings() {
     const savedLine = localStorage.getItem('blog-line');
     const savedCText = localStorage.getItem('blog-ctext');
     const savedCBg = localStorage.getItem('blog-cbg');
+
+    /* 🎯 读取保存的代码设置 */
+    const savedCodeTheme = localStorage.getItem('blog-code-theme') || 'default';
+    const savedCodeInlineSize = localStorage.getItem('blog-code-inline-size');
+    const savedCodeBlockSize = localStorage.getItem('blog-code-block-size');
 
     if (savedWidth && wSlider) {
         wSlider.value = savedWidth;
@@ -261,6 +295,24 @@ function restoreSavedSettings() {
     if (savedCBg && cBg) {
         cBg.value = savedCBg;
         root.style.setProperty('--bg-color', savedCBg);
+    }
+
+    /* 🎯 恢复代码相关属性 */
+    if (article) article.setAttribute('data-code-theme', savedCodeTheme);
+    if (codeThemeSelect) codeThemeSelect.value = savedCodeTheme;
+
+    if (savedCodeInlineSize && codeInlineSlider) {
+        codeInlineSlider.value = savedCodeInlineSize;
+        root.style.setProperty('--code-inline-size', `${savedCodeInlineSize}px`);
+        const valEl = document.getElementById('code-inline-val');
+        if (valEl) valEl.innerText = `${savedCodeInlineSize}px`;
+    }
+
+    if (savedCodeBlockSize && codeBlockSlider) {
+        codeBlockSlider.value = savedCodeBlockSize;
+        root.style.setProperty('--code-block-size', `${savedCodeBlockSize}px`);
+        const valEl = document.getElementById('code-block-val');
+        if (valEl) valEl.innerText = `${savedCodeBlockSize}px`;
     }
 
     const fontTable = document.querySelector('.font-matrix-table');
@@ -469,7 +521,6 @@ window.addEventListener('DOMContentLoaded', () => {
             if (article) {
                 article.innerHTML = htmlData;
 
-                // 🖼️ 关键改动：清理渲染出的所有图片的行内 zoom 样式，恢复正常比例
                 article.querySelectorAll('img').forEach(img => {
                     img.style.zoom = '';
                 });
@@ -487,7 +538,6 @@ window.addEventListener('DOMContentLoaded', () => {
     restoreSavedSettings();
 });
 
-// 7. 图片单击放大 (Lightbox) 交互控制
 function initImageLightbox() {
     if (!document.getElementById('lightbox-overlay')) {
         const overlay = document.createElement('div');

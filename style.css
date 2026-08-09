@@ -8,6 +8,10 @@
     --line-height: 1.7;    
     --text-color: #222222; 
     --bg-color: #fbfbfb;   
+    
+    /* 🎯 行内与块级代码字号 CSS 变量 */
+    --code-inline-size: 14px;
+    --code-block-size: 14px;
 }
 
 body {
@@ -69,7 +73,72 @@ body {
 .font-matrix-table .row-label { font-weight: bold; text-align: center; background-color: #fafafa; width: 32px; }
 .font-matrix-table input[type="radio"] { cursor: pointer; margin: 0; vertical-align: middle; }
 
-code, pre, kbd, samp, var { font-size: 0.9em; background: rgba(0, 0, 0, 0.04); padding: 2px 4px; border-radius: 3px; }
+/* ==========================================================================
+   🎯 代码与输出标签控制（行内代码 + 块级代码）
+   ========================================================================== */
+
+/* 1. 基础行内代码字号绑定 */
+#article-container code:not(pre code),
+#article-container kbd,
+#article-container samp,
+#article-container var {
+    font-size: var(--code-inline-size, 14px) !important;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: background 0.2s, color 0.2s, border 0.2s;
+}
+
+/* 2. 非行内（块级）代码字号绑定 */
+#article-container pre,
+#article-container pre code {
+    font-size: var(--code-block-size, 14px) !important;
+}
+
+/* 3. 清除嵌套标签时的背景叠加、边距重复 */
+code code, code samp, code kbd,
+samp code, samp samp, samp kbd,
+kbd code, kbd samp {
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    font-size: 1em !important;
+    border-radius: 0 !important;
+    border: none !important;
+}
+
+/* 4. 行内代码高亮预设风格 (GitHub / GitLab / Dark / Default) */
+#article-container[data-code-theme="default"] code:not(pre code),
+#article-container[data-code-theme="default"] kbd,
+#article-container[data-code-theme="default"] samp {
+    background: rgba(0, 0, 0, 0.05);
+    color: inherit;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+#article-container[data-code-theme="github"] code:not(pre code),
+#article-container[data-code-theme="github"] kbd,
+#article-container[data-code-theme="github"] samp {
+    background-color: #afb8c133;
+    color: #24292f;
+    border: 1px solid rgba(175, 184, 193, 0.2);
+}
+
+#article-container[data-code-theme="gitlab"] code:not(pre code),
+#article-container[data-code-theme="gitlab"] kbd,
+#article-container[data-code-theme="gitlab"] samp {
+    background-color: #f3f4f5;
+    color: #c0392b;
+    border: 1px solid #e5e5e5;
+}
+
+#article-container[data-code-theme="dark"] code:not(pre code),
+#article-container[data-code-theme="dark"] kbd,
+#article-container[data-code-theme="dark"] samp {
+    background-color: #272822;
+    color: #f8f8f2;
+    border: 1px solid #3e3d32;
+}
+
 kbd { font-style: oblique; }
 pre.display, pre.format { font-family: inherit; }
 div.display { margin-left: 3.2em; }
@@ -190,6 +259,15 @@ p { margin-bottom: 1.5em; text-align: justify; }
 .control-group { display: flex; align-items: center; justify-content: space-between; gap: 5px;}
 .control-group input[type="range"] { flex-grow: 1; max-width: 110px;}
 .control-group input[type="color"] { border: 1px solid #ccc; background: none; width: 40px; height: 24px; cursor: pointer; padding: 0;}
+.control-group select {
+    flex-grow: 1;
+    padding: 3px 6px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: #fff;
+    font-size: 11px;
+    cursor: pointer;
+}
 
 /* ==========================================================================
    🎯 强制正方形小方块 (42px x 42px) 最小化状态样式
@@ -344,19 +422,19 @@ p { margin-bottom: 1.5em; text-align: justify; }
    🎯 文章图片排版优化与点击放大 (Lightbox)
    ========================================================================== */
 
-/* 1. 正文图片优雅约束 */
 #article-container img {
-    max-width: 80% !important;          /* 限制最大宽度，绝不超出文字版面 */
-    max-height: 65vh;                    /* 限制最大高度为屏幕的 65%，保留上下文视线 */
+    zoom: 1 !important;                  
+    max-width: 80% !important;          
+    max-height: 60vh !important;         
     width: auto;
     height: auto;
-    object-fit: contain;                 /* 保持比例等比缩放 */
+    object-fit: contain;                 
     display: block;
-    margin: 1.8rem auto;                 /* 居中排列并保持与上下段落间距 */
-    border-radius: 6px;                  /* 圆角边框 */
-    border: 1px solid rgba(0, 0, 0, 0.08);/* 浅色边缘界限，防止白底图与网页背景混淆 */
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04); /* 软微阴影 */
-    cursor: zoom-in;                     /* 鼠标悬停提示可放大 */
+    margin: 1.8rem auto;                 
+    border-radius: 6px;                  
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04); 
+    cursor: zoom-in;                     
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -365,7 +443,6 @@ p { margin-bottom: 1.5em; text-align: justify; }
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
 }
 
-/* 2. 支持带有 caption 的 figure 结构 */
 #article-container figure {
     margin: 2rem 0;
     text-align: center;
@@ -379,19 +456,18 @@ p { margin-bottom: 1.5em; text-align: justify; }
     margin-top: 6px;
 }
 
-/* 3. 单击放大灯箱 (Lightbox) 蒙层样式 */
 .lightbox-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(0, 0, 0, 0.82);    /* 深色磨砂半透明背景 */
-    backdrop-filter: blur(8px);          /* 现代毛玻璃柔化背景 */
+    background: rgba(0, 0, 0, 0.82);    
+    backdrop-filter: blur(8px);          
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 9999;                       /* 确保位于右侧 Dock 悬浮窗上方 */
+    z-index: 9999;                       
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.25s ease;

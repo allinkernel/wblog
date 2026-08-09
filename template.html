@@ -77,6 +77,36 @@
             </div>
         </div>
 
+        <!-- 🎯 新增方块：代码样式调节面板 -->
+        <div class="panel-box" id="panel-code-style">
+            <div class="panel-header" title="点击展开/折叠">
+                <span class="panel-icon">💻</span>
+                <span class="panel-title">代码样式调节</span>
+                <button class="min-btn">➖</button>
+            </div>
+            <div class="panel-content">
+                <div class="control-group">
+                    <label>行内风格：</label>
+                    <select id="code-theme-select">
+                        <option value="default">默认浅灰</option>
+                        <option value="github">GitHub 风格</option>
+                        <option value="gitlab">GitLab 风格</option>
+                        <option value="dark">暗色高亮</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>行内字号：</label>
+                    <input type="range" id="code-inline-slider" min="10" max="26" value="14">
+                    <span id="code-inline-val">14px</span>
+                </div>
+                <div class="control-group">
+                    <label>块级字号：</label>
+                    <input type="range" id="code-block-slider" min="10" max="26" value="14">
+                    <span id="code-block-val">14px</span>
+                </div>
+            </div>
+        </div>
+
         <!-- 方块四：字体矩阵配置面板 -->
         <div class="panel-box" id="panel-font-matrix">
             <div class="panel-header" title="点击展开/折叠">
