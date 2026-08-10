@@ -40,7 +40,7 @@
     <!-- 2. 右侧悬浮坞：配置与调节 -->
     <div id="right-dock-container">
 
-        <!-- 方块三：排版调节面板 -->
+        <!-- 方块三：版面调节面板（仅保留画布小手/版面宽度/版面位置） -->
         <div class="panel-box" id="panel-config">
             <div class="panel-header" title="点击展开/折叠">
                 <span class="panel-icon">⚙️</span>
@@ -72,16 +72,6 @@
                 </div>
 
                 <div class="control-group">
-                    <label>文字大小：</label>
-                    <div class="slider-container">
-                        <button class="slider-btn" data-target="size-slider" data-step="-1">-</button>
-                        <input type="range" id="size-slider" min="14" max="32" value="18">
-                        <button class="slider-btn" data-target="size-slider" data-step="1">+</button>
-                    </div>
-                    <span class="val-badge" id="size-val">18px</span>
-                </div>
-
-                <div class="control-group">
                     <label>版面位置：</label>
                     <div class="slider-container">
                         <button class="slider-btn" data-target="position-slider" data-step="-10">-</button>
@@ -89,6 +79,26 @@
                         <button class="slider-btn" data-target="position-slider" data-step="10">+</button>
                     </div>
                     <span class="val-badge" id="position-val">居中</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 方块：字体调节面板（文字大小 / 文本行距 / 文字颜色与背景） -->
+        <div class="panel-box" id="panel-font">
+            <div class="panel-header" title="点击展开/折叠">
+                <span class="panel-icon icon-aa">Aa</span>
+                <span class="panel-title">字体调节</span>
+                <button class="min-btn">➖</button>
+            </div>
+            <div class="panel-content">
+                <div class="control-group">
+                    <label>文字大小：</label>
+                    <div class="slider-container">
+                        <button class="slider-btn" data-target="size-slider" data-step="-1">-</button>
+                        <input type="range" id="size-slider" min="14" max="32" value="18">
+                        <button class="slider-btn" data-target="size-slider" data-step="1">+</button>
+                    </div>
+                    <span class="val-badge" id="size-val">18px</span>
                 </div>
 
                 <div class="control-group">
@@ -108,6 +118,77 @@
                     <input type="color" id="color-bg" value="#fbfbfb">
                 </div>
 
+                <div class="panel-inner-divider"></div>
+
+                <table class="font-matrix-table">
+                    <thead>
+                        <tr>
+                            <th>区域</th>
+                            <th title="原生/继承">继承</th>
+                            <th title="无衬线不等宽">比例无衬</th>
+                            <th title="衬线不等宽">比例衬线</th>
+                            <th title="无衬线等宽">等宽无衬</th>
+                            <th title="衬线等宽">等宽衬线</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="row-label">正文</td>
+                            <td><input type="radio" name="font-body" value="inherit" checked></td>
+                            <td><input type="radio" name="font-body" value="sans-prop"></td>
+                            <td><input type="radio" name="font-body" value="serif-prop"></td>
+                            <td><input type="radio" name="font-body" value="sans-mono"></td>
+                            <td><input type="radio" name="font-body" value="serif-mono"></td>
+                        </tr>
+                        <tr>
+                            <td class="row-label">代码</td>
+                            <td><input type="radio" name="font-code" value="inherit"></td>
+                            <td><input type="radio" name="font-code" value="sans-prop"></td>
+                            <td><input type="radio" name="font-code" value="serif-prop"></td>
+                            <td><input type="radio" name="font-code" value="sans-mono" checked></td>
+                            <td><input type="radio" name="font-code" value="serif-mono"></td>
+                        </tr>
+                        <tr>
+                            <td class="row-label">标题</td>
+                            <td><input type="radio" name="font-heading" value="inherit" checked></td>
+                            <td><input type="radio" name="font-heading" value="sans-prop"></td>
+                            <td><input type="radio" name="font-heading" value="serif-prop"></td>
+                            <td><input type="radio" name="font-heading" value="sans-mono"></td>
+                            <td><input type="radio" name="font-heading" value="serif-mono"></td>
+                        </tr>
+                        <tr>
+                            <td class="row-label">链接</td>
+                            <td><input type="radio" name="font-link" value="inherit" checked></td>
+                            <td><input type="radio" name="font-link" value="sans-prop"></td>
+                            <td><input type="radio" name="font-link" value="serif-prop"></td>
+                            <td><input type="radio" name="font-link" value="sans-mono"></td>
+                            <td><input type="radio" name="font-link" value="serif-mono"></td>
+                        </tr>
+                        <tr>
+                            <td class="row-label">引用</td>
+                            <td><input type="radio" name="font-quote" value="inherit" checked></td>
+                            <td><input type="radio" name="font-quote" value="sans-prop"></td>
+                            <td><input type="radio" name="font-quote" value="serif-prop"></td>
+                            <td><input type="radio" name="font-quote" value="sans-mono"></td>
+                            <td><input type="radio" name="font-quote" value="serif-mono"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 方块：样式调节面板（引用样式等外观类调节） -->
+        <div class="panel-box" id="panel-style">
+            <div class="panel-header" title="点击展开/折叠">
+                <span class="panel-icon icon-rgb">
+                    <span class="rgb-dot rgb-r"></span>
+                    <span class="rgb-dot rgb-g"></span>
+                    <span class="rgb-dot rgb-b"></span>
+                </span>
+                <span class="panel-title">样式调节</span>
+                <button class="min-btn">➖</button>
+            </div>
+            <div class="panel-content">
                 <div class="control-group">
                     <label>引用样式：</label>
                     <select id="quote-style-select">
@@ -179,71 +260,6 @@
                     </div>
                     <span class="val-badge" id="code-block-val">14px</span>
                 </div>
-            </div>
-        </div>
-
-        <!-- 方块四：字体矩阵配置面板 -->
-        <div class="panel-box" id="panel-font-matrix">
-            <div class="panel-header" title="点击展开/折叠">
-                <span class="panel-icon">🔤</span>
-                <span class="panel-title">字体矩阵配置</span>
-                <button class="min-btn">➖</button>
-            </div>
-            <div class="panel-content">
-                <table class="font-matrix-table">
-                    <thead>
-                        <tr>
-                            <th>区域</th>
-                            <th title="原生/继承">继承</th>
-                            <th title="无衬线不等宽">比例无衬</th>
-                            <th title="衬线不等宽">比例衬线</th>
-                            <th title="无衬线等宽">等宽无衬</th>
-                            <th title="衬线等宽">等宽衬线</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td class="row-label">正文</td>
-                            <td><input type="radio" name="font-body" value="inherit" checked></td>
-                            <td><input type="radio" name="font-body" value="sans-prop"></td>
-                            <td><input type="radio" name="font-body" value="serif-prop"></td>
-                            <td><input type="radio" name="font-body" value="sans-mono"></td>
-                            <td><input type="radio" name="font-body" value="serif-mono"></td>
-                        </tr>
-                        <tr>
-                            <td class="row-label">代码</td>
-                            <td><input type="radio" name="font-code" value="inherit"></td>
-                            <td><input type="radio" name="font-code" value="sans-prop"></td>
-                            <td><input type="radio" name="font-code" value="serif-prop"></td>
-                            <td><input type="radio" name="font-code" value="sans-mono" checked></td>
-                            <td><input type="radio" name="font-code" value="serif-mono"></td>
-                        </tr>
-                        <tr>
-                            <td class="row-label">标题</td>
-                            <td><input type="radio" name="font-heading" value="inherit" checked></td>
-                            <td><input type="radio" name="font-heading" value="sans-prop"></td>
-                            <td><input type="radio" name="font-heading" value="serif-prop"></td>
-                            <td><input type="radio" name="font-heading" value="sans-mono"></td>
-                            <td><input type="radio" name="font-heading" value="serif-mono"></td>
-                        </tr>
-                        <tr>
-                            <td class="row-label">链接</td>
-                            <td><input type="radio" name="font-link" value="inherit" checked></td>
-                            <td><input type="radio" name="font-link" value="sans-prop"></td>
-                            <td><input type="radio" name="font-link" value="serif-prop"></td>
-                            <td><input type="radio" name="font-link" value="sans-mono"></td>
-                            <td><input type="radio" name="font-link" value="serif-mono"></td>
-                        </tr>
-                        <tr>
-                            <td class="row-label">引用</td>
-                            <td><input type="radio" name="font-quote" value="inherit" checked></td>
-                            <td><input type="radio" name="font-quote" value="sans-prop"></td>
-                            <td><input type="radio" name="font-quote" value="serif-prop"></td>
-                            <td><input type="radio" name="font-quote" value="sans-mono"></td>
-                            <td><input type="radio" name="font-quote" value="serif-mono"></td>
-                        </tr>
-                    </tbody>
-                </table>
             </div>
         </div>
 

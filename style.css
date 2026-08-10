@@ -486,6 +486,35 @@ p { margin-bottom: 1.5em; text-align: justify; }
 .panel-icon { margin-right: 8px; font-size: 15px; }
 .panel-title { font-size: 13px; font-weight: bold; flex-grow: 1; color: #444; white-space: nowrap; }
 
+/* 「字体调节」Aa 字样图标：纯文本 + 字体样式，不依赖任何图片 */
+.icon-aa {
+    font-family: Georgia, "Songti SC", "Noto Serif SC", "Times New Roman", serif !important;
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    color: #444;
+}
+
+/* 「样式调节」三原色圆点图标：纯 CSS 绘制的 RGB 三色叠加图形 */
+.icon-rgb {
+    position: relative;
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    vertical-align: -0.16em;
+}
+.icon-rgb .rgb-dot {
+    position: absolute;
+    width: 0.62em;
+    height: 0.62em;
+    border-radius: 50%;
+    mix-blend-mode: multiply;
+}
+.icon-rgb .rgb-r { background: #ff3b30; top: 0; left: 0.19em; }
+.icon-rgb .rgb-g { background: #2ecc71; bottom: 0; left: -0.04em; }
+.icon-rgb .rgb-b { background: #007aff; bottom: 0; left: 0.42em; }
+
+.panel-box.minimized .icon-rgb { width: 1em; height: 1em; }
+
 .min-btn {
     background: none;
     border: none;
@@ -526,6 +555,14 @@ p { margin-bottom: 1.5em; text-align: justify; }
 }
 
 .control-group label {
+    flex-shrink: 0;
+}
+
+/* 面板内部分隔线：用于同一面板内区分不同小节 */
+.panel-inner-divider {
+    height: 1px;
+    background: #e8e8e8;
+    margin: 2px 0;
     flex-shrink: 0;
 }
 
