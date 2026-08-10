@@ -641,6 +641,7 @@ function bindControls() {
     const codeInlineThemeSelect = document.getElementById('code-inline-theme-select');
     const codeInlineSlider = document.getElementById('code-inline-slider');
     const codeBlockSlider = document.getElementById('code-block-slider');
+    const quoteStyleSelect = document.getElementById('quote-style-select');
 
     // 💡 监听左右 `-` 和 `+` 按钮微调 Slider
     document.querySelectorAll('.slider-btn').forEach(btn => {
@@ -747,6 +748,11 @@ function bindControls() {
         if (valEl) valEl.innerText = `${e.target.value}px`;
         localStorage.setItem('blog-code-block-size', e.target.value);
     });
+
+    quoteStyleSelect?.addEventListener('change', (e) => {
+        if (article) article.setAttribute('data-quote-style', e.target.value);
+        localStorage.setItem('blog-quote-style', e.target.value);
+    });
 }
 
 function restoreSavedSettings() {
@@ -763,6 +769,7 @@ function restoreSavedSettings() {
     const codeInlineThemeSelect = document.getElementById('code-inline-theme-select');
     const codeInlineSlider = document.getElementById('code-inline-slider');
     const codeBlockSlider = document.getElementById('code-block-slider');
+    const quoteStyleSelect = document.getElementById('quote-style-select');
 
     const savedWidth = localStorage.getItem('blog-width');
     const savedSize = localStorage.getItem('blog-size');
@@ -776,6 +783,7 @@ function restoreSavedSettings() {
     const savedCodeInlineTheme = localStorage.getItem('blog-code-inline-theme') || 'default';
     const savedCodeInlineOffset = localStorage.getItem('blog-code-inline-offset') ?? '-2';
     const savedCodeBlockSize = localStorage.getItem('blog-code-block-size');
+    const savedQuoteStyle = localStorage.getItem('blog-quote-style') || 'default';
 
     if (savedWidth && wSlider) {
         wSlider.value = savedWidth;
@@ -811,10 +819,12 @@ function restoreSavedSettings() {
         article.setAttribute('data-code-format', savedCodeFormat);
         article.setAttribute('data-code-theme', savedCodeTheme);
         article.setAttribute('data-code-inline-theme', savedCodeInlineTheme);
+        article.setAttribute('data-quote-style', savedQuoteStyle);
     }
     if (codeFormatSelect) codeFormatSelect.value = savedCodeFormat;
     if (codeThemeSelect) codeThemeSelect.value = savedCodeTheme;
     if (codeInlineThemeSelect) codeInlineThemeSelect.value = savedCodeInlineTheme;
+    if (quoteStyleSelect) quoteStyleSelect.value = savedQuoteStyle;
 
     if (codeInlineSlider) {
         codeInlineSlider.value = savedCodeInlineOffset;

@@ -74,6 +74,81 @@ body {
 .font-matrix-table input[type="radio"] { cursor: pointer; margin: 0; vertical-align: middle; }
 
 /* ==========================================================================
+   引用文字（blockquote）多样式主题
+   ========================================================================== */
+
+#article-container blockquote {
+    margin: 1.2em 0;
+    transition: all 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+#article-container blockquote p {
+    margin: 0.3em 0;
+}
+
+/* 1. 默认左边框 */
+#article-container[data-quote-style="default"] blockquote {
+    padding: 0.6em 1em;
+    border-left: 4px solid #d0d7de;
+    background: rgba(0, 0, 0, 0.03);
+    border-radius: 0 4px 4px 0;
+}
+
+/* 2. 强调色块 */
+#article-container[data-quote-style="accent"] blockquote {
+    padding: 0.6em 1em;
+    border-left: 4px solid #1890ff;
+    background: rgba(24, 144, 255, 0.07);
+    border-radius: 0 4px 4px 0;
+}
+
+/* 3. 卡片高亮 */
+#article-container[data-quote-style="card"] blockquote {
+    padding: 0.8em 1.2em;
+    border: 1px solid #d0d7de;
+    background: #f6f8fa;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+/* 4. 大引号风格 */
+#article-container[data-quote-style="mark"] blockquote {
+    position: relative;
+    padding: 0.4em 0.2em 0.4em 1.6em;
+    border: none;
+    background: transparent;
+    font-style: italic;
+    color: rgba(0, 0, 0, 0.65);
+}
+#article-container[data-quote-style="mark"] blockquote::before {
+    content: "“";
+    position: absolute;
+    left: 0;
+    top: -0.15em;
+    font-size: 2.2em;
+    color: rgba(0, 0, 0, 0.2);
+    font-family: Georgia, "Times New Roman", serif;
+    line-height: 1;
+}
+
+/* 5. 极简无边框 */
+#article-container[data-quote-style="plain"] blockquote {
+    padding: 0 0 0 0.2em;
+    border: none;
+    background: transparent;
+    font-style: italic;
+    color: rgba(0, 0, 0, 0.6);
+}
+
+/* 6. 虚线边框 */
+#article-container[data-quote-style="dashed"] blockquote {
+    padding: 0.6em 1em;
+    border: 1px dashed rgba(0, 0, 0, 0.3);
+    background: transparent;
+    border-radius: 6px;
+}
+
+/* ==========================================================================
    行内代码基础与多主题样式
    ========================================================================== */
 
