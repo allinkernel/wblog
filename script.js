@@ -726,6 +726,7 @@ function bindControls() {
     const codeThemeSelect = document.getElementById('code-theme-select');
     const codeInlineThemeSelect = document.getElementById('code-inline-theme-select');
     const codeInlineSlider = document.getElementById('code-inline-slider');
+    const codeInlinePadSlider = document.getElementById('code-inline-pad-slider');
     const codeBlockSlider = document.getElementById('code-block-slider');
     const codeLineNumbersToggle = document.getElementById('code-line-numbers-toggle');
     const codeHeaderToggle = document.getElementById('code-header-toggle');
@@ -845,6 +846,14 @@ function bindControls() {
         localStorage.setItem('blog-code-inline-offset', offsetVal);
     });
 
+    codeInlinePadSlider?.addEventListener('input', (e) => {
+        const padVal = e.target.value;
+        root.style.setProperty('--code-inline-pad-y', `${padVal}px`);
+        const valEl = document.getElementById('code-inline-pad-val');
+        if (valEl) valEl.innerText = `${padVal}px`;
+        localStorage.setItem('blog-code-inline-pad', padVal);
+    });
+
     codeBlockSlider?.addEventListener('input', (e) => {
         root.style.setProperty('--code-block-size', `${e.target.value}px`);
         const valEl = document.getElementById('code-block-val');
@@ -882,6 +891,7 @@ function restoreSavedSettings() {
     const codeThemeSelect = document.getElementById('code-theme-select');
     const codeInlineThemeSelect = document.getElementById('code-inline-theme-select');
     const codeInlineSlider = document.getElementById('code-inline-slider');
+    const codeInlinePadSlider = document.getElementById('code-inline-pad-slider');
     const codeBlockSlider = document.getElementById('code-block-slider');
     const codeLineNumbersToggle = document.getElementById('code-line-numbers-toggle');
     const codeHeaderToggle = document.getElementById('code-header-toggle');
@@ -899,6 +909,7 @@ function restoreSavedSettings() {
     const savedCodeTheme = localStorage.getItem('blog-code-theme') || 'default';
     const savedCodeInlineTheme = localStorage.getItem('blog-code-inline-theme') || 'default';
     const savedCodeInlineOffset = localStorage.getItem('blog-code-inline-offset') ?? '-2';
+    const savedCodeInlinePad = localStorage.getItem('blog-code-inline-pad') ?? '2';
     const savedCodeBlockSize = localStorage.getItem('blog-code-block-size');
     const savedCodeLineNumbers = localStorage.getItem('blog-code-line-numbers') || 'on';
     const savedCodeHeader = localStorage.getItem('blog-code-header') || 'on';
@@ -961,6 +972,13 @@ function restoreSavedSettings() {
         root.style.setProperty('--code-inline-size', cssStr);
         const valEl = document.getElementById('code-inline-val');
         if (valEl) valEl.innerText = labelStr;
+    }
+
+    if (codeInlinePadSlider) {
+        codeInlinePadSlider.value = savedCodeInlinePad;
+        root.style.setProperty('--code-inline-pad-y', `${savedCodeInlinePad}px`);
+        const valEl = document.getElementById('code-inline-pad-val');
+        if (valEl) valEl.innerText = `${savedCodeInlinePad}px`;
     }
 
     if (savedCodeBlockSize && codeBlockSlider) {

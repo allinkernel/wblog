@@ -226,7 +226,7 @@
         <!-- 方块：代码样式调节面板 -->
         <div class="panel-box" id="panel-code-style">
             <div class="panel-header" title="点击展开/折叠">
-                <span class="panel-icon">💻</span>
+                <span class="panel-icon icon-code">&lt;/&gt;</span>
                 <span class="panel-title">代码样式调节</span>
                 <button class="min-btn">➖</button>
             </div>
@@ -283,6 +283,16 @@
                         <button class="slider-btn" data-target="code-inline-slider" data-step="1">+</button>
                     </div>
                     <span class="val-badge" id="code-inline-val">-2px</span>
+                </div>
+
+                <div class="control-group">
+                    <label>行内边距：</label>
+                    <div class="slider-container">
+                        <button class="slider-btn" data-target="code-inline-pad-slider" data-step="-1">-</button>
+                        <input type="range" id="code-inline-pad-slider" min="0" max="6" step="1" value="2">
+                        <button class="slider-btn" data-target="code-inline-pad-slider" data-step="1">+</button>
+                    </div>
+                    <span class="val-badge" id="code-inline-pad-val">2px</span>
                 </div>
 
                 <div class="control-group">

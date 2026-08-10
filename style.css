@@ -23,6 +23,8 @@
     
     /* 默认设置为 calc(1em - 2px) 相对基准 */
     --code-inline-size: calc(1em - 2px);
+    --code-inline-pad-y: 2px;
+    --code-inline-pad-x: 6px;
     --code-block-size: 14px;
 }
 
@@ -181,7 +183,7 @@ body {
 #article-container kbd,
 #article-container samp {
     font-size: var(--code-inline-size, calc(1em - 2px)) !important;
-    padding: 2px 6px;
+    padding: var(--code-inline-pad-y, 2px) var(--code-inline-pad-x, 6px);
     border-radius: 4px;
     transition: all 0.2s ease;
 }
@@ -630,6 +632,15 @@ p { margin-bottom: 1.5em; text-align: justify; }
     font-weight: 700;
     letter-spacing: -0.04em;
     color: #444;
+}
+
+/* 「代码样式调节」</> 图标：等宽字体，贴合代码语义 */
+.icon-code {
+    font-family: Consolas, "Fira Code", Monaco, monospace !important;
+    font-weight: 700;
+    letter-spacing: -0.06em;
+    color: #444;
+    font-size: 13px;
 }
 
 /* 「样式调节」三原色圆点图标：纯 CSS 绘制的 RGB 三色叠加图形 */
@@ -1376,6 +1387,7 @@ body {
 
 .panel-title,
 .icon-aa,
+.icon-code,
 .min-btn {
     color: var(--text-color) !important;
 }
