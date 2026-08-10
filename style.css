@@ -1222,20 +1222,47 @@ body {
     --syntax-op:#0184bb; --syntax-pp:#a626a4; --syntax-builtin:#4078f2;
 }
 
-/* 用变量桥接语法高亮：局部代码块 data-code-theme 优先于 article 的全局 code-theme */
-.code-block-wrapper .line-code span.kw { color: var(--syntax-kw, inherit); }
-.code-block-wrapper .line-code span.cf { color: var(--syntax-cf, inherit); }
-.code-block-wrapper .line-code span.dt { color: var(--syntax-dt, inherit); }
-.code-block-wrapper .line-code span.dv, .code-block-wrapper .line-code span.bn, .code-block-wrapper .line-code span.fl { color: var(--syntax-num, inherit); }
-.code-block-wrapper .line-code span.st { color: var(--syntax-str, inherit); }
-.code-block-wrapper .line-code span.co { color: var(--syntax-comment, inherit); font-style: italic; }
-.code-block-wrapper .line-code span.fu { color: var(--syntax-fn, inherit); }
-.code-block-wrapper .line-code span.ex { color: var(--syntax-ex, inherit); font-weight: bold; }
-.code-block-wrapper .line-code span.at { color: var(--syntax-at, inherit); }
-.code-block-wrapper .line-code span.va { color: var(--syntax-var, inherit); }
-.code-block-wrapper .line-code span.op { color: var(--syntax-op, inherit); }
-.code-block-wrapper .line-code span.pp { color: var(--syntax-pp, inherit); }
-.code-block-wrapper .line-code span.bu { color: var(--syntax-builtin, inherit); }
+/* 用变量桥接语法高亮：局部代码块 data-code-theme 优先于 article 的全局 code-theme
+   同时覆盖全屏灯箱 .code-lightbox-content / .code-lightbox-body，确保「跟随全局」等变量主题在全屏下也生效 */
+.code-block-wrapper .line-code span.kw,
+.code-lightbox-content .line-code span.kw,
+.code-lightbox-body .line-code span.kw { color: var(--syntax-kw, inherit); }
+.code-block-wrapper .line-code span.cf,
+.code-lightbox-content .line-code span.cf,
+.code-lightbox-body .line-code span.cf { color: var(--syntax-cf, inherit); }
+.code-block-wrapper .line-code span.dt,
+.code-lightbox-content .line-code span.dt,
+.code-lightbox-body .line-code span.dt { color: var(--syntax-dt, inherit); }
+.code-block-wrapper .line-code span.dv, .code-block-wrapper .line-code span.bn, .code-block-wrapper .line-code span.fl,
+.code-lightbox-content .line-code span.dv, .code-lightbox-content .line-code span.bn, .code-lightbox-content .line-code span.fl,
+.code-lightbox-body .line-code span.dv, .code-lightbox-body .line-code span.bn, .code-lightbox-body .line-code span.fl { color: var(--syntax-num, inherit); }
+.code-block-wrapper .line-code span.st,
+.code-lightbox-content .line-code span.st,
+.code-lightbox-body .line-code span.st { color: var(--syntax-str, inherit); }
+.code-block-wrapper .line-code span.co,
+.code-lightbox-content .line-code span.co,
+.code-lightbox-body .line-code span.co { color: var(--syntax-comment, inherit); font-style: italic; }
+.code-block-wrapper .line-code span.fu,
+.code-lightbox-content .line-code span.fu,
+.code-lightbox-body .line-code span.fu { color: var(--syntax-fn, inherit); }
+.code-block-wrapper .line-code span.ex,
+.code-lightbox-content .line-code span.ex,
+.code-lightbox-body .line-code span.ex { color: var(--syntax-ex, inherit); font-weight: bold; }
+.code-block-wrapper .line-code span.at,
+.code-lightbox-content .line-code span.at,
+.code-lightbox-body .line-code span.at { color: var(--syntax-at, inherit); }
+.code-block-wrapper .line-code span.va,
+.code-lightbox-content .line-code span.va,
+.code-lightbox-body .line-code span.va { color: var(--syntax-var, inherit); }
+.code-block-wrapper .line-code span.op,
+.code-lightbox-content .line-code span.op,
+.code-lightbox-body .line-code span.op { color: var(--syntax-op, inherit); }
+.code-block-wrapper .line-code span.pp,
+.code-lightbox-content .line-code span.pp,
+.code-lightbox-body .line-code span.pp { color: var(--syntax-pp, inherit); }
+.code-block-wrapper .line-code span.bu,
+.code-lightbox-content .line-code span.bu,
+.code-lightbox-body .line-code span.bu { color: var(--syntax-builtin, inherit); }
 
 /* 旧代码主题也补变量，保证局部选择可以真正覆盖全局代码主题 */
 #article-container[data-code-theme="default"] .code-block-wrapper, .code-block-wrapper[data-code-theme="default"] {
@@ -1327,7 +1354,8 @@ body {
     --syntax-comment:#a0a1a7; --syntax-fn:#4078f2; --syntax-ex:#50a14f; --syntax-at:#986801; --syntax-var:#e45649;
     --syntax-op:#0184bb; --syntax-pp:#a626a4; --syntax-builtin:#4078f2;
 }
-#article-container .code-block-wrapper[data-code-theme="global"] {
+#article-container .code-block-wrapper[data-code-theme="global"],
+.code-lightbox-content[data-code-theme="global"] {
     --code-bg-color:var(--theme-surface-2); --code-header-bg:var(--theme-surface); --code-border-color:var(--theme-border);
     --code-header-text:var(--theme-muted); --code-linenum-bg:transparent; --code-linenum-color:var(--theme-muted); --code-text-color:var(--text-color);
     --syntax-kw:var(--theme-link); --syntax-cf:var(--theme-link); --syntax-dt:var(--theme-accent); --syntax-num:var(--theme-link-hover);
