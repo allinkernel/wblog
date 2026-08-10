@@ -16,6 +16,38 @@ const radioVarMap = {
     'font-quote': '--font-quote'
 };
 
+/* 正文阅读主题：只设置阅读层 Token；代码块/行内代码/引用可以选择独立主题。 */
+const readerThemeMap = {
+    'custom': {text:'#222222', bg:'#fbfbfb', surface:'#ffffff', surface2:'#f6f8fa', border:'#d0d7de', muted:'#57606a', link:'#0969da', hover:'#0550ae', accent:'#1890ff', quoteBg:'rgba(0,0,0,.03)', quoteBorder:'#d0d7de', quoteMark:'rgba(0,0,0,.22)'},
+    'github-light': {text:'#1f2328', bg:'#ffffff', surface:'#ffffff', surface2:'#f6f8fa', border:'#d0d7de', muted:'#57606a', link:'#0969da', hover:'#0550ae', accent:'#0969da', quoteBg:'#f6f8fa', quoteBorder:'#d0d7de', quoteMark:'rgba(31,35,40,.22)'},
+    'github-dark': {text:'#c9d1d9', bg:'#0d1117', surface:'#161b22', surface2:'#21262d', border:'#30363d', muted:'#8b949e', link:'#58a6ff', hover:'#79c0ff', accent:'#58a6ff', quoteBg:'rgba(56,139,253,.12)', quoteBorder:'#3b82f6', quoteMark:'rgba(201,209,217,.25)'},
+    'claude-light': {text:'#3f3a36', bg:'#f7f4ee', surface:'#fbf9f5', surface2:'#eee9df', border:'#d9d1c5', muted:'#766d63', link:'#a75d32', hover:'#874621', accent:'#c66a3d', quoteBg:'#eee9df', quoteBorder:'#cfa98d', quoteMark:'rgba(92,69,53,.22)'},
+    'claude-dark': {text:'#e8e1d9', bg:'#1f1d1a', surface:'#292622', surface2:'#332e29', border:'#4a433c', muted:'#a99f95', link:'#e0a27d', hover:'#f0b898', accent:'#d88b63', quoteBg:'rgba(216,139,99,.10)', quoteBorder:'#9b6a51', quoteMark:'rgba(232,225,217,.24)'},
+    'notion-light': {text:'#37352f', bg:'#ffffff', surface:'#ffffff', surface2:'#f7f6f3', border:'#e6e6e3', muted:'#787774', link:'#2383e2', hover:'#1b6fbe', accent:'#2383e2', quoteBg:'#f7f6f3', quoteBorder:'#cfcfcb', quoteMark:'rgba(55,53,47,.22)'},
+    'solarized-light': {text:'#657b83', bg:'#fdf6e3', surface:'#eee8d5', surface2:'#f6f0dc', border:'#d8cfb4', muted:'#93a1a1', link:'#268bd2', hover:'#2074b0', accent:'#b58900', quoteBg:'rgba(238,232,213,.75)', quoteBorder:'#93a1a1', quoteMark:'rgba(101,123,131,.25)'},
+    'solarized-dark': {text:'#839496', bg:'#002b36', surface:'#073642', surface2:'#0a3b47', border:'#28535d', muted:'#657b83', link:'#2aa198', hover:'#5fcfc4', accent:'#b58900', quoteBg:'rgba(7,54,66,.8)', quoteBorder:'#586e75', quoteMark:'rgba(131,148,150,.25)'},
+    'dracula': {text:'#f8f8f2', bg:'#282a36', surface:'#21222c', surface2:'#343746', border:'#44475a', muted:'#a5a8bd', link:'#8be9fd', hover:'#b6f3ff', accent:'#bd93f9', quoteBg:'rgba(189,147,249,.10)', quoteBorder:'#6272a4', quoteMark:'rgba(248,248,242,.24)'}
+};
+
+function applyReaderTheme(themeName) {
+    const article = document.getElementById('article-container');
+    const theme = readerThemeMap[themeName] || readerThemeMap.custom;
+    if (!article) return;
+    article.setAttribute('data-reader-theme', themeName);
+    root.style.setProperty('--text-color', theme.text);
+    root.style.setProperty('--bg-color', theme.bg);
+    root.style.setProperty('--theme-surface', theme.surface);
+    root.style.setProperty('--theme-surface-2', theme.surface2);
+    root.style.setProperty('--theme-border', theme.border);
+    root.style.setProperty('--theme-muted', theme.muted);
+    root.style.setProperty('--theme-link', theme.link);
+    root.style.setProperty('--theme-link-hover', theme.hover);
+    root.style.setProperty('--theme-accent', theme.accent);
+    root.style.setProperty('--theme-quote-bg', theme.quoteBg);
+    root.style.setProperty('--theme-quote-border', theme.quoteBorder);
+    root.style.setProperty('--theme-quote-mark', theme.quoteMark);
+}
+
 function updatePosition() {
     const wrapper = document.getElementById('article-wrapper');
     const article = document.getElementById('article-container');
@@ -436,6 +468,12 @@ function enhanceCodeBlocks() {
                     <option value="dark">暗黑极客</option>
                     <option value="github-dark">GitHub Dark</option>
                     <option value="solarized">Solarized Dark</option>
+                    <option value="github-light">GitHub Light</option>
+                    <option value="dracula">Dracula</option>
+                    <option value="nord">Nord</option>
+                    <option value="one-dark">One Dark</option>
+                    <option value="one-light">Atom One Light</option>
+                    <option value="global">跟随全局阅读主题</option>
                 </select>
                 <button class="copy-code-btn" title="复制文本">复制</button>
                 <button class="fullscreen-code-btn" title="全屏查看代码">全屏</button>
@@ -635,6 +673,7 @@ function bindControls() {
     const lSlider = document.getElementById('line-slider');
     const cText = document.getElementById('color-text');
     const cBg = document.getElementById('color-bg');
+    const readerThemeSelect = document.getElementById('reader-theme-select');
 
     const codeFormatSelect = document.getElementById('code-format-select');
     const codeThemeSelect = document.getElementById('code-theme-select');
@@ -708,13 +747,28 @@ function bindControls() {
     });
 
     cText?.addEventListener('input', (e) => {
+        applyReaderTheme('custom');
         root.style.setProperty('--text-color', e.target.value);
         localStorage.setItem('blog-ctext', e.target.value);
+        if (readerThemeSelect) readerThemeSelect.value = 'custom';
+        localStorage.setItem('blog-reader-theme', 'custom');
     });
 
     cBg?.addEventListener('input', (e) => {
+        applyReaderTheme('custom');
         root.style.setProperty('--bg-color', e.target.value);
         localStorage.setItem('blog-cbg', e.target.value);
+        if (readerThemeSelect) readerThemeSelect.value = 'custom';
+        localStorage.setItem('blog-reader-theme', 'custom');
+    });
+
+    readerThemeSelect?.addEventListener('change', (e) => {
+        const themeName = e.target.value || 'custom';
+        applyReaderTheme(themeName);
+        localStorage.setItem('blog-reader-theme', themeName);
+        const theme = readerThemeMap[themeName] || readerThemeMap.custom;
+        if (cText) cText.value = theme.text;
+        if (cBg) cBg.value = theme.bg;
     });
 
     codeFormatSelect?.addEventListener('change', (e) => {
@@ -763,6 +817,7 @@ function restoreSavedSettings() {
     const lSlider = document.getElementById('line-slider');
     const cText = document.getElementById('color-text');
     const cBg = document.getElementById('color-bg');
+    const readerThemeSelect = document.getElementById('reader-theme-select');
 
     const codeFormatSelect = document.getElementById('code-format-select');
     const codeThemeSelect = document.getElementById('code-theme-select');
@@ -777,13 +832,14 @@ function restoreSavedSettings() {
     const savedLine = localStorage.getItem('blog-line');
     const savedCText = localStorage.getItem('blog-ctext');
     const savedCBg = localStorage.getItem('blog-cbg');
+    const savedReaderTheme = localStorage.getItem('blog-reader-theme') || 'custom';
 
     const savedCodeFormat = localStorage.getItem('blog-code-format') || 'scroll';
     const savedCodeTheme = localStorage.getItem('blog-code-theme') || 'default';
     const savedCodeInlineTheme = localStorage.getItem('blog-code-inline-theme') || 'default';
     const savedCodeInlineOffset = localStorage.getItem('blog-code-inline-offset') ?? '-2';
     const savedCodeBlockSize = localStorage.getItem('blog-code-block-size');
-    const savedQuoteStyle = localStorage.getItem('blog-quote-style') || 'default';
+    const savedQuoteStyle = localStorage.getItem('blog-quote-style') || 'global';
 
     if (savedWidth && wSlider) {
         wSlider.value = savedWidth;
@@ -806,13 +862,22 @@ function restoreSavedSettings() {
         const valEl = document.getElementById('line-val');
         if (valEl) valEl.innerText = savedLine;
     }
-    if (savedCText && cText) {
-        cText.value = savedCText;
-        root.style.setProperty('--text-color', savedCText);
-    }
-    if (savedCBg && cBg) {
-        cBg.value = savedCBg;
-        root.style.setProperty('--bg-color', savedCBg);
+    applyReaderTheme(savedReaderTheme);
+    if (readerThemeSelect) readerThemeSelect.value = savedReaderTheme;
+
+    if (savedReaderTheme === 'custom') {
+        if (savedCText && cText) {
+            cText.value = savedCText;
+            root.style.setProperty('--text-color', savedCText);
+        }
+        if (savedCBg && cBg) {
+            cBg.value = savedCBg;
+            root.style.setProperty('--bg-color', savedCBg);
+        }
+    } else {
+        const savedTheme = readerThemeMap[savedReaderTheme] || readerThemeMap.custom;
+        if (cText) cText.value = savedTheme.text;
+        if (cBg) cBg.value = savedTheme.bg;
     }
 
     if (article) {
