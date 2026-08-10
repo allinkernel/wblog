@@ -26,14 +26,15 @@ const readerThemeMap = {
     'notion-light': {text:'#37352f', bg:'#ffffff', surface:'#ffffff', surface2:'#f7f6f3', border:'#e6e6e3', muted:'#787774', link:'#2383e2', hover:'#1b6fbe', accent:'#2383e2', quoteBg:'#f7f6f3', quoteBorder:'#cfcfcb', quoteMark:'rgba(55,53,47,.22)'},
     'solarized-light': {text:'#657b83', bg:'#fdf6e3', surface:'#eee8d5', surface2:'#f6f0dc', border:'#d8cfb4', muted:'#93a1a1', link:'#268bd2', hover:'#2074b0', accent:'#b58900', quoteBg:'rgba(238,232,213,.75)', quoteBorder:'#93a1a1', quoteMark:'rgba(101,123,131,.25)'},
     'solarized-dark': {text:'#839496', bg:'#002b36', surface:'#073642', surface2:'#0a3b47', border:'#28535d', muted:'#657b83', link:'#2aa198', hover:'#5fcfc4', accent:'#b58900', quoteBg:'rgba(7,54,66,.8)', quoteBorder:'#586e75', quoteMark:'rgba(131,148,150,.25)'},
-    'dracula': {text:'#f8f8f2', bg:'#282a36', surface:'#21222c', surface2:'#343746', border:'#44475a', muted:'#a5a8bd', link:'#8be9fd', hover:'#b6f3ff', accent:'#bd93f9', quoteBg:'rgba(189,147,249,.10)', quoteBorder:'#6272a4', quoteMark:'rgba(248,248,242,.24)'}
+    'dracula': {text:'#f8f8f2', bg:'#282a36', surface:'#21222c', surface2:'#343746', border:'#44475a', muted:'#a5a8bd', link:'#8be9fd', hover:'#b6f3ff', accent:'#bd93f9', quoteBg:'rgba(189,147,249,.10)', quoteBorder:'#6272a4', quoteMark:'rgba(248,248,242,.24)'},
+    'stack-overflow': {text:'#232629', bg:'#ffffff', surface:'#ffffff', surface2:'#f1f2f3', border:'#d6d9dc', muted:'#6a737c', link:'#0077cc', hover:'#005999', accent:'#f48024', quoteBg:'#f1f2f3', quoteBorder:'#d6d9dc', quoteMark:'rgba(35,38,41,.22)'},
+    'catppuccin-latte': {text:'#4c4f69', bg:'#eff1f5', surface:'#e6e9ef', surface2:'#e6e9ef', border:'#ccd0da', muted:'#7c7f93', link:'#1e66f5', hover:'#1250c7', accent:'#8839ef', quoteBg:'rgba(136,57,239,.08)', quoteBorder:'#b4befe', quoteMark:'rgba(76,79,105,.22)'},
+    'catppuccin-mocha': {text:'#cdd6f4', bg:'#1e1e2e', surface:'#181825', surface2:'#313244', border:'#45475a', muted:'#a6adc8', link:'#89b4fa', hover:'#b4d0ff', accent:'#cba6f7', quoteBg:'rgba(203,166,247,.10)', quoteBorder:'#585b70', quoteMark:'rgba(205,214,244,.24)'},
+    'nord': {text:'#d8dee9', bg:'#2e3440', surface:'#3b4252', surface2:'#434c5e', border:'#4c566a', muted:'#8fbcbb', link:'#88c0d0', hover:'#a3d7e3', accent:'#81a1c1', quoteBg:'rgba(136,192,208,.10)', quoteBorder:'#5e81ac', quoteMark:'rgba(216,222,233,.24)'},
+    'texi2html': {text:'#000000', bg:'#ffffff', surface:'#ffffff', surface2:'#ffffff', border:'#c8c8c8', muted:'#555555', link:'#0000ee', hover:'#551a8b', accent:'#000000', quoteBg:'transparent', quoteBorder:'#000000', quoteMark:'rgba(0,0,0,.22)'}
 };
 
-function applyReaderTheme(themeName) {
-    const article = document.getElementById('article-container');
-    const theme = readerThemeMap[themeName] || readerThemeMap.custom;
-    if (!article) return;
-    article.setAttribute('data-reader-theme', themeName);
+function setReaderThemeVariables(theme) {
     root.style.setProperty('--text-color', theme.text);
     root.style.setProperty('--bg-color', theme.bg);
     root.style.setProperty('--theme-surface', theme.surface);
@@ -46,6 +47,46 @@ function applyReaderTheme(themeName) {
     root.style.setProperty('--theme-quote-bg', theme.quoteBg);
     root.style.setProperty('--theme-quote-border', theme.quoteBorder);
     root.style.setProperty('--theme-quote-mark', theme.quoteMark);
+}
+
+function applyReaderTheme(themeName) {
+    const article = document.getElementById('article-container');
+    const theme = readerThemeMap[themeName] || readerThemeMap.custom;
+    if (!article) return;
+    article.setAttribute('data-reader-theme', themeName);
+    setReaderThemeVariables(theme);
+}
+
+function hexToRgb(hex) {
+    const m = String(hex || '').replace('#','').match(/^([0-9a-f]{3}|[0-9a-f]{6})$/i);
+    if (!m) return null;
+    const h = m[1].length === 3 ? m[1].split('').map(x => x + x).join('') : m[1];
+    return { r: parseInt(h.slice(0,2),16), g: parseInt(h.slice(2,4),16), b: parseInt(h.slice(4,6),16) };
+}
+
+function mixHex(a, b, amount) {
+    const x = hexToRgb(a), y = hexToRgb(b);
+    if (!x || !y) return a;
+    const t = Math.max(0, Math.min(1, amount));
+    const c = k => Math.round(x[k] * (1-t) + y[k] * t).toString(16).padStart(2,'0');
+    return `#${c('r')}${c('g')}${c('b')}`;
+}
+
+function applyCustomReaderColors(text, bg) {
+    const rgb = hexToRgb(bg);
+    const dark = rgb ? (0.299*rgb.r + 0.587*rgb.g + 0.114*rgb.b) < 150 : false;
+    const surface = dark ? mixHex(bg, '#ffffff', 0.055) : mixHex(bg, '#ffffff', 0.72);
+    const surface2 = dark ? mixHex(bg, '#ffffff', 0.10) : mixHex(bg, '#000000', 0.035);
+    const border = dark ? mixHex(bg, '#ffffff', 0.18) : mixHex(bg, '#000000', 0.14);
+    const muted = dark ? mixHex(text, bg, 0.48) : mixHex(text, bg, 0.52);
+    const link = dark ? '#66b3ff' : '#0969da';
+    const hover = dark ? '#8bc7ff' : '#0550ae';
+    const accent = dark ? '#8ab4ff' : '#1890ff';
+    const quoteBorder = dark ? mixHex(link, bg, 0.35) : mixHex(link, bg, 0.45);
+    const quoteBg = dark ? `rgba(102,179,255,.10)` : `rgba(0,0,0,.035)`;
+    const quoteMark = dark ? 'rgba(255,255,255,.24)' : 'rgba(0,0,0,.22)';
+    const theme = {text, bg, surface, surface2, border, muted, link, hover, accent, quoteBg, quoteBorder, quoteMark};
+    setReaderThemeVariables(theme);
 }
 
 function updatePosition() {
@@ -376,9 +417,12 @@ function openCodeLightbox(lang, rawText, codeBlockWrapper) {
         });
     });
 
-    const theme = codeBlockWrapper.getAttribute('data-code-theme') || 
-                  document.getElementById('article-container')?.getAttribute('data-code-theme') || 'default';
+    const article = document.getElementById('article-container');
+    const theme = codeBlockWrapper.getAttribute('data-code-theme') ||
+                  article?.getAttribute('data-code-theme') || 'default';
     content.setAttribute('data-code-theme', theme);
+    content.setAttribute('data-code-line-numbers', article?.getAttribute('data-code-line-numbers') || 'on');
+    content.setAttribute('data-code-header', article?.getAttribute('data-code-header') || 'on');
 
     body.innerHTML = '';
     const linesContainer = codeBlockWrapper.querySelector('.code-lines');
@@ -473,6 +517,9 @@ function enhanceCodeBlocks() {
                     <option value="nord">Nord</option>
                     <option value="one-dark">One Dark</option>
                     <option value="one-light">Atom One Light</option>
+                    <option value="wildcharm">Wildcharm</option>
+                    <option value="nightfox">Nightfox</option>
+                    <option value="tokyonight">TokyoNight</option>
                     <option value="global">跟随全局阅读主题</option>
                 </select>
                 <button class="copy-code-btn" title="复制文本">复制</button>
@@ -680,6 +727,8 @@ function bindControls() {
     const codeInlineThemeSelect = document.getElementById('code-inline-theme-select');
     const codeInlineSlider = document.getElementById('code-inline-slider');
     const codeBlockSlider = document.getElementById('code-block-slider');
+    const codeLineNumbersToggle = document.getElementById('code-line-numbers-toggle');
+    const codeHeaderToggle = document.getElementById('code-header-toggle');
     const quoteStyleSelect = document.getElementById('quote-style-select');
 
     // 💡 监听左右 `-` 和 `+` 按钮微调 Slider
@@ -747,16 +796,16 @@ function bindControls() {
     });
 
     cText?.addEventListener('input', (e) => {
-        applyReaderTheme('custom');
-        root.style.setProperty('--text-color', e.target.value);
+        const bg = cBg?.value || '#fbfbfb';
+        applyCustomReaderColors(e.target.value, bg);
         localStorage.setItem('blog-ctext', e.target.value);
         if (readerThemeSelect) readerThemeSelect.value = 'custom';
         localStorage.setItem('blog-reader-theme', 'custom');
     });
 
     cBg?.addEventListener('input', (e) => {
-        applyReaderTheme('custom');
-        root.style.setProperty('--bg-color', e.target.value);
+        const text = cText?.value || '#222222';
+        applyCustomReaderColors(text, e.target.value);
         localStorage.setItem('blog-cbg', e.target.value);
         if (readerThemeSelect) readerThemeSelect.value = 'custom';
         localStorage.setItem('blog-reader-theme', 'custom');
@@ -803,6 +852,16 @@ function bindControls() {
         localStorage.setItem('blog-code-block-size', e.target.value);
     });
 
+    codeLineNumbersToggle?.addEventListener('change', (e) => {
+        if (article) article.setAttribute('data-code-line-numbers', e.target.checked ? 'on' : 'off');
+        localStorage.setItem('blog-code-line-numbers', e.target.checked ? 'on' : 'off');
+    });
+
+    codeHeaderToggle?.addEventListener('change', (e) => {
+        if (article) article.setAttribute('data-code-header', e.target.checked ? 'on' : 'off');
+        localStorage.setItem('blog-code-header', e.target.checked ? 'on' : 'off');
+    });
+
     quoteStyleSelect?.addEventListener('change', (e) => {
         if (article) article.setAttribute('data-quote-style', e.target.value);
         localStorage.setItem('blog-quote-style', e.target.value);
@@ -824,6 +883,8 @@ function restoreSavedSettings() {
     const codeInlineThemeSelect = document.getElementById('code-inline-theme-select');
     const codeInlineSlider = document.getElementById('code-inline-slider');
     const codeBlockSlider = document.getElementById('code-block-slider');
+    const codeLineNumbersToggle = document.getElementById('code-line-numbers-toggle');
+    const codeHeaderToggle = document.getElementById('code-header-toggle');
     const quoteStyleSelect = document.getElementById('quote-style-select');
 
     const savedWidth = localStorage.getItem('blog-width');
@@ -839,6 +900,8 @@ function restoreSavedSettings() {
     const savedCodeInlineTheme = localStorage.getItem('blog-code-inline-theme') || 'default';
     const savedCodeInlineOffset = localStorage.getItem('blog-code-inline-offset') ?? '-2';
     const savedCodeBlockSize = localStorage.getItem('blog-code-block-size');
+    const savedCodeLineNumbers = localStorage.getItem('blog-code-line-numbers') || 'on';
+    const savedCodeHeader = localStorage.getItem('blog-code-header') || 'on';
     const savedQuoteStyle = localStorage.getItem('blog-quote-style') || 'global';
 
     if (savedWidth && wSlider) {
@@ -866,14 +929,11 @@ function restoreSavedSettings() {
     if (readerThemeSelect) readerThemeSelect.value = savedReaderTheme;
 
     if (savedReaderTheme === 'custom') {
-        if (savedCText && cText) {
-            cText.value = savedCText;
-            root.style.setProperty('--text-color', savedCText);
-        }
-        if (savedCBg && cBg) {
-            cBg.value = savedCBg;
-            root.style.setProperty('--bg-color', savedCBg);
-        }
+        const customText = savedCText || '#222222';
+        const customBg = savedCBg || '#fbfbfb';
+        if (cText) cText.value = customText;
+        if (cBg) cBg.value = customBg;
+        applyCustomReaderColors(customText, customBg);
     } else {
         const savedTheme = readerThemeMap[savedReaderTheme] || readerThemeMap.custom;
         if (cText) cText.value = savedTheme.text;
@@ -884,12 +944,16 @@ function restoreSavedSettings() {
         article.setAttribute('data-code-format', savedCodeFormat);
         article.setAttribute('data-code-theme', savedCodeTheme);
         article.setAttribute('data-code-inline-theme', savedCodeInlineTheme);
+        article.setAttribute('data-code-line-numbers', savedCodeLineNumbers);
+        article.setAttribute('data-code-header', savedCodeHeader);
         article.setAttribute('data-quote-style', savedQuoteStyle);
     }
     if (codeFormatSelect) codeFormatSelect.value = savedCodeFormat;
     if (codeThemeSelect) codeThemeSelect.value = savedCodeTheme;
     if (codeInlineThemeSelect) codeInlineThemeSelect.value = savedCodeInlineTheme;
     if (quoteStyleSelect) quoteStyleSelect.value = savedQuoteStyle;
+    if (codeLineNumbersToggle) codeLineNumbersToggle.checked = savedCodeLineNumbers !== 'off';
+    if (codeHeaderToggle) codeHeaderToggle.checked = savedCodeHeader !== 'off';
 
     if (codeInlineSlider) {
         codeInlineSlider.value = savedCodeInlineOffset;

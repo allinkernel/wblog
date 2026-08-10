@@ -1323,3 +1323,276 @@ body {
     --syntax-str:var(--theme-accent); --syntax-comment:var(--theme-muted); --syntax-fn:var(--theme-link); --syntax-ex:var(--theme-link);
     --syntax-at:var(--theme-accent); --syntax-var:var(--theme-accent); --syntax-op:var(--theme-link); --syntax-pp:var(--theme-accent); --syntax-builtin:var(--theme-link);
 }
+
+/* ==========================================================================\n   全局阅读主题：控制台 / 大纲 / 文章树也属于阅读环境的一部分\n   这些规则故意放在文件末尾，覆盖旧的固定浅色值。\n   ========================================================================== */
+:root {
+    --theme-panel-hover: color-mix(in srgb, var(--theme-surface) 88%, var(--theme-link) 12%);
+    --theme-control-bg: var(--theme-surface);
+    --theme-control-border: var(--theme-border);
+    --theme-control-text: var(--text-color);
+    --theme-control-muted: var(--theme-muted);
+    --theme-shadow: 0 4px 12px rgba(0,0,0,.12);
+}
+
+body {
+    background-color: var(--bg-color) !important;
+    color: var(--text-color) !important;
+}
+
+#left-dock-container, #right-dock-container {
+    color: var(--text-color);
+}
+
+#left-dock-container::-webkit-scrollbar-thumb,
+#right-dock-container::-webkit-scrollbar-thumb {
+    background: var(--theme-border);
+}
+
+.panel-box {
+    background: var(--theme-surface) !important;
+    border-color: var(--theme-border) !important;
+    box-shadow: var(--theme-shadow) !important;
+    color: var(--text-color) !important;
+}
+
+.panel-box *,
+.panel-box label,
+.panel-box td,
+.panel-box th,
+.panel-box span {
+    color: inherit;
+}
+
+.panel-header {
+    background: var(--theme-surface-2) !important;
+    border-bottom-color: var(--theme-border) !important;
+    color: var(--text-color) !important;
+}
+
+.panel-header:hover,
+.panel-box.minimized .panel-header:hover {
+    background: var(--theme-panel-hover) !important;
+}
+
+.panel-title,
+.icon-aa,
+.min-btn {
+    color: var(--text-color) !important;
+}
+
+.min-btn { opacity: .72; }
+
+.panel-content {
+    background: var(--theme-surface) !important;
+    color: var(--text-color) !important;
+}
+
+.panel-inner-divider {
+    background: var(--theme-border) !important;
+}
+
+.control-group input[type="range"] {
+    accent-color: var(--theme-accent);
+}
+
+.slider-btn {
+    background: var(--theme-surface-2) !important;
+    border-color: var(--theme-control-border) !important;
+    color: var(--text-color) !important;
+}
+
+.slider-btn:hover { background: var(--theme-panel-hover) !important; }
+.slider-btn:active { background: var(--theme-border) !important; }
+
+.val-badge {
+    color: var(--theme-control-muted) !important;
+}
+
+.control-group input[type="color"] {
+    border-color: var(--theme-control-border) !important;
+    background: var(--theme-control-bg) !important;
+}
+
+.control-group select,
+.local-code-select {
+    background: var(--theme-control-bg) !important;
+    color: var(--theme-control-text) !important;
+    border-color: var(--theme-control-border) !important;
+}
+
+.control-group select option,
+.local-code-select option {
+    background: var(--theme-control-bg);
+    color: var(--theme-control-text);
+}
+
+.switch .slider {
+    background-color: var(--theme-border);
+}
+
+.switch .text-off { color: var(--theme-muted); }
+.switch input:checked + .slider { background-color: var(--theme-accent); }
+
+/* 文章树 */
+.tree-nav-top {
+    background: var(--theme-surface-2) !important;
+    border-color: var(--theme-border) !important;
+    color: var(--text-color) !important;
+}
+.tree-nav-top:hover {
+    background: var(--theme-panel-hover) !important;
+    border-color: var(--theme-link) !important;
+}
+.topic-item {
+    border-color: var(--theme-border) !important;
+    background: var(--theme-surface) !important;
+    color: var(--text-color) !important;
+}
+.topic-item:hover {
+    background: var(--theme-panel-hover) !important;
+    color: var(--theme-link) !important;
+}
+.tree-node-row,
+.tree-spacer,
+.tree-toggle { color: var(--theme-muted) !important; }
+.tree-toggle:hover { color: var(--theme-link) !important; }
+.tree-link {
+    color: var(--text-color) !important;
+}
+.tree-link:hover {
+    color: var(--theme-link) !important;
+}
+.tree-link.active {
+    background-color: var(--theme-accent) !important;
+    color: #fff !important;
+}
+.article-tree ul {
+    border-left-color: var(--theme-border) !important;
+}
+
+/* 大纲 */
+.scrollable a,
+.toc-tree a {
+    color: var(--text-color) !important;
+}
+.scrollable a:hover,
+.toc-tree a:hover {
+    color: var(--theme-link) !important;
+}
+.toc-toggle,
+.toc-spacer {
+    color: var(--theme-muted) !important;
+}
+.toc-toggle:hover { color: var(--theme-link) !important; }
+
+/* 字体矩阵：四个 AiaI 样本各自使用真正对应的字体 */
+.font-matrix-table {
+    color: var(--text-color) !important;
+}
+.font-matrix-table th,
+.font-matrix-table td {
+    border-color: var(--theme-border) !important;
+}
+.font-matrix-table th {
+    background: var(--theme-surface-2) !important;
+    color: var(--text-color) !important;
+}
+.font-matrix-table .row-label {
+    background: var(--theme-surface-2) !important;
+    color: var(--text-color) !important;
+}
+.font-sample {
+    display: inline-block;
+    font-size: 12px;
+    line-height: 1;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+}
+.font-sample.sample-sans-prop { font-family: var(--font-stack-sans-prop) !important; }
+.font-sample.sample-serif-prop { font-family: var(--font-stack-serif-prop) !important; }
+.font-sample.sample-sans-mono { font-family: var(--font-stack-sans-mono) !important; }
+.font-sample.sample-serif-mono { font-family: var(--font-stack-serif-mono) !important; }
+
+/* ==========================================================================\n   纯粹 texi2html 风格：白底、黑字、标题下划线、无装饰背景\n   ========================================================================== */
+#article-container[data-reader-theme="texi2html"] h1,
+#article-container[data-reader-theme="texi2html"] h2,
+#article-container[data-reader-theme="texi2html"] h3,
+#article-container[data-reader-theme="texi2html"] h4,
+#article-container[data-reader-theme="texi2html"] h5,
+#article-container[data-reader-theme="texi2html"] h6 {
+    color: #000 !important;
+    opacity: 1 !important;
+    border-bottom: 1px solid #000;
+    padding-bottom: .12em;
+}
+#article-container[data-reader-theme="texi2html"] a { color: #0000ee !important; }
+#article-container[data-reader-theme="texi2html"] a:visited { color: #551a8b !important; }
+#article-container[data-reader-theme="texi2html"] blockquote { background: transparent; }
+#article-container[data-reader-theme="texi2html"] .tree-link,
+#article-container[data-reader-theme="texi2html"] .toc-tree a { text-decoration: underline; }
+
+/* ==========================================================================\n   代码块显示开关：全局开关，但不改变代码主题优先级\n   ========================================================================== */
+#article-container[data-code-line-numbers="off"] .line-num,
+.code-lightbox-content[data-code-line-numbers="off"] .line-num {
+    display: none !important;
+}
+
+#article-container[data-code-line-numbers="off"] .line-code {
+    padding-left: 12px;
+}
+
+#article-container[data-code-header="off"] .code-block-header,
+.code-lightbox-content[data-code-header="off"] .code-lightbox-header {
+    display: none !important;
+}
+
+/* 新增代码主题：Wildcharm / Nightfox / TokyoNight */
+#article-container[data-code-theme="wildcharm"] .code-block-wrapper,
+.code-block-wrapper[data-code-theme="wildcharm"],
+.code-lightbox-content[data-code-theme="wildcharm"] {
+    --code-bg-color:#1f1f1f; --code-header-bg:#282828; --code-border-color:#454545;
+    --code-header-text:#d7c9a7; --code-linenum-bg:transparent; --code-linenum-color:#77716a; --code-text-color:#f2eadb;
+    --syntax-kw:#d75f5f; --syntax-cf:#d75f5f; --syntax-dt:#87afaf; --syntax-num:#d7af87; --syntax-str:#afc67a;
+    --syntax-comment:#807d74; --syntax-fn:#87afd7; --syntax-ex:#d7af87; --syntax-at:#d7c9a7; --syntax-var:#d78787;
+    --syntax-op:#87afaf; --syntax-pp:#d75f87; --syntax-builtin:#87afd7;
+}
+#article-container[data-code-theme="nightfox"] .code-block-wrapper,
+.code-block-wrapper[data-code-theme="nightfox"],
+.code-lightbox-content[data-code-theme="nightfox"] {
+    --code-bg-color:#192330; --code-header-bg:#131a24; --code-border-color:#344154;
+    --code-header-text:#a8b5c7; --code-linenum-bg:transparent; --code-linenum-color:#526176; --code-text-color:#cdcecf;
+    --syntax-kw:#9d79d6; --syntax-cf:#9d79d6; --syntax-dt:#63cdcf; --syntax-num:#dbc074; --syntax-str:#81b29a;
+    --syntax-comment:#738091; --syntax-fn:#719cd6; --syntax-ex:#81b29a; --syntax-at:#f4a261; --syntax-var:#f4a261;
+    --syntax-op:#63cdcf; --syntax-pp:#c94f6d; --syntax-builtin:#719cd6;
+}
+#article-container[data-code-theme="tokyonight"] .code-block-wrapper,
+.code-block-wrapper[data-code-theme="tokyonight"],
+.code-lightbox-content[data-code-theme="tokyonight"] {
+    --code-bg-color:#1a1b26; --code-header-bg:#16161e; --code-border-color:#32344a;
+    --code-header-text:#a9b1d6; --code-linenum-bg:transparent; --code-linenum-color:#565f89; --code-text-color:#c0caf5;
+    --syntax-kw:#bb9af7; --syntax-cf:#bb9af7; --syntax-dt:#7dcfff; --syntax-num:#e0af68; --syntax-str:#9ece6a;
+    --syntax-comment:#565f89; --syntax-fn:#7aa2f7; --syntax-ex:#73daca; --syntax-at:#ff9e64; --syntax-var:#f7768e;
+    --syntax-op:#7dcfff; --syntax-pp:#bb9af7; --syntax-builtin:#7aa2f7;
+}
+
+#article-container .code-block-wrapper[data-code-theme="wildcharm"] {
+    --code-bg-color:#1f1f1f; --code-header-bg:#282828; --code-border-color:#454545; --code-header-text:#d7c9a7;
+    --code-linenum-bg:transparent; --code-linenum-color:#77716a; --code-text-color:#f2eadb;
+    --syntax-kw:#d75f5f; --syntax-cf:#d75f5f; --syntax-dt:#87afaf; --syntax-num:#d7af87; --syntax-str:#afc67a;
+    --syntax-comment:#807d74; --syntax-fn:#87afd7; --syntax-ex:#d7af87; --syntax-at:#d7c9a7; --syntax-var:#d78787;
+    --syntax-op:#87afaf; --syntax-pp:#d75f87; --syntax-builtin:#87afd7;
+}
+#article-container .code-block-wrapper[data-code-theme="nightfox"] {
+    --code-bg-color:#192330; --code-header-bg:#131a24; --code-border-color:#344154; --code-header-text:#a8b5c7;
+    --code-linenum-bg:transparent; --code-linenum-color:#526176; --code-text-color:#cdcecf;
+    --syntax-kw:#9d79d6; --syntax-cf:#9d79d6; --syntax-dt:#63cdcf; --syntax-num:#dbc074; --syntax-str:#81b29a;
+    --syntax-comment:#738091; --syntax-fn:#719cd6; --syntax-ex:#81b29a; --syntax-at:#f4a261; --syntax-var:#f4a261;
+    --syntax-op:#63cdcf; --syntax-pp:#c94f6d; --syntax-builtin:#719cd6;
+}
+#article-container .code-block-wrapper[data-code-theme="tokyonight"] {
+    --code-bg-color:#1a1b26; --code-header-bg:#16161e; --code-border-color:#32344a; --code-header-text:#a9b1d6;
+    --code-linenum-bg:transparent; --code-linenum-color:#565f89; --code-text-color:#c0caf5;
+    --syntax-kw:#bb9af7; --syntax-cf:#bb9af7; --syntax-dt:#7dcfff; --syntax-num:#e0af68; --syntax-str:#9ece6a;
+    --syntax-comment:#565f89; --syntax-fn:#7aa2f7; --syntax-ex:#73daca; --syntax-at:#ff9e64; --syntax-var:#f7768e;
+    --syntax-op:#7dcfff; --syntax-pp:#bb9af7; --syntax-builtin:#7aa2f7;
+}

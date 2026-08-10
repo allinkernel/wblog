@@ -125,10 +125,10 @@
                         <tr>
                             <th>区域</th>
                             <th title="原生/继承">继承</th>
-                            <th title="无衬线不等宽">比例无衬</th>
-                            <th title="衬线不等宽">比例衬线</th>
-                            <th title="无衬线等宽">等宽无衬</th>
-                            <th title="衬线等宽">等宽衬线</th>
+                            <th title="无衬线不等宽"><span class="font-sample sample-sans-prop">AiaI</span></th>
+                            <th title="衬线不等宽"><span class="font-sample sample-serif-prop">AiaI</span></th>
+                            <th title="无衬线等宽"><span class="font-sample sample-sans-mono">AiaI</span></th>
+                            <th title="衬线等宽"><span class="font-sample sample-serif-mono">AiaI</span></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -201,6 +201,11 @@
                         <option value="solarized-light">Solarized Light</option>
                         <option value="solarized-dark">Solarized Dark</option>
                         <option value="dracula">Dracula</option>
+                        <option value="stack-overflow">Stack Overflow</option>
+                        <option value="catppuccin-latte">Catppuccin Latte</option>
+                        <option value="catppuccin-mocha">Catppuccin Mocha</option>
+                        <option value="nord">Nord</option>
+                        <option value="texi2html">texi2html 纯粹经典</option>
                     </select>
                 </div>
                 <div class="control-group">
@@ -247,6 +252,9 @@
                         <option value="nord">Nord</option>
                         <option value="one-dark">One Dark</option>
                         <option value="one-light">Atom One Light</option>
+                        <option value="wildcharm">Wildcharm</option>
+                        <option value="nightfox">Nightfox</option>
+                        <option value="tokyonight">TokyoNight</option>
                         <option value="global">跟随全局阅读主题</option>
                     </select>
                 </div>
@@ -285,6 +293,32 @@
                         <button class="slider-btn" data-target="code-block-slider" data-step="1">+</button>
                     </div>
                     <span class="val-badge" id="code-block-val">14px</span>
+                </div>
+
+                <div class="panel-inner-divider"></div>
+
+                <div class="control-group">
+                    <label>显示行号：</label>
+                    <label class="switch">
+                        <input type="checkbox" id="code-line-numbers-toggle" checked>
+                        <span class="slider">
+                            <span class="slider-text text-on">ON</span>
+                            <span class="slider-text text-off">OFF</span>
+                            <span class="knob"></span>
+                        </span>
+                    </label>
+                </div>
+
+                <div class="control-group">
+                    <label>顶部工具栏：</label>
+                    <label class="switch">
+                        <input type="checkbox" id="code-header-toggle" checked>
+                        <span class="slider">
+                            <span class="slider-text text-on">ON</span>
+                            <span class="slider-text text-off">OFF</span>
+                            <span class="knob"></span>
+                        </span>
+                    </label>
                 </div>
             </div>
         </div>
