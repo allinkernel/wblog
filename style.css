@@ -828,3 +828,127 @@ code:not(pre code)[contenteditable="true"]:focus {
     user-select: none;
     -webkit-user-select: none;
 }
+
+/* ==========================================================================
+   Pandoc Skylighting 全语言语法高亮适配 (包含 Bash / C / Python / Shell 等)
+   ========================================================================== */
+
+/* 1. 默认浅色主题 (default) */
+#article-container[data-code-theme="default"] .line-code span.kw,
+#article-container .code-block-wrapper[data-code-theme="default"] .line-code span.kw { color: #008000; font-weight: bold; } /* Keyword */
+#article-container[data-code-theme="default"] .line-code span.cf,
+#article-container .code-block-wrapper[data-code-theme="default"] .line-code span.cf { color: #008000; font-weight: bold; } /* ControlFlow */
+#article-container[data-code-theme="default"] .line-code span.dt,
+#article-container .code-block-wrapper[data-code-theme="default"] .line-code span.dt { color: #000236; } /* DataType */
+#article-container[data-code-theme="default"] .line-code span.dv,
+#article-container[data-code-theme="default"] .line-code span.bn,
+#article-container[data-code-theme="default"] .line-code span.fl,
+#article-container .code-block-wrapper[data-code-theme="default"] .line-code span.dv { color: #666666; } /* DecVal/Number */
+#article-container[data-code-theme="default"] .line-code span.st,
+#article-container .code-block-wrapper[data-code-theme="default"] .line-code span.st { color: #ba2121; } /* String */
+#article-container[data-code-theme="default"] .line-code span.co,
+#article-container .code-block-wrapper[data-code-theme="default"] .line-code span.co { color: #408080; font-style: italic; } /* Comment */
+#article-container[data-code-theme="default"] .line-code span.fu,
+#article-container .code-block-wrapper[data-code-theme="default"] .line-code span.fu { color: #06287e; } /* Function */
+#article-container[data-code-theme="default"] .line-code span.ex,
+#article-container .code-block-wrapper[data-code-theme="default"] .line-code span.ex { color: #005cc5; font-weight: bold; } /* Executable (Bash命令) */
+#article-container[data-code-theme="default"] .line-code span.at,
+#article-container .code-block-wrapper[data-code-theme="default"] .line-code span.at { color: #6f42c1; } /* Attribute (Bash --选项) */
+#article-container[data-code-theme="default"] .line-code span.va,
+#article-container .code-block-wrapper[data-code-theme="default"] .line-code span.va { color: #e36209; } /* Variable ($变量) */
+#article-container[data-code-theme="default"] .line-code span.op,
+#article-container .code-block-wrapper[data-code-theme="default"] .line-code span.op { color: #d73a49; } /* Operator (< >) */
+#article-container[data-code-theme="default"] .line-code span.pp,
+#article-container .code-block-wrapper[data-code-theme="default"] .line-code span.pp { color: #bc7a00; } /* Preprocessor */
+#article-container[data-code-theme="default"] .line-code span.bu,
+#article-container .code-block-wrapper[data-code-theme="default"] .line-code span.bu { color: #005cc5; } /* BuiltIn */
+
+/* 2. 暗黑极客主题 (dark - Monokai 风格) */
+#article-container[data-code-theme="dark"] .line-code span.kw,
+#article-container .code-block-wrapper[data-code-theme="dark"] .line-code span.kw { color: #f92672; font-weight: bold; }
+#article-container[data-code-theme="dark"] .line-code span.cf,
+#article-container .code-block-wrapper[data-code-theme="dark"] .line-code span.cf { color: #f92672; font-weight: bold; }
+#article-container[data-code-theme="dark"] .line-code span.dt,
+#article-container .code-block-wrapper[data-code-theme="dark"] .line-code span.dt { color: #66d9ef; font-style: italic; }
+#article-container[data-code-theme="dark"] .line-code span.dv,
+#article-container[data-code-theme="dark"] .line-code span.bn,
+#article-container[data-code-theme="dark"] .line-code span.fl,
+#article-container .code-block-wrapper[data-code-theme="dark"] .line-code span.dv { color: #ae81ff; }
+#article-container[data-code-theme="dark"] .line-code span.st,
+#article-container .code-block-wrapper[data-code-theme="dark"] .line-code span.st { color: #e6db74; }
+#article-container[data-code-theme="dark"] .line-code span.co,
+#article-container .code-block-wrapper[data-code-theme="dark"] .line-code span.co { color: #75715e; font-style: italic; }
+#article-container[data-code-theme="dark"] .line-code span.fu,
+#article-container .code-block-wrapper[data-code-theme="dark"] .line-code span.fu { color: #a6e22e; }
+#article-container[data-code-theme="dark"] .line-code span.ex,
+#article-container .code-block-wrapper[data-code-theme="dark"] .line-code span.ex { color: #a6e22e; font-weight: bold; }
+#article-container[data-code-theme="dark"] .line-code span.at,
+#article-container .code-block-wrapper[data-code-theme="dark"] .line-code span.at { color: #66d9ef; }
+#article-container[data-code-theme="dark"] .line-code span.va,
+#article-container .code-block-wrapper[data-code-theme="dark"] .line-code span.va { color: #fd971f; }
+#article-container[data-code-theme="dark"] .line-code span.op,
+#article-container .code-block-wrapper[data-code-theme="dark"] .line-code span.op { color: #f92672; }
+#article-container[data-code-theme="dark"] .line-code span.pp,
+#article-container .code-block-wrapper[data-code-theme="dark"] .line-code span.pp { color: #f92672; }
+#article-container[data-code-theme="dark"] .line-code span.bu,
+#article-container .code-block-wrapper[data-code-theme="dark"] .line-code span.bu { color: #a6e22e; }
+
+/* 3. GitHub Dark 主题 */
+#article-container[data-code-theme="github-dark"] .line-code span.kw,
+#article-container .code-block-wrapper[data-code-theme="github-dark"] .line-code span.kw { color: #ff7b72; }
+#article-container[data-code-theme="github-dark"] .line-code span.cf,
+#article-container .code-block-wrapper[data-code-theme="github-dark"] .line-code span.cf { color: #ff7b72; }
+#article-container[data-code-theme="github-dark"] .line-code span.dt,
+#article-container .code-block-wrapper[data-code-theme="github-dark"] .line-code span.dt { color: #ff7b72; }
+#article-container[data-code-theme="github-dark"] .line-code span.dv,
+#article-container[data-code-theme="github-dark"] .line-code span.bn,
+#article-container[data-code-theme="github-dark"] .line-code span.fl,
+#article-container .code-block-wrapper[data-code-theme="github-dark"] .line-code span.dv { color: #79c0ff; }
+#article-container[data-code-theme="github-dark"] .line-code span.st,
+#article-container .code-block-wrapper[data-code-theme="github-dark"] .line-code span.st { color: #a5d6ff; }
+#article-container[data-code-theme="github-dark"] .line-code span.co,
+#article-container .code-block-wrapper[data-code-theme="github-dark"] .line-code span.co { color: #8b949e; font-style: italic; }
+#article-container[data-code-theme="github-dark"] .line-code span.fu,
+#article-container .code-block-wrapper[data-code-theme="github-dark"] .line-code span.fu { color: #d2a8ff; }
+#article-container[data-code-theme="github-dark"] .line-code span.ex,
+#article-container .code-block-wrapper[data-code-theme="github-dark"] .line-code span.ex { color: #7ee787; font-weight: bold; }
+#article-container[data-code-theme="github-dark"] .line-code span.at,
+#article-container .code-block-wrapper[data-code-theme="github-dark"] .line-code span.at { color: #79c0ff; }
+#article-container[data-code-theme="github-dark"] .line-code span.va,
+#article-container .code-block-wrapper[data-code-theme="github-dark"] .line-code span.va { color: #ffa657; }
+#article-container[data-code-theme="github-dark"] .line-code span.op,
+#article-container .code-block-wrapper[data-code-theme="github-dark"] .line-code span.op { color: #ff7b72; }
+#article-container[data-code-theme="github-dark"] .line-code span.pp,
+#article-container .code-block-wrapper[data-code-theme="github-dark"] .line-code span.pp { color: #ff7b72; }
+#article-container[data-code-theme="github-dark"] .line-code span.bu,
+#article-container .code-block-wrapper[data-code-theme="github-dark"] .line-code span.bu { color: #7ee787; }
+
+/* 4. Solarized Dark 主题 */
+#article-container[data-code-theme="solarized"] .line-code span.kw,
+#article-container .code-block-wrapper[data-code-theme="solarized"] .line-code span.kw { color: #859900; }
+#article-container[data-code-theme="solarized"] .line-code span.cf,
+#article-container .code-block-wrapper[data-code-theme="solarized"] .line-code span.cf { color: #859900; }
+#article-container[data-code-theme="solarized"] .line-code span.dt,
+#article-container .code-block-wrapper[data-code-theme="solarized"] .line-code span.dt { color: #b58900; }
+#article-container[data-code-theme="solarized"] .line-code span.dv,
+#article-container[data-code-theme="solarized"] .line-code span.bn,
+#article-container[data-code-theme="solarized"] .line-code span.fl,
+#article-container .code-block-wrapper[data-code-theme="solarized"] .line-code span.dv { color: #d33682; }
+#article-container[data-code-theme="solarized"] .line-code span.st,
+#article-container .code-block-wrapper[data-code-theme="solarized"] .line-code span.st { color: #2aa198; }
+#article-container[data-code-theme="solarized"] .line-code span.co,
+#article-container .code-block-wrapper[data-code-theme="solarized"] .line-code span.co { color: #586e75; font-style: italic; }
+#article-container[data-code-theme="solarized"] .line-code span.fu,
+#article-container .code-block-wrapper[data-code-theme="solarized"] .line-code span.fu { color: #268bd2; }
+#article-container[data-code-theme="solarized"] .line-code span.ex,
+#article-container .code-block-wrapper[data-code-theme="solarized"] .line-code span.ex { color: #268bd2; font-weight: bold; }
+#article-container[data-code-theme="solarized"] .line-code span.at,
+#article-container .code-block-wrapper[data-code-theme="solarized"] .line-code span.at { color: #b58900; }
+#article-container[data-code-theme="solarized"] .line-code span.va,
+#article-container .code-block-wrapper[data-code-theme="solarized"] .line-code span.va { color: #cb4b16; }
+#article-container[data-code-theme="solarized"] .line-code span.op,
+#article-container .code-block-wrapper[data-code-theme="solarized"] .line-code span.op { color: #859900; }
+#article-container[data-code-theme="solarized"] .line-code span.pp,
+#article-container .code-block-wrapper[data-code-theme="solarized"] .line-code span.pp { color: #cb4b16; }
+#article-container[data-code-theme="solarized"] .line-code span.bu,
+#article-container .code-block-wrapper[data-code-theme="solarized"] .line-code span.bu { color: #268bd2; }
