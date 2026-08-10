@@ -277,9 +277,10 @@ body {
     word-break: normal !important;
 }
 
-/* 代码块主题预设 */
+/* 代码块主题预设 (包含正文、局部覆盖及全屏 Lightbox) */
 #article-container[data-code-theme="default"] .code-block-wrapper,
-#article-container .code-block-wrapper[data-code-theme="default"] {
+.code-block-wrapper[data-code-theme="default"],
+.code-lightbox-content[data-code-theme="default"] {
     --code-bg-color: #f6f8fa;
     --code-header-bg: #eaeef2;
     --code-border-color: #d0d7de;
@@ -290,7 +291,8 @@ body {
 }
 
 #article-container[data-code-theme="dark"] .code-block-wrapper,
-#article-container .code-block-wrapper[data-code-theme="dark"] {
+.code-block-wrapper[data-code-theme="dark"],
+.code-lightbox-content[data-code-theme="dark"] {
     --code-bg-color: #272822;
     --code-header-bg: #1e1f1c;
     --code-border-color: #3e3d32;
@@ -301,7 +303,8 @@ body {
 }
 
 #article-container[data-code-theme="github-dark"] .code-block-wrapper,
-#article-container .code-block-wrapper[data-code-theme="github-dark"] {
+.code-block-wrapper[data-code-theme="github-dark"],
+.code-lightbox-content[data-code-theme="github-dark"] {
     --code-bg-color: #0d1117;
     --code-header-bg: #161b22;
     --code-border-color: #30363d;
@@ -312,7 +315,8 @@ body {
 }
 
 #article-container[data-code-theme="solarized"] .code-block-wrapper,
-#article-container .code-block-wrapper[data-code-theme="solarized"] {
+.code-block-wrapper[data-code-theme="solarized"],
+.code-lightbox-content[data-code-theme="solarized"] {
     --code-bg-color: #002b36;
     --code-header-bg: #073642;
     --code-border-color: #073642;
@@ -371,7 +375,7 @@ p { margin-bottom: 1.5em; text-align: justify; }
 #left-dock-container::-webkit-scrollbar-thumb,
 #right-dock-container::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
 
-/* 💡 面板宽度自适应调整 */
+/* 面板宽度自适应调整 */
 .panel-box {
     background: #ffffff;
     border: 1px solid #ddd;
@@ -437,7 +441,7 @@ p { margin-bottom: 1.5em; text-align: justify; }
 .toc-toggle:hover { color: #ff6600; }
 .toc-spacer { width: 12px; flex-shrink: 0; }
 
-/* 💡 控制项布局优化 */
+/* 控制项布局优化 */
 .control-group { 
     display: flex; 
     align-items: center; 
@@ -491,7 +495,7 @@ p { margin-bottom: 1.5em; text-align: justify; }
     margin: 0;
 }
 
-/* 💡 限制数字/数值框的大小 */
+/* 限制数字/数值框的大小 */
 .val-badge {
     min-width: 38px;
     text-align: right;
@@ -742,6 +746,7 @@ p { margin-bottom: 1.5em; text-align: justify; }
     max-width: 1300px;
     height: 85vh;
     background-color: var(--code-bg-color, #f6f8fa);
+    color: var(--code-text-color, #24292e);
     border: 1px solid var(--code-border-color, #d0d7de);
     border-radius: 10px;
     box-shadow: 0 12px 48px rgba(0, 0, 0, 0.5);
@@ -830,125 +835,73 @@ code:not(pre code)[contenteditable="true"]:focus {
 }
 
 /* ==========================================================================
-   Pandoc Skylighting 全语言语法高亮适配 (包含 Bash / C / Python / Shell 等)
+   Pandoc Skylighting 全语言语法高亮适配 (通用作用域，包含全屏 Lightbox)
    ========================================================================== */
 
 /* 1. 默认浅色主题 (default) */
-#article-container[data-code-theme="default"] .line-code span.kw,
-#article-container .code-block-wrapper[data-code-theme="default"] .line-code span.kw { color: #008000; font-weight: bold; } /* Keyword */
-#article-container[data-code-theme="default"] .line-code span.cf,
-#article-container .code-block-wrapper[data-code-theme="default"] .line-code span.cf { color: #008000; font-weight: bold; } /* ControlFlow */
-#article-container[data-code-theme="default"] .line-code span.dt,
-#article-container .code-block-wrapper[data-code-theme="default"] .line-code span.dt { color: #000236; } /* DataType */
-#article-container[data-code-theme="default"] .line-code span.dv,
-#article-container[data-code-theme="default"] .line-code span.bn,
-#article-container[data-code-theme="default"] .line-code span.fl,
-#article-container .code-block-wrapper[data-code-theme="default"] .line-code span.dv { color: #666666; } /* DecVal/Number */
-#article-container[data-code-theme="default"] .line-code span.st,
-#article-container .code-block-wrapper[data-code-theme="default"] .line-code span.st { color: #ba2121; } /* String */
-#article-container[data-code-theme="default"] .line-code span.co,
-#article-container .code-block-wrapper[data-code-theme="default"] .line-code span.co { color: #408080; font-style: italic; } /* Comment */
-#article-container[data-code-theme="default"] .line-code span.fu,
-#article-container .code-block-wrapper[data-code-theme="default"] .line-code span.fu { color: #06287e; } /* Function */
-#article-container[data-code-theme="default"] .line-code span.ex,
-#article-container .code-block-wrapper[data-code-theme="default"] .line-code span.ex { color: #005cc5; font-weight: bold; } /* Executable (Bash命令) */
-#article-container[data-code-theme="default"] .line-code span.at,
-#article-container .code-block-wrapper[data-code-theme="default"] .line-code span.at { color: #6f42c1; } /* Attribute (Bash --选项) */
-#article-container[data-code-theme="default"] .line-code span.va,
-#article-container .code-block-wrapper[data-code-theme="default"] .line-code span.va { color: #e36209; } /* Variable ($变量) */
-#article-container[data-code-theme="default"] .line-code span.op,
-#article-container .code-block-wrapper[data-code-theme="default"] .line-code span.op { color: #d73a49; } /* Operator (< >) */
-#article-container[data-code-theme="default"] .line-code span.pp,
-#article-container .code-block-wrapper[data-code-theme="default"] .line-code span.pp { color: #bc7a00; } /* Preprocessor */
-#article-container[data-code-theme="default"] .line-code span.bu,
-#article-container .code-block-wrapper[data-code-theme="default"] .line-code span.bu { color: #005cc5; } /* BuiltIn */
+[data-code-theme="default"] .line-code span.kw { color: #008000; font-weight: bold; } /* Keyword */
+[data-code-theme="default"] .line-code span.cf { color: #008000; font-weight: bold; } /* ControlFlow */
+[data-code-theme="default"] .line-code span.dt { color: #000236; } /* DataType */
+[data-code-theme="default"] .line-code span.dv,
+[data-code-theme="default"] .line-code span.bn,
+[data-code-theme="default"] .line-code span.fl { color: #666666; } /* DecVal/Number */
+[data-code-theme="default"] .line-code span.st { color: #ba2121; } /* String */
+[data-code-theme="default"] .line-code span.co { color: #408080; font-style: italic; } /* Comment */
+[data-code-theme="default"] .line-code span.fu { color: #06287e; } /* Function */
+[data-code-theme="default"] .line-code span.ex { color: #005cc5; font-weight: bold; } /* Executable (Bash命令) */
+[data-code-theme="default"] .line-code span.at { color: #6f42c1; } /* Attribute (Bash --选项) */
+[data-code-theme="default"] .line-code span.va { color: #e36209; } /* Variable ($变量) */
+[data-code-theme="default"] .line-code span.op { color: #d73a49; } /* Operator (< >) */
+[data-code-theme="default"] .line-code span.pp { color: #bc7a00; } /* Preprocessor */
+[data-code-theme="default"] .line-code span.bu { color: #005cc5; } /* BuiltIn */
 
 /* 2. 暗黑极客主题 (dark - Monokai 风格) */
-#article-container[data-code-theme="dark"] .line-code span.kw,
-#article-container .code-block-wrapper[data-code-theme="dark"] .line-code span.kw { color: #f92672; font-weight: bold; }
-#article-container[data-code-theme="dark"] .line-code span.cf,
-#article-container .code-block-wrapper[data-code-theme="dark"] .line-code span.cf { color: #f92672; font-weight: bold; }
-#article-container[data-code-theme="dark"] .line-code span.dt,
-#article-container .code-block-wrapper[data-code-theme="dark"] .line-code span.dt { color: #66d9ef; font-style: italic; }
-#article-container[data-code-theme="dark"] .line-code span.dv,
-#article-container[data-code-theme="dark"] .line-code span.bn,
-#article-container[data-code-theme="dark"] .line-code span.fl,
-#article-container .code-block-wrapper[data-code-theme="dark"] .line-code span.dv { color: #ae81ff; }
-#article-container[data-code-theme="dark"] .line-code span.st,
-#article-container .code-block-wrapper[data-code-theme="dark"] .line-code span.st { color: #e6db74; }
-#article-container[data-code-theme="dark"] .line-code span.co,
-#article-container .code-block-wrapper[data-code-theme="dark"] .line-code span.co { color: #75715e; font-style: italic; }
-#article-container[data-code-theme="dark"] .line-code span.fu,
-#article-container .code-block-wrapper[data-code-theme="dark"] .line-code span.fu { color: #a6e22e; }
-#article-container[data-code-theme="dark"] .line-code span.ex,
-#article-container .code-block-wrapper[data-code-theme="dark"] .line-code span.ex { color: #a6e22e; font-weight: bold; }
-#article-container[data-code-theme="dark"] .line-code span.at,
-#article-container .code-block-wrapper[data-code-theme="dark"] .line-code span.at { color: #66d9ef; }
-#article-container[data-code-theme="dark"] .line-code span.va,
-#article-container .code-block-wrapper[data-code-theme="dark"] .line-code span.va { color: #fd971f; }
-#article-container[data-code-theme="dark"] .line-code span.op,
-#article-container .code-block-wrapper[data-code-theme="dark"] .line-code span.op { color: #f92672; }
-#article-container[data-code-theme="dark"] .line-code span.pp,
-#article-container .code-block-wrapper[data-code-theme="dark"] .line-code span.pp { color: #f92672; }
-#article-container[data-code-theme="dark"] .line-code span.bu,
-#article-container .code-block-wrapper[data-code-theme="dark"] .line-code span.bu { color: #a6e22e; }
+[data-code-theme="dark"] .line-code span.kw { color: #f92672; font-weight: bold; }
+[data-code-theme="dark"] .line-code span.cf { color: #f92672; font-weight: bold; }
+[data-code-theme="dark"] .line-code span.dt { color: #66d9ef; font-style: italic; }
+[data-code-theme="dark"] .line-code span.dv,
+[data-code-theme="dark"] .line-code span.bn,
+[data-code-theme="dark"] .line-code span.fl { color: #ae81ff; }
+[data-code-theme="dark"] .line-code span.st { color: #e6db74; }
+[data-code-theme="dark"] .line-code span.co { color: #75715e; font-style: italic; }
+[data-code-theme="dark"] .line-code span.fu { color: #a6e22e; }
+[data-code-theme="dark"] .line-code span.ex { color: #a6e22e; font-weight: bold; }
+[data-code-theme="dark"] .line-code span.at { color: #66d9ef; }
+[data-code-theme="dark"] .line-code span.va { color: #fd971f; }
+[data-code-theme="dark"] .line-code span.op { color: #f92672; }
+[data-code-theme="dark"] .line-code span.pp { color: #f92672; }
+[data-code-theme="dark"] .line-code span.bu { color: #a6e22e; }
 
 /* 3. GitHub Dark 主题 */
-#article-container[data-code-theme="github-dark"] .line-code span.kw,
-#article-container .code-block-wrapper[data-code-theme="github-dark"] .line-code span.kw { color: #ff7b72; }
-#article-container[data-code-theme="github-dark"] .line-code span.cf,
-#article-container .code-block-wrapper[data-code-theme="github-dark"] .line-code span.cf { color: #ff7b72; }
-#article-container[data-code-theme="github-dark"] .line-code span.dt,
-#article-container .code-block-wrapper[data-code-theme="github-dark"] .line-code span.dt { color: #ff7b72; }
-#article-container[data-code-theme="github-dark"] .line-code span.dv,
-#article-container[data-code-theme="github-dark"] .line-code span.bn,
-#article-container[data-code-theme="github-dark"] .line-code span.fl,
-#article-container .code-block-wrapper[data-code-theme="github-dark"] .line-code span.dv { color: #79c0ff; }
-#article-container[data-code-theme="github-dark"] .line-code span.st,
-#article-container .code-block-wrapper[data-code-theme="github-dark"] .line-code span.st { color: #a5d6ff; }
-#article-container[data-code-theme="github-dark"] .line-code span.co,
-#article-container .code-block-wrapper[data-code-theme="github-dark"] .line-code span.co { color: #8b949e; font-style: italic; }
-#article-container[data-code-theme="github-dark"] .line-code span.fu,
-#article-container .code-block-wrapper[data-code-theme="github-dark"] .line-code span.fu { color: #d2a8ff; }
-#article-container[data-code-theme="github-dark"] .line-code span.ex,
-#article-container .code-block-wrapper[data-code-theme="github-dark"] .line-code span.ex { color: #7ee787; font-weight: bold; }
-#article-container[data-code-theme="github-dark"] .line-code span.at,
-#article-container .code-block-wrapper[data-code-theme="github-dark"] .line-code span.at { color: #79c0ff; }
-#article-container[data-code-theme="github-dark"] .line-code span.va,
-#article-container .code-block-wrapper[data-code-theme="github-dark"] .line-code span.va { color: #ffa657; }
-#article-container[data-code-theme="github-dark"] .line-code span.op,
-#article-container .code-block-wrapper[data-code-theme="github-dark"] .line-code span.op { color: #ff7b72; }
-#article-container[data-code-theme="github-dark"] .line-code span.pp,
-#article-container .code-block-wrapper[data-code-theme="github-dark"] .line-code span.pp { color: #ff7b72; }
-#article-container[data-code-theme="github-dark"] .line-code span.bu,
-#article-container .code-block-wrapper[data-code-theme="github-dark"] .line-code span.bu { color: #7ee787; }
+[data-code-theme="github-dark"] .line-code span.kw { color: #ff7b72; }
+[data-code-theme="github-dark"] .line-code span.cf { color: #ff7b72; }
+[data-code-theme="github-dark"] .line-code span.dt { color: #ff7b72; }
+[data-code-theme="github-dark"] .line-code span.dv,
+[data-code-theme="github-dark"] .line-code span.bn,
+[data-code-theme="github-dark"] .line-code span.fl { color: #79c0ff; }
+[data-code-theme="github-dark"] .line-code span.st { color: #a5d6ff; }
+[data-code-theme="github-dark"] .line-code span.co { color: #8b949e; font-style: italic; }
+[data-code-theme="github-dark"] .line-code span.fu { color: #d2a8ff; }
+[data-code-theme="github-dark"] .line-code span.ex { color: #7ee787; font-weight: bold; }
+[data-code-theme="github-dark"] .line-code span.at { color: #79c0ff; }
+[data-code-theme="github-dark"] .line-code span.va { color: #ffa657; }
+[data-code-theme="github-dark"] .line-code span.op { color: #ff7b72; }
+[data-code-theme="github-dark"] .line-code span.pp { color: #ff7b72; }
+[data-code-theme="github-dark"] .line-code span.bu { color: #7ee787; }
 
 /* 4. Solarized Dark 主题 */
-#article-container[data-code-theme="solarized"] .line-code span.kw,
-#article-container .code-block-wrapper[data-code-theme="solarized"] .line-code span.kw { color: #859900; }
-#article-container[data-code-theme="solarized"] .line-code span.cf,
-#article-container .code-block-wrapper[data-code-theme="solarized"] .line-code span.cf { color: #859900; }
-#article-container[data-code-theme="solarized"] .line-code span.dt,
-#article-container .code-block-wrapper[data-code-theme="solarized"] .line-code span.dt { color: #b58900; }
-#article-container[data-code-theme="solarized"] .line-code span.dv,
-#article-container[data-code-theme="solarized"] .line-code span.bn,
-#article-container[data-code-theme="solarized"] .line-code span.fl,
-#article-container .code-block-wrapper[data-code-theme="solarized"] .line-code span.dv { color: #d33682; }
-#article-container[data-code-theme="solarized"] .line-code span.st,
-#article-container .code-block-wrapper[data-code-theme="solarized"] .line-code span.st { color: #2aa198; }
-#article-container[data-code-theme="solarized"] .line-code span.co,
-#article-container .code-block-wrapper[data-code-theme="solarized"] .line-code span.co { color: #586e75; font-style: italic; }
-#article-container[data-code-theme="solarized"] .line-code span.fu,
-#article-container .code-block-wrapper[data-code-theme="solarized"] .line-code span.fu { color: #268bd2; }
-#article-container[data-code-theme="solarized"] .line-code span.ex,
-#article-container .code-block-wrapper[data-code-theme="solarized"] .line-code span.ex { color: #268bd2; font-weight: bold; }
-#article-container[data-code-theme="solarized"] .line-code span.at,
-#article-container .code-block-wrapper[data-code-theme="solarized"] .line-code span.at { color: #b58900; }
-#article-container[data-code-theme="solarized"] .line-code span.va,
-#article-container .code-block-wrapper[data-code-theme="solarized"] .line-code span.va { color: #cb4b16; }
-#article-container[data-code-theme="solarized"] .line-code span.op,
-#article-container .code-block-wrapper[data-code-theme="solarized"] .line-code span.op { color: #859900; }
-#article-container[data-code-theme="solarized"] .line-code span.pp,
-#article-container .code-block-wrapper[data-code-theme="solarized"] .line-code span.pp { color: #cb4b16; }
-#article-container[data-code-theme="solarized"] .line-code span.bu,
-#article-container .code-block-wrapper[data-code-theme="solarized"] .line-code span.bu { color: #268bd2; }
+[data-code-theme="solarized"] .line-code span.kw { color: #859900; }
+[data-code-theme="solarized"] .line-code span.cf { color: #859900; }
+[data-code-theme="solarized"] .line-code span.dt { color: #b58900; }
+[data-code-theme="solarized"] .line-code span.dv,
+[data-code-theme="solarized"] .line-code span.bn,
+[data-code-theme="solarized"] .line-code span.fl { color: #d33682; }
+[data-code-theme="solarized"] .line-code span.st { color: #2aa198; }
+[data-code-theme="solarized"] .line-code span.co { color: #586e75; font-style: italic; }
+[data-code-theme="solarized"] .line-code span.fu { color: #268bd2; }
+[data-code-theme="solarized"] .line-code span.ex { color: #268bd2; font-weight: bold; }
+[data-code-theme="solarized"] .line-code span.at { color: #b58900; }
+[data-code-theme="solarized"] .line-code span.va { color: #cb4b16; }
+[data-code-theme="solarized"] .line-code span.op { color: #859900; }
+[data-code-theme="solarized"] .line-code span.pp { color: #cb4b16; }
+[data-code-theme="solarized"] .line-code span.bu { color: #268bd2; }
