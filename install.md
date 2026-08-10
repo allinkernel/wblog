@@ -124,6 +124,13 @@ server {
 }
 ```
 
+### 重启服务
+配置文件更该完毕后，还需要重新启动`nginx`服务，通过执行以下命令
+```bash
+sudo systemctl reload nginx.service
+```
+
+
 ### nginx日志查看方法
 ```bash
 sudo tail -f /var/log/nginx/error.log
