@@ -1,4 +1,5 @@
-// 所有控件绑定、保存/恢复设置
+// ==================== 控件绑定与设置管理 ====================
+
 const fontValueMap = {
     'inherit': 'inherit',
     'sans-prop': 'var(--font-stack-sans-prop)',
@@ -6,6 +7,7 @@ const fontValueMap = {
     'sans-mono': 'var(--font-stack-sans-mono)',
     'serif-mono': 'var(--font-stack-serif-mono)'
 };
+
 const radioVarMap = {
     'font-body': '--font-body',
     'font-code': '--font-code',
@@ -49,15 +51,23 @@ function formatInlineSize(val) {
     return { cssStr, labelStr };
 }
 
+// ==================== 绑定所有控件 ====================
 function bindControls() {
     const article = document.getElementById('article-container');
+
+    // ----- 版面调节 -----
     const wSlider = document.getElementById('width-slider');
     const sSlider = document.getElementById('size-slider');
     const pSlider = document.getElementById('position-slider');
     const lSlider = document.getElementById('line-slider');
     const cText = document.getElementById('color-text');
     const cBg = document.getElementById('color-bg');
+
+    // ----- 样式调节 -----
     const readerThemeSelect = document.getElementById('reader-theme-select');
+    const quoteStyleSelect = document.getElementById('quote-style-select');
+
+    // ----- 代码样式调节 -----
     const codeFormatSelect = document.getElementById('code-format-select');
     const codeThemeSelect = document.getElementById('code-theme-select');
     const codeInlineThemeSelect = document.getElementById('code-inline-theme-select');
@@ -66,8 +76,12 @@ function bindControls() {
     const codeBlockSlider = document.getElementById('code-block-slider');
     const codeLineNumbersToggle = document.getElementById('code-line-numbers-toggle');
     const codeHeaderToggle = document.getElementById('code-header-toggle');
-    const quoteStyleSelect = document.getElementById('quote-style-select');
 
+    // ----- 表格样式调节 (新增) -----
+    const tableFormatSelect = document.getElementById('table-format-select');
+    const tableHeaderToggle = document.getElementById('table-header-toggle');
+
+    // ----- 微调按钮（所有 slider 的 +/- 按钮）-----
     document.querySelectorAll('.slider-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             const targetId = btn.getAttribute('data-target');
@@ -88,6 +102,7 @@ function bindControls() {
         });
     });
 
+    // ----- 版面宽度 -----
     wSlider?.addEventListener('input', (e) => {
         root.style.setProperty('--page-width', `${e.target.value}px`);
         const valEl = document.getElementById('width-val');
@@ -95,15 +110,20 @@ function bindControls() {
         localStorage.setItem('blog-width', e.target.value);
         updatePosition();
     });
+
+    // ----- 文字大小 -----
     sSlider?.addEventListener('input', (e) => {
         root.style.setProperty('--font-size', `${e.target.value}px`);
         const valEl = document.getElementById('size-val');
         if (valEl) valEl.innerText = `${e.target.value}px`;
         localStorage.setItem('blog-size', e.target.value);
     });
+
+    // ----- 版面位置 -----
     pSlider?.addEventListener('input', updatePosition);
     window.addEventListener('resize', updatePosition);
 
+    // ----- 字体矩阵（radio）-----
     document.querySelector('.font-matrix-table')?.addEventListener('change', (e) => {
         if (e.target.type === 'radio') {
             const groupName = e.target.name;
@@ -116,6 +136,7 @@ function bindControls() {
         }
     });
 
+    // ----- 行距 -----
     lSlider?.addEventListener('input', (e) => {
         root.style.setProperty('--line-height', e.target.value);
         const valEl = document.getElementById('line-val');
@@ -123,6 +144,7 @@ function bindControls() {
         localStorage.setItem('blog-line', e.target.value);
     });
 
+    // ----- 文字颜色 -----
     cText?.addEventListener('input', (e) => {
         const bg = cBg?.value || '#fbfbfb';
         applyCustomReaderColors(e.target.value, bg);
@@ -130,6 +152,8 @@ function bindControls() {
         if (readerThemeSelect) readerThemeSelect.value = 'custom';
         localStorage.setItem('blog-reader-theme', 'custom');
     });
+
+    // ----- 背景颜色 -----
     cBg?.addEventListener('input', (e) => {
         const text = cText?.value || '#222222';
         applyCustomReaderColors(text, e.target.value);
@@ -138,6 +162,7 @@ function bindControls() {
         localStorage.setItem('blog-reader-theme', 'custom');
     });
 
+    // ----- 阅读主题下拉 -----
     readerThemeSelect?.addEventListener('change', (e) => {
         const themeName = e.target.value || 'custom';
         applyReaderTheme(themeName);
@@ -147,18 +172,25 @@ function bindControls() {
         if (cBg) cBg.value = theme.bg;
     });
 
+    // ----- 代码显示格式 -----
     codeFormatSelect?.addEventListener('change', (e) => {
         if (article) article.setAttribute('data-code-format', e.target.value);
         localStorage.setItem('blog-code-format', e.target.value);
     });
+
+    // ----- 代码块主题 -----
     codeThemeSelect?.addEventListener('change', (e) => {
         if (article) article.setAttribute('data-code-theme', e.target.value);
         localStorage.setItem('blog-code-theme', e.target.value);
     });
+
+    // ----- 行内代码主题 -----
     codeInlineThemeSelect?.addEventListener('change', (e) => {
         if (article) article.setAttribute('data-code-inline-theme', e.target.value);
         localStorage.setItem('blog-code-inline-theme', e.target.value);
     });
+
+    // ----- 行内字号偏移 -----
     codeInlineSlider?.addEventListener('input', (e) => {
         const offsetVal = e.target.value;
         const { cssStr, labelStr } = formatInlineSize(offsetVal);
@@ -167,6 +199,8 @@ function bindControls() {
         if (valEl) valEl.innerText = labelStr;
         localStorage.setItem('blog-code-inline-offset', offsetVal);
     });
+
+    // ----- 行内边距 -----
     codeInlinePadSlider?.addEventListener('input', (e) => {
         const padVal = e.target.value;
         root.style.setProperty('--code-inline-pad-y', `${padVal}px`);
@@ -174,26 +208,58 @@ function bindControls() {
         if (valEl) valEl.innerText = `${padVal}px`;
         localStorage.setItem('blog-code-inline-pad', padVal);
     });
+
+    // ----- 块级字号 -----
     codeBlockSlider?.addEventListener('input', (e) => {
         root.style.setProperty('--code-block-size', `${e.target.value}px`);
         const valEl = document.getElementById('code-block-val');
         if (valEl) valEl.innerText = `${e.target.value}px`;
         localStorage.setItem('blog-code-block-size', e.target.value);
     });
+
+    // ----- 显示行号 -----
     codeLineNumbersToggle?.addEventListener('change', (e) => {
         if (article) article.setAttribute('data-code-line-numbers', e.target.checked ? 'on' : 'off');
         localStorage.setItem('blog-code-line-numbers', e.target.checked ? 'on' : 'off');
     });
+
+    // ----- 顶部工具栏 -----
     codeHeaderToggle?.addEventListener('change', (e) => {
         if (article) article.setAttribute('data-code-header', e.target.checked ? 'on' : 'off');
         localStorage.setItem('blog-code-header', e.target.checked ? 'on' : 'off');
     });
+
+    // ----- 引用样式 -----
     quoteStyleSelect?.addEventListener('change', (e) => {
         if (article) article.setAttribute('data-quote-style', e.target.value);
         localStorage.setItem('blog-quote-style', e.target.value);
     });
+
+    // ============================================================
+    // 新增：表格样式控件
+    // ============================================================
+
+    // ----- 表格显示格式 -----
+    if (tableFormatSelect) {
+        tableFormatSelect.addEventListener('change', (e) => {
+            const format = e.target.value;
+            localStorage.setItem('table-format', format);
+            // 应用到所有表格（覆盖独立设置）
+            applyGlobalTableFormat(format);
+        });
+    }
+
+    // ----- 隐藏标题栏 -----
+    if (tableHeaderToggle) {
+        tableHeaderToggle.addEventListener('change', (e) => {
+            const show = e.target.checked;
+            localStorage.setItem('table-show-header', show ? 'true' : 'false');
+            applyGlobalTableHeader(show);
+        });
+    }
 }
 
+// ==================== 恢复保存的设置 ====================
 function restoreSavedSettings() {
     const article = document.getElementById('article-container');
     const wSlider = document.getElementById('width-slider');
@@ -212,6 +278,9 @@ function restoreSavedSettings() {
     const codeLineNumbersToggle = document.getElementById('code-line-numbers-toggle');
     const codeHeaderToggle = document.getElementById('code-header-toggle');
     const quoteStyleSelect = document.getElementById('quote-style-select');
+    // 表格控件
+    const tableFormatSelect = document.getElementById('table-format-select');
+    const tableHeaderToggle = document.getElementById('table-header-toggle');
 
     const savedWidth = localStorage.getItem('blog-width');
     const savedSize = localStorage.getItem('blog-size');
@@ -220,6 +289,7 @@ function restoreSavedSettings() {
     const savedCText = localStorage.getItem('blog-ctext');
     const savedCBg = localStorage.getItem('blog-cbg');
     const savedReaderTheme = localStorage.getItem('blog-reader-theme') || 'custom';
+
     const savedCodeFormat = localStorage.getItem('blog-code-format') || 'scroll';
     const savedCodeTheme = localStorage.getItem('blog-code-theme') || 'default';
     const savedCodeInlineTheme = localStorage.getItem('blog-code-inline-theme') || 'default';
@@ -230,6 +300,11 @@ function restoreSavedSettings() {
     const savedCodeHeader = localStorage.getItem('blog-code-header') || 'on';
     const savedQuoteStyle = localStorage.getItem('blog-quote-style') || 'global';
 
+    // 表格保存
+    const savedTableFormat = localStorage.getItem('table-format') || 'adaptive';
+    const savedTableShowHeader = localStorage.getItem('table-show-header') !== 'false';
+
+    // ----- 恢复基础样式 -----
     if (savedWidth && wSlider) {
         wSlider.value = savedWidth;
         root.style.setProperty('--page-width', `${savedWidth}px`);
@@ -266,6 +341,7 @@ function restoreSavedSettings() {
         if (cBg) cBg.value = savedTheme.bg;
     }
 
+    // ----- 恢复代码设置 -----
     if (article) {
         article.setAttribute('data-code-format', savedCodeFormat);
         article.setAttribute('data-code-theme', savedCodeTheme);
@@ -301,6 +377,7 @@ function restoreSavedSettings() {
         if (valEl) valEl.innerText = `${savedCodeBlockSize}px`;
     }
 
+    // ----- 恢复字体矩阵 radio -----
     const fontTable = document.querySelector('.font-matrix-table');
     if (fontTable) {
         Object.keys(radioVarMap).forEach((groupName) => {
@@ -321,5 +398,63 @@ function restoreSavedSettings() {
             }
         });
     }
+
+    // ----- 恢复表格设置 -----
+    if (tableFormatSelect) {
+        tableFormatSelect.value = savedTableFormat;
+    }
+    if (tableHeaderToggle) {
+        tableHeaderToggle.checked = savedTableShowHeader;
+    }
+
+    // 应用表格全局设置（但此时表格可能尚未渲染，因此延迟执行）
+    setTimeout(() => {
+        applyGlobalTableFormat(savedTableFormat);
+        applyGlobalTableHeader(savedTableShowHeader);
+    }, 100);
+
     updatePosition();
 }
+
+// ==================== 全局表格应用函数 ====================
+function applyGlobalTableFormat(format) {
+    const wrappers = document.querySelectorAll('.table-wrapper');
+    wrappers.forEach(wrapper => {
+        // 清除 override 标记（但保留独立设置，因为用户可能单独调整过）
+        // 但我们希望全局设置覆盖所有，所以强制应用
+        const table = wrapper.querySelector('table');
+        if (table) {
+            // 更新 wrapper 的 data-table-format
+            wrapper.dataset.tableFormat = format;
+            // 调用更新函数 (在 code.js 中定义)
+            if (typeof updateTableFormat === 'function') {
+                updateTableFormat(wrapper, format);
+            }
+        }
+    });
+    // 清除所有独立 override 存储（因为现在使用全局设置）
+    const keys = Object.keys(localStorage);
+    keys.forEach(key => {
+        if (key.startsWith('table-format-override-')) {
+            localStorage.removeItem(key);
+        }
+    });
+}
+
+function applyGlobalTableHeader(show) {
+    const wrappers = document.querySelectorAll('.table-wrapper');
+    wrappers.forEach(wrapper => {
+        const toolbar = wrapper.querySelector('.table-toolbar');
+        if (toolbar) {
+            toolbar.style.display = show ? 'flex' : 'none';
+        }
+    });
+}
+
+// ==================== 导出供其他模块使用 ====================
+window.applyGlobalTableFormat = applyGlobalTableFormat;
+window.applyGlobalTableHeader = applyGlobalTableHeader;
+window.bindControls = bindControls;
+window.restoreSavedSettings = restoreSavedSettings;
+window.updatePosition = updatePosition;
+window.formatInlineSize = formatInlineSize;

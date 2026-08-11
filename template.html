@@ -323,6 +323,36 @@
                 </div>
             </div>
         </div>
+
+        <!-- 新增：表格样式调节 -->
+        <div class="panel-box" id="panel-table-style">
+            <div class="panel-header" title="点击切换显示/隐藏">
+                <span class="panel-icon">⊞</span>
+                <span class="panel-title">表格样式调节</span>
+            </div>
+            <div class="panel-content">
+                <div class="control-group">
+                    <label>显示格式：</label>
+                    <select id="table-format-select">
+                        <option value="adaptive">自适应内容</option>
+                        <option value="wrap">自动换行</option>
+                        <option value="scroll">横向滚动</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label>隐藏标题栏：</label>
+                    <label class="switch">
+                        <input type="checkbox" id="table-header-toggle">
+                        <span class="slider">
+                            <span class="slider-text text-on">ON</span>
+                            <span class="slider-text text-off">OFF</span>
+                            <span class="knob"></span>
+                        </span>
+                    </label>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- 3. 正文核心包裹区 -->
@@ -378,6 +408,10 @@
             <button id="bar-code" class="bar-btn" title="代码样式">
                 <span class="bar-icon">&lt;/&gt;</span>
                 <span class="bar-label">代码</span>
+            </button>
+            <button id="bar-table" class="bar-btn" title="表格样式">
+                <span class="bar-icon">⊞</span>
+                <span class="bar-label">表格</span>
             </button>
         </div>
     </div>

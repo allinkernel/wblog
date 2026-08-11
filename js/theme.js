@@ -1,4 +1,4 @@
-// 主题映射与颜色工具函数
+// ==================== 阅读主题管理 ====================
 const root = document.documentElement;
 
 const readerThemeMap = {
@@ -72,3 +72,11 @@ function applyCustomReaderColors(text, bg) {
     const theme = {text, bg, surface, surface2, border, muted, link, hover, accent, quoteBg, quoteBorder, quoteMark};
     setReaderThemeVariables(theme);
 }
+
+// 导出全局
+window.applyReaderTheme = applyReaderTheme;
+window.applyCustomReaderColors = applyCustomReaderColors;
+window.setReaderThemeVariables = setReaderThemeVariables;
+window.hexToRgb = hexToRgb;
+window.mixHex = mixHex;
+window.readerThemeMap = readerThemeMap;

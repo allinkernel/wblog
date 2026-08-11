@@ -27,7 +27,8 @@ function togglePanel(panelId) {
         'panel-config': 'bar-config',
         'panel-font': 'bar-font',
         'panel-style': 'bar-style',
-        'panel-code-style': 'bar-code'
+        'panel-code-style': 'bar-code',
+        'panel-table-style': 'bar-table'
     };
     const barId = barMap[panelId];
     if (barId) {
@@ -47,7 +48,8 @@ function setPanelVisible(panelId, visible) {
         'panel-config': 'bar-config',
         'panel-font': 'bar-font',
         'panel-style': 'bar-style',
-        'panel-code-style': 'bar-code'
+        'panel-code-style': 'bar-code',
+        'panel-table-style': 'bar-table'
     };
     const barId = barMap[panelId];
     if (barId) {
@@ -58,14 +60,13 @@ function setPanelVisible(panelId, visible) {
 }
 
 function initPanelVisibility() {
-    const panelIds = ['panel-tree', 'panel-toc', 'panel-config', 'panel-font', 'panel-style', 'panel-code-style'];
+    const panelIds = ['panel-tree', 'panel-toc', 'panel-config', 'panel-font', 'panel-style', 'panel-code-style', 'panel-table-style'];
     panelIds.forEach(id => {
         const state = localStorage.getItem(`panel-${id}`);
         setPanelVisible(id, state !== 'hidden');
     });
 }
 
-// 加载 bar 位置
 function loadBarPosition() {
     const saved = localStorage.getItem('bar-position');
     if (saved) {
@@ -92,10 +93,8 @@ function applyBarPosition() {
 }
 
 function initBottomBar() {
-    // 加载保存的位置
     loadBarPosition();
 
-    // 画布小手
     const canvasBtn = document.getElementById('bar-canvas');
     const canvasToggle = document.getElementById('canvas-toggle');
     if (canvasBtn && canvasToggle) {
@@ -111,14 +110,14 @@ function initBottomBar() {
         });
     }
 
-    // 面板按钮映射
     const panelMap = {
         'bar-tree': 'panel-tree',
         'bar-toc': 'panel-toc',
         'bar-config': 'panel-config',
         'bar-font': 'panel-font',
         'bar-style': 'panel-style',
-        'bar-code': 'panel-code-style'
+        'bar-code': 'panel-code-style',
+        'bar-table': 'panel-table-style'
     };
     Object.keys(panelMap).forEach(barId => {
         const btn = document.getElementById(barId);
@@ -129,7 +128,6 @@ function initBottomBar() {
         });
     });
 
-    // 面板标题栏点击切换
     document.querySelectorAll('.panel-header').forEach(header => {
         const panelBox = header.closest('.panel-box');
         if (!panelBox) return;
@@ -142,10 +140,9 @@ function initBottomBar() {
         header.addEventListener('click', handler);
     });
 
-    // 恢复面板显隐状态
     initPanelVisibility();
 
-    // ------------------ 拖拽功能 ------------------
+    // 拖拽功能
     const bar = document.getElementById('bottom-bar');
     const dragHandle = document.querySelector('.bar-drag-handle');
     if (!bar || !dragHandle) return;
@@ -183,9 +180,7 @@ function initBottomBar() {
         }
     });
 
-    // 窗口大小变化时，确保 bar 不超出边界（可选）
     window.addEventListener('resize', () => {
-        // 简单限制，防止完全移出视野
         const rect = bar.getBoundingClientRect();
         const maxX = window.innerWidth - rect.width;
         const maxY = window.innerHeight - rect.height;
@@ -389,3 +384,12 @@ function initImageLightbox() {
         }
     });
 }
+
+// 导出全局
+window.initBottomBar = initBottomBar;
+window.togglePanel = togglePanel;
+window.setPanelVisible = setPanelVisible;
+window.initPanelVisibility = initPanelVisibility;
+window.loadBarPosition = loadBarPosition;
+window.saveBarPosition = saveBarPosition;
+window.applyBarPosition = applyBarPosition;

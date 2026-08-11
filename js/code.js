@@ -1,4 +1,6 @@
 // ==================== 代码相关功能 ====================
+
+// ---------- 辅助：使元素只读可编辑（用于代码内容） ----------
 function makeReadOnlyEditable(el) {
     if (!el) return;
     el.setAttribute('contenteditable', 'true');
@@ -9,6 +11,7 @@ function makeReadOnlyEditable(el) {
     el.addEventListener('drop', (e) => e.preventDefault());
 }
 
+// ---------- 增强所有行内代码及代码行区域 ----------
 function enhanceAllCode() {
     const article = document.getElementById('article-container');
     if (!article) return;
@@ -16,6 +19,7 @@ function enhanceAllCode() {
     targets.forEach(el => makeReadOnlyEditable(el));
 }
 
+// ---------- 全选代码（Ctrl+A 在代码块内） ----------
 function initCodeSelectAll() {
     document.addEventListener('keydown', (e) => {
         if ((e.ctrlKey || e.metaKey) && (e.key === 'a' || e.key === 'A')) {
@@ -39,6 +43,7 @@ function initCodeSelectAll() {
     });
 }
 
+// ---------- 复制文本到剪贴板 ----------
 function copyToClipboard(text) {
     if (navigator.clipboard && window.isSecureContext) {
         return navigator.clipboard.writeText(text);
@@ -64,6 +69,7 @@ function copyToClipboard(text) {
     }
 }
 
+// ---------- 代码灯箱（全屏查看代码） ----------
 function initCodeLightbox() {
     if (document.getElementById('code-lightbox-overlay')) return;
     const overlay = document.createElement('div');
@@ -141,6 +147,7 @@ function openCodeLightbox(lang, rawText, codeBlockWrapper) {
     document.body.style.overflow = 'hidden';
 }
 
+// ---------- 增强代码块（pre -> .code-block-wrapper） ----------
 function enhanceCodeBlocks() {
     const article = document.getElementById('article-container');
     if (!article) return;
@@ -267,75 +274,22 @@ function enhanceCodeBlocks() {
 
 // ==================== 表格增强功能 ====================
 
-function enhanceTables() {
-    const article = document.getElementById('article-container');
-    if (!article) return;
-
-    // 查找所有未被增强的表格
-    const tables = article.querySelectorAll('table:not(.table-enhanced)');
-    tables.forEach((table, tableIndex) => {
-        // 标记已增强
-        table.classList.add('table-enhanced');
-
-        // 创建包装容器
-        const wrapper = document.createElement('div');
-        wrapper.className = 'table-wrapper';
-        wrapper.dataset.tableId = `table-${tableIndex}`;
-
-        // 创建顶部工具栏
-        const toolbar = document.createElement('div');
-        toolbar.className = 'table-toolbar';
-        toolbar.innerHTML = `
-            <span class="table-label">📊 表格</span>
-            <div class="table-toolbar-actions">
-                <button class="table-format-btn" data-format="adaptive" title="自适应内容宽度">自适应</button>
-                <button class="table-format-btn" data-format="wrap" title="自动换行">换行</button>
-                <button class="table-format-btn" data-format="scroll" title="横向滚动">滚动</button>
-            </div>
-        `;
-
-        // 在表格前插入工具栏
-        table.parentNode.insertBefore(wrapper, table);
-        wrapper.appendChild(toolbar);
-        wrapper.appendChild(table);
-
-        // 为表格添加基础类
-        table.classList.add('table-enhanced-inner');
-
-        // 设置默认格式（从 localStorage 读取）
-        const savedFormat = localStorage.getItem('table-format') || 'adaptive';
-        wrapper.dataset.tableFormat = savedFormat;
-        updateTableFormat(wrapper, savedFormat);
-
-        // 绑定格式切换按钮
-        const formatBtns = toolbar.querySelectorAll('.table-format-btn');
-        formatBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const format = btn.dataset.format;
-                wrapper.dataset.tableFormat = format;
-                updateTableFormat(wrapper, format);
-                localStorage.setItem('table-format', format);
-                // 高亮当前按钮
-                formatBtns.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-            });
-        });
-
-        // 默认高亮当前格式
-        const defaultBtn = toolbar.querySelector(`.table-format-btn[data-format="${savedFormat}"]`);
-        if (defaultBtn) defaultBtn.classList.add('active');
-
-        // 添加列宽拖拽功能
-        enableColumnResize(table, wrapper);
-    });
-}
-
+// 全局函数：更新单个表格的格式（由 controls.js 调用）
 function updateTableFormat(wrapper, format) {
     const table = wrapper.querySelector('table');
     if (!table) return;
-
     // 移除所有格式类
     table.classList.remove('table-format-adaptive', 'table-format-wrap', 'table-format-scroll');
+    // 重置样式
+    table.style.width = '';
+    table.style.tableLayout = '';
+    wrapper.style.overflowX = '';
+    wrapper.style.display = '';
+    const cells = table.querySelectorAll('td, th');
+    cells.forEach(cell => {
+        cell.style.wordBreak = '';
+        cell.style.whiteSpace = '';
+    });
 
     switch (format) {
         case 'adaptive':
@@ -349,8 +303,7 @@ function updateTableFormat(wrapper, format) {
             table.style.width = '100%';
             table.style.tableLayout = 'fixed';
             wrapper.style.overflowX = 'visible';
-            // 所有列自动换行
-            table.querySelectorAll('td, th').forEach(cell => {
+            cells.forEach(cell => {
                 cell.style.wordBreak = 'break-word';
                 cell.style.whiteSpace = 'normal';
             });
@@ -361,7 +314,7 @@ function updateTableFormat(wrapper, format) {
             table.style.tableLayout = 'auto';
             wrapper.style.overflowX = 'auto';
             wrapper.style.display = 'block';
-            table.querySelectorAll('td, th').forEach(cell => {
+            cells.forEach(cell => {
                 cell.style.whiteSpace = 'nowrap';
                 cell.style.wordBreak = 'normal';
             });
@@ -369,15 +322,91 @@ function updateTableFormat(wrapper, format) {
     }
 }
 
-function enableColumnResize(table, wrapper) {
-    // 为表格添加列宽拖拽功能
+function enhanceTables() {
+    const article = document.getElementById('article-container');
+    if (!article) return;
+
+    // 读取全局设置
+    const globalFormat = localStorage.getItem('table-format') || 'adaptive';
+    const showHeader = localStorage.getItem('table-show-header') !== 'false';
+
+    const tables = article.querySelectorAll('table:not(.table-enhanced)');
+    tables.forEach((table, tableIndex) => {
+        // 标记已增强
+        table.classList.add('table-enhanced');
+
+        // 创建包装容器
+        const wrapper = document.createElement('div');
+        wrapper.className = 'table-wrapper';
+        const tableId = `table-${tableIndex}-${Date.now()}`;
+        wrapper.dataset.tableId = tableId;
+
+        // 创建顶部工具栏
+        const toolbar = document.createElement('div');
+        toolbar.className = 'table-toolbar';
+        toolbar.innerHTML = `
+            <span class="table-label">📊 表格</span>
+            <div class="table-toolbar-actions">
+                <button class="table-format-btn" data-format="adaptive" title="自适应内容宽度">自适应</button>
+                <button class="table-format-btn" data-format="wrap" title="自动换行">换行</button>
+                <button class="table-format-btn" data-format="scroll" title="横向滚动">滚动</button>
+            </div>
+        `;
+        // 标题栏显示（根据全局设置）
+        toolbar.style.display = showHeader ? 'flex' : 'none';
+
+        // 在表格前插入包装器
+        table.parentNode.insertBefore(wrapper, table);
+        wrapper.appendChild(toolbar);
+        wrapper.appendChild(table);
+
+        // 为表格添加基础类
+        table.classList.add('table-enhanced-inner');
+
+        // 确定使用的格式：优先使用独立存储的 override，否则使用全局设置
+        const overrideKey = `table-format-override-${tableId}`;
+        let format = localStorage.getItem(overrideKey);
+        let isOverride = false;
+        if (format) {
+            isOverride = true;
+            wrapper.dataset.formatOverride = 'true';
+        } else {
+            format = globalFormat;
+        }
+        wrapper.dataset.tableFormat = format;
+        updateTableFormat(wrapper, format);
+
+        // 绑定格式切换按钮
+        const formatBtns = toolbar.querySelectorAll('.table-format-btn');
+        formatBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const fmt = btn.dataset.format;
+                // 更新当前表格
+                wrapper.dataset.tableFormat = fmt;
+                updateTableFormat(wrapper, fmt);
+                // 保存为独立 override
+                localStorage.setItem(overrideKey, fmt);
+                wrapper.dataset.formatOverride = 'true';
+                // 高亮按钮
+                formatBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
+
+        // 高亮当前格式按钮
+        const activeBtn = toolbar.querySelector(`.table-format-btn[data-format="${format}"]`);
+        if (activeBtn) activeBtn.classList.add('active');
+
+        // 添加列宽拖拽功能
+        enableColumnResize(table, wrapper, tableId);
+    });
+}
+
+function enableColumnResize(table, wrapper, tableId) {
     const headerRow = table.querySelector('thead tr') || table.querySelector('tr');
     if (!headerRow) return;
-
-    // 为每个 th 添加拖拽手柄
     const ths = headerRow.querySelectorAll('th');
     ths.forEach((th, index) => {
-        // 添加右边界拖拽手柄（最后一个不添加，因为右侧没有列可以拖拽）
         if (index < ths.length - 1) {
             const handle = document.createElement('div');
             handle.className = 'col-resize-handle';
@@ -395,39 +424,30 @@ function enableColumnResize(table, wrapper) {
             handle.addEventListener('mousedown', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-
                 isResizing = true;
                 startX = e.clientX;
                 startWidth = th.offsetWidth;
                 if (nextTh) {
                     startNextWidth = nextTh.offsetWidth;
                 }
-
                 document.body.style.cursor = 'col-resize';
                 document.body.style.userSelect = 'none';
-
-                // 记录拖拽状态到 wrapper
                 wrapper.dataset.resizing = 'true';
             });
 
             document.addEventListener('mousemove', (e) => {
                 if (!isResizing) return;
-
                 const diff = e.clientX - startX;
                 const newWidth = Math.max(30, startWidth + diff);
                 const newNextWidth = Math.max(30, startNextWidth - diff);
-
                 th.style.width = newWidth + 'px';
                 th.style.minWidth = newWidth + 'px';
                 th.style.maxWidth = newWidth + 'px';
-
                 if (nextTh) {
                     nextTh.style.width = newNextWidth + 'px';
                     nextTh.style.minWidth = newNextWidth + 'px';
                     nextTh.style.maxWidth = newNextWidth + 'px';
                 }
-
-                // 更新表格布局
                 table.style.tableLayout = 'fixed';
             });
 
@@ -437,35 +457,31 @@ function enableColumnResize(table, wrapper) {
                     document.body.style.cursor = '';
                     document.body.style.userSelect = '';
                     wrapper.dataset.resizing = 'false';
-
-                    // 保存列宽到 localStorage
-                    saveColumnWidths(table);
+                    saveColumnWidths(table, tableId);
                 }
             });
         }
     });
 }
 
-function saveColumnWidths(table) {
+function saveColumnWidths(table, tableId) {
     const ths = table.querySelectorAll('th');
     const widths = [];
     ths.forEach(th => {
         widths.push(th.offsetWidth);
     });
-    // 使用文章路径 + 表格索引作为 key
-    const path = window.location.pathname;
-    const key = `table-columns-${path}`;
+    const key = `table-columns-${tableId}`;
     localStorage.setItem(key, JSON.stringify(widths));
 }
 
 function restoreColumnWidths() {
-    const tables = document.querySelectorAll('.table-enhanced');
-    tables.forEach((wrapper, index) => {
+    const wrappers = document.querySelectorAll('.table-wrapper');
+    wrappers.forEach(wrapper => {
         const table = wrapper.querySelector('table');
         if (!table) return;
-
-        const path = window.location.pathname;
-        const key = `table-columns-${path}`;
+        const tableId = wrapper.dataset.tableId;
+        if (!tableId) return;
+        const key = `table-columns-${tableId}`;
         const saved = localStorage.getItem(key);
         if (saved) {
             try {
@@ -479,40 +495,43 @@ function restoreColumnWidths() {
                         th.style.maxWidth = widths[i] + 'px';
                     });
                 }
-            } catch (e) {
-                // 忽略解析错误
-            }
+            } catch (e) { /* ignore */ }
         }
     });
 }
 
-// 在导航后恢复列宽
-function restoreTableColumnWidths() {
-    // 使用 requestAnimationFrame 延迟执行，确保表格已渲染
+function initTableEnhancement() {
+    enhanceTables();
+    // 恢复列宽（延迟确保表格已渲染）
     requestAnimationFrame(() => {
         restoreColumnWidths();
     });
-}
-
-// 监听文章内容变化，增强表格
-function initTableEnhancement() {
-    // 增强所有表格
-    enhanceTables();
-
-    // 恢复列宽
-    restoreTableColumnWidths();
-
-    // 监听窗口大小变化，重新调整表格（可选）
+    // 监听窗口大小变化，重新调整（但仅恢复列宽）
     let resizeTimer;
     window.addEventListener('resize', () => {
         clearTimeout(resizeTimer);
         resizeTimer = setTimeout(() => {
-            // 只恢复列宽，不重新增强
-            restoreTableColumnWidths();
+            restoreColumnWidths();
         }, 300);
     });
 }
 
-// 导出增强函数供 navigation.js 调用
+// ==================== 暴露全局函数供其他模块调用 ====================
+window.updateTableFormat = updateTableFormat;
 window.enhanceTables = enhanceTables;
-window.restoreTableColumnWidths = restoreTableColumnWidths;
+window.initTableEnhancement = initTableEnhancement;
+window.restoreColumnWidths = restoreColumnWidths;
+
+// 初始化时，确保表格设置生效（但 actual 增强由 navigation.js 在加载文章后调用）
+// 在 DOM 完全加载后，如果有表格，初始化
+document.addEventListener('DOMContentLoaded', () => {
+    // 初始表格增强（如果页面加载时已有文章内容）
+    // 注意：此时文章可能尚未加载，但会在 navigation.js 中调用
+    // 这里只做备用
+    setTimeout(() => {
+        const article = document.getElementById('article-container');
+        if (article && article.querySelector('table')) {
+            initTableEnhancement();
+        }
+    }, 500);
+});
