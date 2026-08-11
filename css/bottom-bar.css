@@ -1,4 +1,4 @@
-/* 底部紧凑 Dock Bar */
+/* 底部紧凑 Dock Bar - 适配主题 */
 #bottom-bar {
     position: fixed;
     bottom: 16px;
@@ -6,29 +6,21 @@
     transform: translateX(-50%);
     display: flex;
     align-items: center;
-    gap: 4px;
-    padding: 6px 12px;
-    background: rgba(255, 255, 255, 0.7);
+    gap: 2px;
+    padding: 4px 10px;
+    background: var(--theme-surface);
+    opacity: 0.85;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     border-radius: 20px;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    border: 1px solid var(--theme-border);
     z-index: 10000;
     transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
 }
 
-[data-reader-theme*="dark"] #bottom-bar,
-[data-reader-theme="dracula"] #bottom-bar,
-[data-reader-theme="claude-dark"] #bottom-bar,
-[data-reader-theme="github-dark"] #bottom-bar,
-[data-reader-theme="solarized-dark"] #bottom-bar,
-[data-reader-theme="nord"] #bottom-bar,
-[data-reader-theme="catppuccin-mocha"] #bottom-bar,
-[data-reader-theme="texi2html"] #bottom-bar {
-    background: rgba(30, 30, 40, 0.75);
-    border-color: rgba(255, 255, 255, 0.06);
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+#bottom-bar * {
+    opacity: 1;
 }
 
 .bar-btn {
@@ -38,13 +30,13 @@
     justify-content: center;
     background: transparent;
     border: none;
-    padding: 6px 10px;
-    border-radius: 16px;
+    padding: 4px 8px;
+    border-radius: 14px;
     cursor: pointer;
     transition: background 0.2s, transform 0.15s;
-    color: var(--text-color, #333);
+    color: var(--text-color);
     font-family: inherit;
-    min-width: 40px;
+    min-width: 34px;
     position: relative;
 }
 
@@ -58,22 +50,21 @@
 }
 
 .bar-icon {
-    font-size: 18px;
+    font-size: 16px;
     line-height: 1.2;
     display: block;
 }
 
 .bar-label {
-    font-size: 8px;
+    font-size: 7px;
     margin-top: 1px;
     opacity: 0.7;
     font-weight: 500;
     letter-spacing: 0.2px;
 }
 
-/* 激活状态（蓝色背景） */
 .bar-btn.active {
-    background: #1890ff;
+    background: var(--theme-accent);
     color: #fff;
     box-shadow: 0 2px 8px rgba(24, 144, 255, 0.3);
 }
@@ -83,6 +74,5 @@
 }
 
 .bar-btn.active:hover {
-    background: #40a9ff;
+    background: var(--theme-link-hover);
 }
-
