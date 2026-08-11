@@ -1,0 +1,291 @@
+/* ==========================================================================
+   引用文字（blockquote）多样式主题
+   ========================================================================== */
+
+#article-container blockquote {
+    margin: 1.2em 0;
+    transition: all 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+#article-container blockquote p {
+    margin: 0.3em 0;
+}
+
+/* 1. 默认左边框 */
+#article-container[data-quote-style="default"] blockquote {
+    padding: 0.6em 1em;
+    border-left: 4px solid var(--theme-quote-border);
+    background: var(--theme-quote-bg);
+    border-radius: 0 4px 4px 0;
+}
+
+/* 2. 强调色块 */
+#article-container[data-quote-style="accent"] blockquote {
+    padding: 0.6em 1em;
+    border-left: 4px solid #1890ff;
+    background: rgba(24, 144, 255, 0.07);
+    border-radius: 0 4px 4px 0;
+}
+
+/* 3. 卡片高亮 */
+#article-container[data-quote-style="card"] blockquote {
+    padding: 0.8em 1.2em;
+    border: 1px solid var(--theme-border);
+    background: var(--theme-surface-2);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+/* 4. 大引号风格 */
+#article-container[data-quote-style="mark"] blockquote {
+    position: relative;
+    padding: 0.4em 0.2em 0.4em 1.6em;
+    border: none;
+    background: transparent;
+    font-style: italic;
+    color: rgba(0, 0, 0, 0.65);
+}
+#article-container[data-quote-style="mark"] blockquote::before {
+    content: "“";
+    position: absolute;
+    left: 0;
+    top: -0.15em;
+    font-size: 2.2em;
+    color: rgba(0, 0, 0, 0.2);
+    font-family: Georgia, "Times New Roman", serif;
+    line-height: 1;
+}
+
+/* 5. 极简无边框 */
+#article-container[data-quote-style="plain"] blockquote {
+    padding: 0 0 0 0.2em;
+    border: none;
+    background: transparent;
+    font-style: italic;
+    color: rgba(0, 0, 0, 0.6);
+}
+
+/* 6. 虚线边框 */
+#article-container[data-quote-style="dashed"] blockquote {
+    padding: 0.6em 1em;
+    border: 1px dashed rgba(0, 0, 0, 0.3);
+    background: transparent;
+    border-radius: 6px;
+}
+
+/* ==========================================================================
+   全局阅读主题系统
+   ========================================================================== */
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color .2s ease, color .2s ease;
+}
+
+/* 全局阅读主题：控制台 / 大纲 / 文章树也属于阅读环境的一部分 */
+:root {
+    --theme-panel-hover: color-mix(in srgb, var(--theme-surface) 88%, var(--theme-link) 12%);
+    --theme-control-bg: var(--theme-surface);
+    --theme-control-border: var(--theme-border);
+    --theme-control-text: var(--text-color);
+    --theme-control-muted: var(--theme-muted);
+    --theme-shadow: 0 4px 12px rgba(0,0,0,.12);
+}
+
+body {
+    background-color: var(--bg-color) !important;
+    color: var(--text-color) !important;
+}
+
+#left-dock-container, #right-dock-container {
+    color: var(--text-color);
+}
+
+#left-dock-container::-webkit-scrollbar-thumb,
+#right-dock-container::-webkit-scrollbar-thumb {
+    background: var(--theme-border);
+}
+
+.panel-box {
+    background: var(--theme-surface) !important;
+    border-color: var(--theme-border) !important;
+    box-shadow: var(--theme-shadow) !important;
+    color: var(--text-color) !important;
+}
+
+.panel-box *,
+.panel-box label,
+.panel-box td,
+.panel-box th,
+.panel-box span {
+    color: inherit;
+}
+
+.panel-header {
+    background: var(--theme-surface-2) !important;
+    border-bottom-color: var(--theme-border) !important;
+    color: var(--text-color) !important;
+}
+
+.panel-header:hover {
+    background: var(--theme-panel-hover) !important;
+}
+
+.panel-title,
+.icon-aa,
+.icon-code,
+.min-btn {
+    color: var(--text-color) !important;
+}
+
+.min-btn { opacity: .72; }
+
+.panel-content {
+    background: var(--theme-surface) !important;
+    color: var(--text-color) !important;
+}
+
+.panel-inner-divider {
+    background: var(--theme-border) !important;
+}
+
+.control-group input[type="range"] {
+    accent-color: var(--theme-accent);
+}
+
+.slider-btn {
+    background: var(--theme-surface-2) !important;
+    border-color: var(--theme-control-border) !important;
+    color: var(--text-color) !important;
+}
+
+.slider-btn:hover { background: var(--theme-panel-hover) !important; }
+.slider-btn:active { background: var(--theme-border) !important; }
+
+.val-badge {
+    color: var(--theme-control-muted) !important;
+}
+
+.control-group input[type="color"] {
+    border-color: var(--theme-control-border) !important;
+    background: var(--theme-control-bg) !important;
+}
+
+.control-group select,
+.local-code-select {
+    background: var(--theme-control-bg) !important;
+    color: var(--theme-control-text) !important;
+    border-color: var(--theme-control-border) !important;
+}
+
+.control-group select option,
+.local-code-select option {
+    background: var(--theme-control-bg);
+    color: var(--theme-control-text);
+}
+
+.switch .slider {
+    background-color: var(--theme-border);
+}
+
+.switch .text-off { color: var(--theme-muted); }
+.switch input:checked + .slider { background-color: var(--theme-accent); }
+
+/* 文章树 */
+.tree-nav-top {
+    background: var(--theme-surface-2) !important;
+    border-color: var(--theme-border) !important;
+    color: var(--text-color) !important;
+}
+.tree-nav-top:hover {
+    background: var(--theme-panel-hover) !important;
+    border-color: var(--theme-link) !important;
+}
+.topic-item {
+    border-color: var(--theme-border) !important;
+    background: var(--theme-surface) !important;
+    color: var(--text-color) !important;
+}
+.topic-item:hover {
+    background: var(--theme-panel-hover) !important;
+    color: var(--theme-link) !important;
+}
+.tree-node-row,
+.tree-spacer,
+.tree-toggle { color: var(--theme-muted) !important; }
+.tree-toggle:hover { color: var(--theme-link) !important; }
+.tree-link {
+    color: var(--text-color) !important;
+}
+.tree-link:hover {
+    color: var(--theme-link) !important;
+}
+.tree-link.active {
+    background-color: var(--theme-accent) !important;
+    color: #fff !important;
+}
+.article-tree ul {
+    border-left-color: var(--theme-border) !important;
+}
+
+/* 大纲 */
+.scrollable a,
+.toc-tree a {
+    color: var(--text-color) !important;
+}
+.scrollable a:hover,
+.toc-tree a:hover {
+    color: var(--theme-link) !important;
+}
+.toc-toggle,
+.toc-spacer {
+    color: var(--theme-muted) !important;
+}
+.toc-toggle:hover { color: var(--theme-link) !important; }
+
+/* 字体矩阵：四个 AiaI 样本各自使用真正对应的字体 */
+.font-matrix-table {
+    color: var(--text-color) !important;
+}
+.font-matrix-table th,
+.font-matrix-table td {
+    border-color: var(--theme-border) !important;
+}
+.font-matrix-table th {
+    background: var(--theme-surface-2) !important;
+    color: var(--text-color) !important;
+}
+.font-matrix-table .row-label {
+    background: var(--theme-surface-2) !important;
+    color: var(--text-color) !important;
+}
+.font-sample {
+    display: inline-block;
+    font-size: 12px;
+    line-height: 1;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+}
+.font-sample.sample-sans-prop { font-family: var(--font-stack-sans-prop) !important; }
+.font-sample.sample-serif-prop { font-family: var(--font-stack-serif-prop) !important; }
+.font-sample.sample-sans-mono { font-family: var(--font-stack-sans-mono) !important; }
+.font-sample.sample-serif-mono { font-family: var(--font-stack-serif-mono) !important; }
+
+/* 纯粹 texi2html 风格：白底、黑字、标题下划线 */
+#article-container[data-reader-theme="texi2html"] h1,
+#article-container[data-reader-theme="texi2html"] h2,
+#article-container[data-reader-theme="texi2html"] h3,
+#article-container[data-reader-theme="texi2html"] h4,
+#article-container[data-reader-theme="texi2html"] h5,
+#article-container[data-reader-theme="texi2html"] h6 {
+    color: #000 !important;
+    opacity: 1 !important;
+    border-bottom: 1px solid #000;
+    padding-bottom: .12em;
+}
+#article-container[data-reader-theme="texi2html"] a { color: #0000ee !important; }
+#article-container[data-reader-theme="texi2html"] a:visited { color: #551a8b !important; }
+#article-container[data-reader-theme="texi2html"] blockquote { background: transparent; }
+#article-container[data-reader-theme="texi2html"] .tree-link,
+#article-container[data-reader-theme="texi2html"] .toc-tree a { text-decoration: underline; }

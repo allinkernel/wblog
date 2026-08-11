@@ -1,0 +1,88 @@
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+:root {
+    --page-width: 700px;  
+    --font-size: 18px;   
+    --line-height: 1.7;    
+    --text-color: #222222; 
+    --bg-color: #fbfbfb;
+
+    /* 全局阅读主题 Token */
+    --theme-surface: #ffffff;
+    --theme-surface-2: #f6f8fa;
+    --theme-border: #d0d7de;
+    --theme-muted: #57606a;
+    --theme-link: #0969da;
+    --theme-link-hover: #0550ae;
+    --theme-accent: #1890ff;
+    --theme-quote-bg: rgba(0, 0, 0, 0.03);
+    --theme-quote-border: #d0d7de;
+    --theme-quote-mark: rgba(0, 0, 0, 0.2);   
+    
+    /* 代码相关 */
+    --code-inline-size: calc(1em - 2px);
+    --code-inline-pad-y: 2px;
+    --code-inline-pad-x: 6px;
+    --code-block-size: 14px;
+}
+
+body {
+    margin: 0;
+    padding: 40px 0;
+    overflow-x: hidden;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    line-height: var(--line-height);
+    transition: background-color 0.2s;
+}
+
+#article-wrapper {
+    max-width: var(--page-width);
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+#article-container {
+    font-size: var(--font-size);
+    transform: translateX(0px); 
+    will-change: transform;
+}
+
+:root {
+    --font-stack-sans-prop: sans-serif;
+    --font-stack-serif-prop: serif;
+    --font-stack-sans-mono: Consolas, "Fira Code", Monaco, monospace;
+    --font-stack-serif-mono: "Courier New", Courier, "Iosevka Slab", monospace;
+
+    --font-body: inherit;
+    --font-code: var(--font-stack-sans-mono);
+    --font-heading: inherit;
+    --font-link: inherit;
+    --font-quote: inherit;
+}
+
+#article-container { font-family: var(--font-body); }
+#article-container code, #article-container pre, #article-container kbd, #article-container samp { font-family: var(--font-code) !important; }
+#article-container h1, #article-container h2, #article-container h3, #article-container h4, #article-container h5, #article-container h6 { font-family: var(--font-heading); }
+#article-container a { 
+    font-family: var(--font-link);
+    color: var(--theme-link);
+    transition: color 0.15s ease;
+}
+#article-container a:hover { color: var(--theme-link-hover); }
+#article-container blockquote, #article-container figcaption, #article-container cite, #article-container .footnote, #article-container sup, #article-container sub { font-family: var(--font-quote); }
+
+kbd { font-style: oblique; }
+pre.display, pre.format { font-family: inherit; }
+div.display { margin-left: 3.2em; }
+div.example { margin-left: 3.2em; background: rgba(0,0,0,0.02); padding: 10px; border-left: 3px solid #ccc; }
+a.copiable-anchor { visibility: hidden; text-decoration: none; line-height: 0em; margin-left: 5px; }
+span:hover a.copiable-anchor { visibility: visible; }
+ul.no-bullet { list-style: none; }
+
+h1 { font-size: 2em; margin-bottom: 0.8em; color: var(--text-color); opacity: 0.95; }
+h2 { font-size: 1.5em; margin-top: 1.5em; margin-bottom: 0.6em; color: var(--text-color); opacity: 0.9; }
+h3 { font-size: 1.2em; margin-top: 1.2em; margin-bottom: 0.4em; color: var(--text-color); opacity: 0.8; }
+p { margin-bottom: 1.5em; text-align: justify; }
