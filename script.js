@@ -1014,6 +1014,13 @@ function restoreSavedSettings() {
     updatePosition();
 }
 
+/* ==========================================================================
+   📂 文章树渲染 (支持无刷新导航)
+   ========================================================================== */
+
+// 全局变量，保存当前 manifest 数据
+let currentManifest = null;
+
 function initArticleTree() {
     const treeContainer = document.getElementById('tree-container');
     if (!treeContainer) return;
@@ -1024,6 +1031,7 @@ function initArticleTree() {
             return res.json();
         })
         .then(manifest => {
+            currentManifest = manifest;
             renderManifestUI(manifest);
         })
         .catch(err => {
@@ -1139,11 +1147,22 @@ function renderTopicTree(manifest, topicKey) {
                 const a = document.createElement('a');
                 a.className = 'tree-link';
                 a.href = nodeUrl;
+                a.dataset.path = nodeUrl;  // 存储路径
                 a.innerText = nodeName;
 
                 if (nodeUrl === currentPath) {
                     a.classList.add('active');
                 }
+
+                // 点击事件：无刷新导航
+                a.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const path = a.dataset.path;
+                    if (path) {
+                        navigateTo(path);
+                    }
+                });
+
                 row.appendChild(a);
             } else {
                 const span = document.createElement('span');
@@ -1168,6 +1187,74 @@ function renderTopicTree(manifest, topicKey) {
     const treeEl = buildTree(topicData.nodes);
     treeContainer.appendChild(treeEl);
 }
+
+/* ==========================================================================
+   📄 文章加载与导航 (无刷新)
+   ========================================================================== */
+
+function loadArticleContent(path) {
+    const article = document.getElementById('article-container');
+    if (!article) return;
+
+    // 显示加载提示
+    article.innerHTML = '<p>正在读取正文内容...</p>';
+
+    let fileToFetch;
+    if (path === '/' || path === '/index.html') {
+        fileToFetch = '/template/body.html';
+    } else {
+        fileToFetch = `/articles${path}`;
+    }
+
+    fetch(fileToFetch)
+        .then(response => {
+            if (!response.ok) throw new Error('文件不存在');
+            return response.text();
+        })
+        .then(htmlData => {
+            article.innerHTML = htmlData;
+
+            // 处理图片
+            article.querySelectorAll('img').forEach(img => {
+                img.style.zoom = '';
+            });
+
+            // 增强代码块
+            try { enhanceCodeBlocks(); } catch(e) { console.error("enhanceCodeBlocks 报错:", e); }
+            try { enhanceAllCode(); } catch(e) { console.error("enhanceAllCode 报错:", e); }
+            try { generateTOC(); } catch(e) { console.error("generateTOC 报错:", e); }
+
+            // 刷新当前激活的树节点高亮
+            updateActiveTreeLink(path);
+        })
+        .catch((err) => {
+            console.error("加载文章失败:", err);
+            article.innerHTML = "<p style='color:red'>内容加载失败，请检查路径</p>";
+        });
+}
+
+function navigateTo(path) {
+    // 更新浏览器地址栏
+    history.pushState(null, '', path);
+    // 加载文章内容
+    loadArticleContent(path);
+}
+
+function updateActiveTreeLink(path) {
+    // 移除所有 tree-link 的 active 类
+    document.querySelectorAll('.tree-link').forEach(link => {
+        link.classList.remove('active');
+        if (link.dataset.path === path) {
+            link.classList.add('active');
+        }
+    });
+}
+
+// 监听浏览器前进/后退
+window.addEventListener('popstate', () => {
+    const path = window.location.pathname;
+    loadArticleContent(path);
+});
 
 function initImageLightbox() {
     if (!document.getElementById('lightbox-overlay')) {
@@ -1221,6 +1308,10 @@ function initImageLightbox() {
     });
 }
 
+/* ==========================================================================
+   初始化
+   ========================================================================== */
+
 window.addEventListener('DOMContentLoaded', () => {
     const article = document.getElementById('article-container');
 
@@ -1231,46 +1322,13 @@ window.addEventListener('DOMContentLoaded', () => {
     initCodeLightbox();
     initCodeSelectAll();
 
+    // 加载当前路径的文章
     const currentPath = window.location.pathname;
+    loadArticleContent(currentPath);
 
-    let fileToFetch;
-    if (currentPath === '/' || currentPath === '/index.html') {
-        fileToFetch = '/template/body.html'; 
-    } else {
-        fileToFetch = `/articles${currentPath}`;
-    }
-
-    fetch(fileToFetch)
-        .then(response => {
-            if (!response.ok) throw new Error('文件不存在');
-            return response.text();
-        })
-        .then(htmlData => {
-            if (article) {
-                article.innerHTML = htmlData;
-
-                article.querySelectorAll('img').forEach(img => {
-                    img.style.zoom = '';
-                });
-
-                try {
-                    enhanceCodeBlocks();
-                } catch(e) { console.error("enhanceCodeBlocks 报错:", e); }
-
-                try {
-                    enhanceAllCode();
-                } catch(e) { console.error("enhanceAllCode 报错:", e); }
-
-                generateTOC();
-            }
-        })
-        .catch((err) => {
-            console.error("加载文章失败:", err);
-            if (article) {
-                article.innerHTML = "<p style='color:red'>内容加载失败，请检查路径</p>";
-            }
-        });
-
+    // 初始化文章树（它会根据 manifest 构建，并与当前路径匹配）
     initArticleTree();
+
+    // 恢复用户设置
     restoreSavedSettings();
 });
