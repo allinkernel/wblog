@@ -1,4 +1,4 @@
-// 代码相关功能
+// ==================== 代码相关功能 ====================
 function makeReadOnlyEditable(el) {
     if (!el) return;
     el.setAttribute('contenteditable', 'true');
@@ -264,3 +264,255 @@ function enhanceCodeBlocks() {
         pre.parentNode.replaceChild(wrapper, pre);
     });
 }
+
+// ==================== 表格增强功能 ====================
+
+function enhanceTables() {
+    const article = document.getElementById('article-container');
+    if (!article) return;
+
+    // 查找所有未被增强的表格
+    const tables = article.querySelectorAll('table:not(.table-enhanced)');
+    tables.forEach((table, tableIndex) => {
+        // 标记已增强
+        table.classList.add('table-enhanced');
+
+        // 创建包装容器
+        const wrapper = document.createElement('div');
+        wrapper.className = 'table-wrapper';
+        wrapper.dataset.tableId = `table-${tableIndex}`;
+
+        // 创建顶部工具栏
+        const toolbar = document.createElement('div');
+        toolbar.className = 'table-toolbar';
+        toolbar.innerHTML = `
+            <span class="table-label">📊 表格</span>
+            <div class="table-toolbar-actions">
+                <button class="table-format-btn" data-format="adaptive" title="自适应内容宽度">自适应</button>
+                <button class="table-format-btn" data-format="wrap" title="自动换行">换行</button>
+                <button class="table-format-btn" data-format="scroll" title="横向滚动">滚动</button>
+            </div>
+        `;
+
+        // 在表格前插入工具栏
+        table.parentNode.insertBefore(wrapper, table);
+        wrapper.appendChild(toolbar);
+        wrapper.appendChild(table);
+
+        // 为表格添加基础类
+        table.classList.add('table-enhanced-inner');
+
+        // 设置默认格式（从 localStorage 读取）
+        const savedFormat = localStorage.getItem('table-format') || 'adaptive';
+        wrapper.dataset.tableFormat = savedFormat;
+        updateTableFormat(wrapper, savedFormat);
+
+        // 绑定格式切换按钮
+        const formatBtns = toolbar.querySelectorAll('.table-format-btn');
+        formatBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const format = btn.dataset.format;
+                wrapper.dataset.tableFormat = format;
+                updateTableFormat(wrapper, format);
+                localStorage.setItem('table-format', format);
+                // 高亮当前按钮
+                formatBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
+
+        // 默认高亮当前格式
+        const defaultBtn = toolbar.querySelector(`.table-format-btn[data-format="${savedFormat}"]`);
+        if (defaultBtn) defaultBtn.classList.add('active');
+
+        // 添加列宽拖拽功能
+        enableColumnResize(table, wrapper);
+    });
+}
+
+function updateTableFormat(wrapper, format) {
+    const table = wrapper.querySelector('table');
+    if (!table) return;
+
+    // 移除所有格式类
+    table.classList.remove('table-format-adaptive', 'table-format-wrap', 'table-format-scroll');
+
+    switch (format) {
+        case 'adaptive':
+            table.classList.add('table-format-adaptive');
+            table.style.width = 'auto';
+            table.style.tableLayout = 'auto';
+            wrapper.style.overflowX = 'visible';
+            break;
+        case 'wrap':
+            table.classList.add('table-format-wrap');
+            table.style.width = '100%';
+            table.style.tableLayout = 'fixed';
+            wrapper.style.overflowX = 'visible';
+            // 所有列自动换行
+            table.querySelectorAll('td, th').forEach(cell => {
+                cell.style.wordBreak = 'break-word';
+                cell.style.whiteSpace = 'normal';
+            });
+            break;
+        case 'scroll':
+            table.classList.add('table-format-scroll');
+            table.style.width = '100%';
+            table.style.tableLayout = 'auto';
+            wrapper.style.overflowX = 'auto';
+            wrapper.style.display = 'block';
+            table.querySelectorAll('td, th').forEach(cell => {
+                cell.style.whiteSpace = 'nowrap';
+                cell.style.wordBreak = 'normal';
+            });
+            break;
+    }
+}
+
+function enableColumnResize(table, wrapper) {
+    // 为表格添加列宽拖拽功能
+    const headerRow = table.querySelector('thead tr') || table.querySelector('tr');
+    if (!headerRow) return;
+
+    // 为每个 th 添加拖拽手柄
+    const ths = headerRow.querySelectorAll('th');
+    ths.forEach((th, index) => {
+        // 添加右边界拖拽手柄（最后一个不添加，因为右侧没有列可以拖拽）
+        if (index < ths.length - 1) {
+            const handle = document.createElement('div');
+            handle.className = 'col-resize-handle';
+            handle.dataset.colIndex = index;
+            handle.title = '拖拽调整列宽';
+            th.style.position = 'relative';
+            th.appendChild(handle);
+
+            let isResizing = false;
+            let startX = 0;
+            let startWidth = 0;
+            let nextTh = ths[index + 1];
+            let startNextWidth = 0;
+
+            handle.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+
+                isResizing = true;
+                startX = e.clientX;
+                startWidth = th.offsetWidth;
+                if (nextTh) {
+                    startNextWidth = nextTh.offsetWidth;
+                }
+
+                document.body.style.cursor = 'col-resize';
+                document.body.style.userSelect = 'none';
+
+                // 记录拖拽状态到 wrapper
+                wrapper.dataset.resizing = 'true';
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (!isResizing) return;
+
+                const diff = e.clientX - startX;
+                const newWidth = Math.max(30, startWidth + diff);
+                const newNextWidth = Math.max(30, startNextWidth - diff);
+
+                th.style.width = newWidth + 'px';
+                th.style.minWidth = newWidth + 'px';
+                th.style.maxWidth = newWidth + 'px';
+
+                if (nextTh) {
+                    nextTh.style.width = newNextWidth + 'px';
+                    nextTh.style.minWidth = newNextWidth + 'px';
+                    nextTh.style.maxWidth = newNextWidth + 'px';
+                }
+
+                // 更新表格布局
+                table.style.tableLayout = 'fixed';
+            });
+
+            document.addEventListener('mouseup', () => {
+                if (isResizing) {
+                    isResizing = false;
+                    document.body.style.cursor = '';
+                    document.body.style.userSelect = '';
+                    wrapper.dataset.resizing = 'false';
+
+                    // 保存列宽到 localStorage
+                    saveColumnWidths(table);
+                }
+            });
+        }
+    });
+}
+
+function saveColumnWidths(table) {
+    const ths = table.querySelectorAll('th');
+    const widths = [];
+    ths.forEach(th => {
+        widths.push(th.offsetWidth);
+    });
+    // 使用文章路径 + 表格索引作为 key
+    const path = window.location.pathname;
+    const key = `table-columns-${path}`;
+    localStorage.setItem(key, JSON.stringify(widths));
+}
+
+function restoreColumnWidths() {
+    const tables = document.querySelectorAll('.table-enhanced');
+    tables.forEach((wrapper, index) => {
+        const table = wrapper.querySelector('table');
+        if (!table) return;
+
+        const path = window.location.pathname;
+        const key = `table-columns-${path}`;
+        const saved = localStorage.getItem(key);
+        if (saved) {
+            try {
+                const widths = JSON.parse(saved);
+                const ths = table.querySelectorAll('th');
+                if (widths.length === ths.length) {
+                    table.style.tableLayout = 'fixed';
+                    ths.forEach((th, i) => {
+                        th.style.width = widths[i] + 'px';
+                        th.style.minWidth = widths[i] + 'px';
+                        th.style.maxWidth = widths[i] + 'px';
+                    });
+                }
+            } catch (e) {
+                // 忽略解析错误
+            }
+        }
+    });
+}
+
+// 在导航后恢复列宽
+function restoreTableColumnWidths() {
+    // 使用 requestAnimationFrame 延迟执行，确保表格已渲染
+    requestAnimationFrame(() => {
+        restoreColumnWidths();
+    });
+}
+
+// 监听文章内容变化，增强表格
+function initTableEnhancement() {
+    // 增强所有表格
+    enhanceTables();
+
+    // 恢复列宽
+    restoreTableColumnWidths();
+
+    // 监听窗口大小变化，重新调整表格（可选）
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+            // 只恢复列宽，不重新增强
+            restoreTableColumnWidths();
+        }, 300);
+    });
+}
+
+// 导出增强函数供 navigation.js 调用
+window.enhanceTables = enhanceTables;
+window.restoreTableColumnWidths = restoreTableColumnWidths;

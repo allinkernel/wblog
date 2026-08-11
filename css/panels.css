@@ -365,3 +365,11 @@
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04); cursor: zoom-in; transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 #article-container img:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08); }
+
+/* 大纲链接去掉下划线 */
+.toc-tree a {
+    text-decoration: none !important;
+}
+.toc-tree a:hover {
+    text-decoration: underline !important; /* 悬停时显示下划线，提示可点击 */
+}

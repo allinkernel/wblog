@@ -231,7 +231,6 @@ function renderTopicTree(manifest, topicKey) {
 }
 
 function loadArticleContent(path) {
-    // 如果路径是锚点（以 # 开头），则直接返回，不加载文章
     if (path && path.startsWith('#')) {
         return;
     }
@@ -257,6 +256,9 @@ function loadArticleContent(path) {
             try { enhanceCodeBlocks(); } catch(e) { console.error("enhanceCodeBlocks 报错:", e); }
             try { enhanceAllCode(); } catch(e) { console.error("enhanceAllCode 报错:", e); }
             try { generateTOC(); } catch(e) { console.error("generateTOC 报错:", e); }
+            // 新增：表格增强
+            try { enhanceTables(); } catch(e) { console.error("enhanceTables 报错:", e); }
+            try { initTableEnhancement(); } catch(e) { console.error("initTableEnhancement 报错:", e); }
             updateActiveTreeLink(path);
         })
         .catch((err) => {
