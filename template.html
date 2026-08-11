@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>我的极简内容平台</title>
-    <!-- CSS 拆分 -->
     <link rel="stylesheet" href="/template/css/base.css">
     <link rel="stylesheet" href="/template/css/theme.css">
     <link rel="stylesheet" href="/template/css/panels.css">
@@ -335,37 +334,54 @@
 
     <!-- 4. 底部紧凑 Bar -->
     <div id="bottom-bar">
-        <button id="bar-canvas" class="bar-btn" title="画布小手切换">
-            <span class="bar-icon">🖐️</span>
-            <span class="bar-label">小手</span>
-        </button>
-        <button id="bar-tree" class="bar-btn" title="文章列表">
-            <span class="bar-icon">📁</span>
-            <span class="bar-label">文章</span>
-        </button>
-        <button id="bar-toc" class="bar-btn" title="文章大纲">
-            <span class="bar-icon">📜</span>
-            <span class="bar-label">大纲</span>
-        </button>
-        <button id="bar-config" class="bar-btn" title="版面调节">
-            <span class="bar-icon">⚙️</span>
-            <span class="bar-label">版面</span>
-        </button>
-        <button id="bar-font" class="bar-btn" title="字体调节">
-            <span class="bar-icon">Aa</span>
-            <span class="bar-label">字体</span>
-        </button>
-        <button id="bar-style" class="bar-btn" title="样式调节">
-            <span class="bar-icon">🎨</span>
-            <span class="bar-label">样式</span>
-        </button>
-        <button id="bar-code" class="bar-btn" title="代码样式">
-            <span class="bar-icon">&lt;/&gt;</span>
-            <span class="bar-label">代码</span>
-        </button>
+        <!-- 拖动把手 -->
+        <div class="bar-drag-handle" title="拖动移动 bar">
+            <span class="drag-dot"></span><span class="drag-dot"></span><span class="drag-dot"></span>
+            <span class="drag-dot"></span><span class="drag-dot"></span><span class="drag-dot"></span>
+        </div>
+
+        <div class="bar-group">
+            <button id="bar-canvas" class="bar-btn" title="画布小手切换">
+                <span class="bar-icon">🖐️</span>
+                <span class="bar-label">小手</span>
+            </button>
+        </div>
+
+        <div class="bar-divider"></div>
+
+        <div class="bar-group">
+            <button id="bar-tree" class="bar-btn" title="文章列表">
+                <span class="bar-icon">📁</span>
+                <span class="bar-label">文章</span>
+            </button>
+            <button id="bar-toc" class="bar-btn" title="文章大纲">
+                <span class="bar-icon">📜</span>
+                <span class="bar-label">大纲</span>
+            </button>
+        </div>
+
+        <div class="bar-divider"></div>
+
+        <div class="bar-group">
+            <button id="bar-config" class="bar-btn" title="版面调节">
+                <span class="bar-icon">⚙️</span>
+                <span class="bar-label">版面</span>
+            </button>
+            <button id="bar-font" class="bar-btn" title="字体调节">
+                <span class="bar-icon">Aa</span>
+                <span class="bar-label">字体</span>
+            </button>
+            <button id="bar-style" class="bar-btn" title="样式调节">
+                <span class="bar-icon">🎨</span>
+                <span class="bar-label">样式</span>
+            </button>
+            <button id="bar-code" class="bar-btn" title="代码样式">
+                <span class="bar-icon">&lt;/&gt;</span>
+                <span class="bar-label">代码</span>
+            </button>
+        </div>
     </div>
 
-    <!-- JS 拆分 -->
     <script src="/template/js/theme.js"></script>
     <script src="/template/js/code.js"></script>
     <script src="/template/js/navigation.js"></script>

@@ -6,23 +6,70 @@
     transform: translateX(-50%);
     display: flex;
     align-items: center;
-    gap: 2px;
-    padding: 4px 10px;
+    gap: 4px;                 /* 按钮间距由 .bar-group 和分隔线控制 */
+    padding: 6px 12px;
     background: var(--theme-surface);
     opacity: 0.85;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-    border-radius: 20px;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+    border-radius: 24px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
     border: 1px solid var(--theme-border);
     z-index: 10000;
     transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+    user-select: none;
 }
 
 #bottom-bar * {
     opacity: 1;
 }
 
+/* ---- 拖动把手 ---- */
+.bar-drag-handle {
+    display: flex;
+    flex-wrap: wrap;
+    width: 14px;
+    height: 14px;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    cursor: grab;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+    margin-right: 2px;
+}
+.bar-drag-handle:hover {
+    opacity: 1;
+}
+.bar-drag-handle:active {
+    cursor: grabbing;
+}
+.drag-dot {
+    display: inline-block;
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: var(--text-color);
+    opacity: 0.5;
+}
+
+/* ---- 分组容器 ---- */
+.bar-group {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+/* ---- 分隔线 ---- */
+.bar-divider {
+    width: 1px;
+    height: 24px;
+    background: var(--theme-border);
+    opacity: 0.6;
+    margin: 0 2px;
+}
+
+/* ---- 按钮样式 ---- */
 .bar-btn {
     display: flex;
     flex-direction: column;
@@ -76,3 +123,4 @@
 .bar-btn.active:hover {
     background: var(--theme-link-hover);
 }
+

@@ -59,6 +59,21 @@ function generateTOC() {
             const a = document.createElement('a');
             a.href = `#${node.id}`;
             a.innerText = node.text;
+            // 阻止事件冒泡，防止被其他监听捕获
+            a.addEventListener('click', function(e) {
+                e.stopPropagation();
+                // 手动跳转到锚点
+                const targetId = this.getAttribute('href').substring(1);
+                const targetEl = document.getElementById(targetId);
+                if (targetEl) {
+                    targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+                // 更新 URL hash 但不触发 popstate
+                history.pushState(null, '', `#${targetId}`);
+                // 阻止默认行为，因为我们手动处理了
+                e.preventDefault();
+                return false;
+            });
             itemRow.appendChild(a);
             li.appendChild(itemRow);
             if (node.children.length > 0) {
@@ -216,6 +231,10 @@ function renderTopicTree(manifest, topicKey) {
 }
 
 function loadArticleContent(path) {
+    // 如果路径是锚点（以 # 开头），则直接返回，不加载文章
+    if (path && path.startsWith('#')) {
+        return;
+    }
     const article = document.getElementById('article-container');
     if (!article) return;
     article.innerHTML = '<p>正在读取正文内容...</p>';
@@ -247,6 +266,10 @@ function loadArticleContent(path) {
 }
 
 function navigateTo(path) {
+    // 如果是锚点，不处理
+    if (path && path.startsWith('#')) {
+        return;
+    }
     history.pushState(null, '', path);
     loadArticleContent(path);
 }
@@ -260,7 +283,15 @@ function updateActiveTreeLink(path) {
     });
 }
 
+// 监听浏览器前进/后退
 window.addEventListener('popstate', () => {
     const path = window.location.pathname;
-    loadArticleContent(path);
+    // 如果当前路径带有哈希，忽略，因为哈希变化不触发 popstate
+    if (window.location.hash) {
+        // 但 popstate 可能在 hash 变化时触发，我们只加载文章路径
+        const pathname = window.location.pathname;
+        loadArticleContent(pathname);
+    } else {
+        loadArticleContent(path);
+    }
 });

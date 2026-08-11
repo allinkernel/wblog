@@ -1,6 +1,5 @@
-// 主入口：初始化所有功能
+// ==================== 主入口 ====================
 window.addEventListener('DOMContentLoaded', () => {
-    // 注意：这些函数在其他js文件中定义
     initBottomBar();
     bindControls();
     initCanvasPan();
@@ -14,7 +13,10 @@ window.addEventListener('DOMContentLoaded', () => {
     restoreSavedSettings();
 });
 
-// ==================== 底部 Bar 初始化（包含面板显隐） ====================
+// ==================== 底部 Bar 初始化（含拖拽） ====================
+let barOffsetX = 0;
+let barOffsetY = 0;
+
 function togglePanel(panelId) {
     const panel = document.getElementById(panelId);
     if (!panel) return;
@@ -63,7 +65,36 @@ function initPanelVisibility() {
     });
 }
 
+// 加载 bar 位置
+function loadBarPosition() {
+    const saved = localStorage.getItem('bar-position');
+    if (saved) {
+        try {
+            const pos = JSON.parse(saved);
+            barOffsetX = pos.x || 0;
+            barOffsetY = pos.y || 0;
+        } catch (e) {
+            barOffsetX = 0;
+            barOffsetY = 0;
+        }
+    }
+    applyBarPosition();
+}
+
+function saveBarPosition() {
+    localStorage.setItem('bar-position', JSON.stringify({ x: barOffsetX, y: barOffsetY }));
+}
+
+function applyBarPosition() {
+    const bar = document.getElementById('bottom-bar');
+    if (!bar) return;
+    bar.style.transform = `translate(calc(-50% + ${barOffsetX}px), ${barOffsetY}px)`;
+}
+
 function initBottomBar() {
+    // 加载保存的位置
+    loadBarPosition();
+
     // 画布小手
     const canvasBtn = document.getElementById('bar-canvas');
     const canvasToggle = document.getElementById('canvas-toggle');
@@ -111,7 +142,60 @@ function initBottomBar() {
         header.addEventListener('click', handler);
     });
 
+    // 恢复面板显隐状态
     initPanelVisibility();
+
+    // ------------------ 拖拽功能 ------------------
+    const bar = document.getElementById('bottom-bar');
+    const dragHandle = document.querySelector('.bar-drag-handle');
+    if (!bar || !dragHandle) return;
+
+    let isDragging = false;
+    let startMouseX = 0, startMouseY = 0;
+    let startOffsetX = 0, startOffsetY = 0;
+
+    dragHandle.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        isDragging = true;
+        startMouseX = e.clientX;
+        startMouseY = e.clientY;
+        startOffsetX = barOffsetX;
+        startOffsetY = barOffsetY;
+        document.body.style.cursor = 'grabbing';
+        dragHandle.style.cursor = 'grabbing';
+    });
+
+    document.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        const dx = e.clientX - startMouseX;
+        const dy = e.clientY - startMouseY;
+        barOffsetX = startOffsetX + dx;
+        barOffsetY = startOffsetY + dy;
+        applyBarPosition();
+    });
+
+    document.addEventListener('mouseup', () => {
+        if (isDragging) {
+            isDragging = false;
+            document.body.style.cursor = '';
+            dragHandle.style.cursor = 'grab';
+            saveBarPosition();
+        }
+    });
+
+    // 窗口大小变化时，确保 bar 不超出边界（可选）
+    window.addEventListener('resize', () => {
+        // 简单限制，防止完全移出视野
+        const rect = bar.getBoundingClientRect();
+        const maxX = window.innerWidth - rect.width;
+        const maxY = window.innerHeight - rect.height;
+        if (barOffsetX < -rect.width / 2) barOffsetX = -rect.width / 2 + 10;
+        if (barOffsetX > window.innerWidth - rect.width / 2 - 10) barOffsetX = window.innerWidth - rect.width / 2 - 10;
+        if (barOffsetY < -rect.height + 10) barOffsetY = -rect.height + 10;
+        if (barOffsetY > window.innerHeight - 10) barOffsetY = window.innerHeight - 10;
+        applyBarPosition();
+        saveBarPosition();
+    });
 }
 
 // ==================== 画布小手功能 ====================
