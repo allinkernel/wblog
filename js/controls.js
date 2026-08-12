@@ -64,7 +64,8 @@ function bindControls() {
     const cBg = document.getElementById('color-bg');
 
     // ----- 样式调节 -----
-    const readerThemeSelect = document.getElementById('reader-theme-select');
+    const lightThemeSelect = document.getElementById('light-theme-select');
+    const darkThemeSelect = document.getElementById('dark-theme-select');
     const quoteStyleSelect = document.getElementById('quote-style-select');
 
     // ----- 代码样式调节 -----
@@ -149,9 +150,8 @@ function bindControls() {
         const bg = cBg?.value || '#fbfbfb';
         applyCustomReaderColors(e.target.value, bg);
         localStorage.setItem('blog-ctext', e.target.value);
-        if (readerThemeSelect) readerThemeSelect.value = 'custom';
+        // 标记为自定义亮色
         localStorage.setItem('blog-reader-theme', 'custom');
-        // 自定义颜色视为亮色（因为用户可自由选择，但默认我们将其归类为亮色）
         localStorage.setItem('last-light-theme', 'custom');
         localStorage.setItem('blog-theme-mode', 'light');
         const themeBtn = document.getElementById('bar-theme');
@@ -159,6 +159,11 @@ function bindControls() {
             themeBtn.classList.remove('active');
             themeBtn.querySelector('.bar-icon').textContent = '☀️';
             themeBtn.querySelector('.bar-label').textContent = '亮色';
+        }
+        // 同步下拉框（如果有日间主题下拉则选中 custom）
+        if (lightThemeSelect) lightThemeSelect.value = 'custom';
+        if (darkThemeSelect && darkThemeSelect.value === 'custom') {
+            // 如果当前夜间主题是 custom，则不清除，但日间已是 custom
         }
     });
 
@@ -167,9 +172,7 @@ function bindControls() {
         const text = cText?.value || '#222222';
         applyCustomReaderColors(text, e.target.value);
         localStorage.setItem('blog-cbg', e.target.value);
-        if (readerThemeSelect) readerThemeSelect.value = 'custom';
         localStorage.setItem('blog-reader-theme', 'custom');
-        // 自定义颜色视为亮色
         localStorage.setItem('last-light-theme', 'custom');
         localStorage.setItem('blog-theme-mode', 'light');
         const themeBtn = document.getElementById('bar-theme');
@@ -178,42 +181,64 @@ function bindControls() {
             themeBtn.querySelector('.bar-icon').textContent = '☀️';
             themeBtn.querySelector('.bar-label').textContent = '亮色';
         }
+        if (lightThemeSelect) lightThemeSelect.value = 'custom';
     });
 
-    // ----- 阅读主题下拉 -----
-    readerThemeSelect?.addEventListener('change', (e) => {
-        const themeName = e.target.value || 'custom';
-        applyReaderTheme(themeName);
-        localStorage.setItem('blog-reader-theme', themeName);
-        const theme = readerThemeMap[themeName] || readerThemeMap.custom;
-        if (cText) cText.value = theme.text;
-        if (cBg) cBg.value = theme.bg;
+    // ----- 日间主题下拉 -----
+    lightThemeSelect?.addEventListener('change', (e) => {
+        const themeName = e.target.value;
+        if (themeName === 'custom') {
+            // 使用当前颜色选择器的值
+            const text = cText?.value || '#222222';
+            const bg = cBg?.value || '#fbfbfb';
+            applyCustomReaderColors(text, bg);
+            localStorage.setItem('blog-reader-theme', 'custom');
+            localStorage.setItem('last-light-theme', 'custom');
+            localStorage.setItem('blog-theme-mode', 'light');
+        } else {
+            applyReaderTheme(themeName);
+            localStorage.setItem('blog-reader-theme', themeName);
+            localStorage.setItem('last-light-theme', themeName);
+            localStorage.setItem('blog-theme-mode', 'light');
+        }
+        // 更新底部按钮状态
+        const themeBtn = document.getElementById('bar-theme');
+        if (themeBtn) {
+            themeBtn.classList.remove('active');
+            themeBtn.querySelector('.bar-icon').textContent = '☀️';
+            themeBtn.querySelector('.bar-label').textContent = '亮色';
+        }
+        // 如果夜间主题下拉也选中 custom，不需要自动切换
+    });
 
-        // ----- 同步底部明暗按钮状态 + 保存最近使用的亮色/暗色主题 -----
-        const isDarkTheme = themeName.includes('dark');
-        if (isDarkTheme) {
-            // 保存为最近使用的暗色主题
+    // ----- 夜间主题下拉 -----
+    darkThemeSelect?.addEventListener('change', (e) => {
+        const themeName = e.target.value;
+        if (themeName === 'custom') {
+            const text = cText?.value || '#222222';
+            const bg = cBg?.value || '#fbfbfb';
+            applyCustomReaderColors(text, bg);
+            localStorage.setItem('blog-reader-theme', 'custom');
+            localStorage.setItem('last-dark-theme', 'custom');
+            localStorage.setItem('blog-theme-mode', 'dark');
+        } else {
+            applyReaderTheme(themeName);
+            localStorage.setItem('blog-reader-theme', themeName);
             localStorage.setItem('last-dark-theme', themeName);
             localStorage.setItem('blog-theme-mode', 'dark');
-            const themeBtn = document.getElementById('bar-theme');
-            if (themeBtn) {
-                themeBtn.classList.add('active');
-                themeBtn.querySelector('.bar-icon').textContent = '🌙';
-                themeBtn.querySelector('.bar-label').textContent = '暗色';
-            }
-        } else {
-            // 保存为最近使用的亮色主题（除了 'custom'，它已在前面处理）
-            if (themeName !== 'custom') {
-                localStorage.setItem('last-light-theme', themeName);
-            }
-            localStorage.setItem('blog-theme-mode', 'light');
-            const themeBtn = document.getElementById('bar-theme');
-            if (themeBtn) {
-                themeBtn.classList.remove('active');
-                themeBtn.querySelector('.bar-icon').textContent = '☀️';
-                themeBtn.querySelector('.bar-label').textContent = '亮色';
-            }
         }
+        const themeBtn = document.getElementById('bar-theme');
+        if (themeBtn) {
+            themeBtn.classList.add('active');
+            themeBtn.querySelector('.bar-icon').textContent = '🌙';
+            themeBtn.querySelector('.bar-label').textContent = '暗色';
+        }
+    });
+
+    // ----- 引用样式 -----
+    quoteStyleSelect?.addEventListener('change', (e) => {
+        if (article) article.setAttribute('data-quote-style', e.target.value);
+        localStorage.setItem('blog-quote-style', e.target.value);
     });
 
     // ----- 代码显示格式 -----
@@ -273,12 +298,6 @@ function bindControls() {
         localStorage.setItem('blog-code-header', e.target.checked ? 'on' : 'off');
     });
 
-    // ----- 引用样式 -----
-    quoteStyleSelect?.addEventListener('change', (e) => {
-        if (article) article.setAttribute('data-quote-style', e.target.value);
-        localStorage.setItem('blog-quote-style', e.target.value);
-    });
-
     // ----- 表格显示格式 -----
     if (tableFormatSelect) {
         tableFormatSelect.addEventListener('change', (e) => {
@@ -288,14 +307,15 @@ function bindControls() {
         });
     }
 
-    // ----- 隐藏标题栏 -----
+    // ----- 显示标题栏 -----
     if (tableHeaderToggle) {
         tableHeaderToggle.addEventListener('change', (e) => {
-            const show = e.target.checked;
+            const show = e.target.checked; // 开关状态为"显示标题栏"，checked 表示显示
             localStorage.setItem('table-show-header', show ? 'true' : 'false');
             applyGlobalTableHeader(show);
         });
     }
+
 }
 
 // ==================== 恢复保存的设置 ====================
@@ -307,7 +327,9 @@ function restoreSavedSettings() {
     const lSlider = document.getElementById('line-slider');
     const cText = document.getElementById('color-text');
     const cBg = document.getElementById('color-bg');
-    const readerThemeSelect = document.getElementById('reader-theme-select');
+    const lightThemeSelect = document.getElementById('light-theme-select');
+    const darkThemeSelect = document.getElementById('dark-theme-select');
+    const quoteStyleSelect = document.getElementById('quote-style-select');
     const codeFormatSelect = document.getElementById('code-format-select');
     const codeThemeSelect = document.getElementById('code-theme-select');
     const codeInlineThemeSelect = document.getElementById('code-inline-theme-select');
@@ -316,30 +338,36 @@ function restoreSavedSettings() {
     const codeBlockSlider = document.getElementById('code-block-slider');
     const codeLineNumbersToggle = document.getElementById('code-line-numbers-toggle');
     const codeHeaderToggle = document.getElementById('code-header-toggle');
-    const quoteStyleSelect = document.getElementById('quote-style-select');
     const tableFormatSelect = document.getElementById('table-format-select');
     const tableHeaderToggle = document.getElementById('table-header-toggle');
 
+    // 读取保存的值，若没有则使用默认值
     const savedWidth = localStorage.getItem('blog-width');
     const savedSize = localStorage.getItem('blog-size');
     const savedPos = localStorage.getItem('blog-pos');
     const savedLine = localStorage.getItem('blog-line');
     const savedCText = localStorage.getItem('blog-ctext');
     const savedCBg = localStorage.getItem('blog-cbg');
-    const savedReaderTheme = localStorage.getItem('blog-reader-theme') || 'github-light';
+    // 当前主题
+    const savedTheme = localStorage.getItem('blog-reader-theme') || 'github-light';
+    // 日间/夜间主题选择器的默认值：根据当前主题是亮还是暗决定
+    const isDark = savedTheme.includes('dark');
+    const defaultLightTheme = localStorage.getItem('last-light-theme') || 'github-light';
+    const defaultDarkTheme = localStorage.getItem('last-dark-theme') || 'github-dark';
 
+    // 代码默认设置
     const savedCodeFormat = localStorage.getItem('blog-code-format') || 'scroll';
     const savedCodeTheme = localStorage.getItem('blog-code-theme') || 'global';
     const savedCodeInlineTheme = localStorage.getItem('blog-code-inline-theme') || 'global';
     const savedCodeInlineOffset = localStorage.getItem('blog-code-inline-offset') ?? '-2';
     const savedCodeInlinePad = localStorage.getItem('blog-code-inline-pad') ?? '2';
     const savedCodeBlockSize = localStorage.getItem('blog-code-block-size');
-    const savedCodeLineNumbers = localStorage.getItem('blog-code-line-numbers') || 'on';
-    const savedCodeHeader = localStorage.getItem('blog-code-header') || 'on';
+    const savedCodeLineNumbers = localStorage.getItem('blog-code-line-numbers') || 'off'; // 默认关
+    const savedCodeHeader = localStorage.getItem('blog-code-header') || 'off'; // 默认关
     const savedQuoteStyle = localStorage.getItem('blog-quote-style') || 'global';
 
     const savedTableFormat = localStorage.getItem('table-format') || 'adaptive';
-    const savedTableShowHeader = localStorage.getItem('table-show-header') !== 'false';
+    const savedTableShowHeader = localStorage.getItem('table-show-header') === 'true';
 
     // ----- 恢复基础样式 -----
     if (savedWidth && wSlider) {
@@ -363,31 +391,38 @@ function restoreSavedSettings() {
         const valEl = document.getElementById('line-val');
         if (valEl) valEl.innerText = savedLine;
     }
-    applyReaderTheme(savedReaderTheme);
-    if (readerThemeSelect) readerThemeSelect.value = savedReaderTheme;
 
-    if (savedReaderTheme === 'custom') {
+    // 恢复主题
+    if (savedTheme === 'custom') {
         const customText = savedCText || '#222222';
         const customBg = savedCBg || '#fbfbfb';
         if (cText) cText.value = customText;
         if (cBg) cBg.value = customBg;
         applyCustomReaderColors(customText, customBg);
-        // 自定义颜色视为亮色
+        // 标记为自定义
         localStorage.setItem('last-light-theme', 'custom');
         localStorage.setItem('blog-theme-mode', 'light');
     } else {
-        const savedTheme = readerThemeMap[savedReaderTheme] || readerThemeMap.custom;
-        if (cText) cText.value = savedTheme.text;
-        if (cBg) cBg.value = savedTheme.bg;
-        // 保存最近使用的主题
-        const isDark = savedReaderTheme.includes('dark');
+        applyReaderTheme(savedTheme);
+        const theme = readerThemeMap[savedTheme] || readerThemeMap['github-light'];
+        if (cText) cText.value = theme.text;
+        if (cBg) cBg.value = theme.bg;
         if (isDark) {
-            localStorage.setItem('last-dark-theme', savedReaderTheme);
+            localStorage.setItem('last-dark-theme', savedTheme);
             localStorage.setItem('blog-theme-mode', 'dark');
         } else {
-            localStorage.setItem('last-light-theme', savedReaderTheme);
+            localStorage.setItem('last-light-theme', savedTheme);
             localStorage.setItem('blog-theme-mode', 'light');
         }
+    }
+
+    // 设置下拉框值
+    if (lightThemeSelect) {
+        // 如果当前是暗色，日间下拉选最近使用的亮色，否则选当前主题
+        lightThemeSelect.value = isDark ? defaultLightTheme : savedTheme;
+    }
+    if (darkThemeSelect) {
+        darkThemeSelect.value = isDark ? savedTheme : defaultDarkTheme;
     }
 
     // ----- 恢复代码设置 -----
@@ -403,8 +438,8 @@ function restoreSavedSettings() {
     if (codeThemeSelect) codeThemeSelect.value = savedCodeTheme;
     if (codeInlineThemeSelect) codeInlineThemeSelect.value = savedCodeInlineTheme;
     if (quoteStyleSelect) quoteStyleSelect.value = savedQuoteStyle;
-    if (codeLineNumbersToggle) codeLineNumbersToggle.checked = savedCodeLineNumbers !== 'off';
-    if (codeHeaderToggle) codeHeaderToggle.checked = savedCodeHeader !== 'off';
+    if (codeLineNumbersToggle) codeLineNumbersToggle.checked = savedCodeLineNumbers === 'on';
+    if (codeHeaderToggle) codeHeaderToggle.checked = savedCodeHeader === 'on';
 
     if (codeInlineSlider) {
         codeInlineSlider.value = savedCodeInlineOffset;
@@ -449,26 +484,22 @@ function restoreSavedSettings() {
     }
 
     // ----- 恢复表格设置 -----
-    if (tableFormatSelect) {
-        tableFormatSelect.value = savedTableFormat;
-    }
-    if (tableHeaderToggle) {
-        tableHeaderToggle.checked = savedTableShowHeader;
-    }
+    if (tableFormatSelect) tableFormatSelect.value = savedTableFormat;
+    if (tableHeaderToggle) tableHeaderToggle.checked = savedTableShowHeader; // 默认显示
 
     setTimeout(() => {
         applyGlobalTableFormat(savedTableFormat);
         applyGlobalTableHeader(savedTableShowHeader);
     }, 100);
 
-    // ----- 恢复主题按钮状态 -----
-    const currentTheme = localStorage.getItem('blog-reader-theme') || 'github-light';
-    const isDark = currentTheme.includes('dark');
+    // ----- 恢复底部主题按钮状态 -----
     const themeBtn = document.getElementById('bar-theme');
     if (themeBtn) {
-        themeBtn.classList.toggle('active', isDark);
-        themeBtn.querySelector('.bar-icon').textContent = isDark ? '🌙' : '☀️';
-        themeBtn.querySelector('.bar-label').textContent = isDark ? '暗色' : '亮色';
+        const mode = localStorage.getItem('blog-theme-mode') || 'light';
+        const isDarkMode = mode === 'dark';
+        themeBtn.classList.toggle('active', isDarkMode);
+        themeBtn.querySelector('.bar-icon').textContent = isDarkMode ? '🌙' : '☀️';
+        themeBtn.querySelector('.bar-label').textContent = isDarkMode ? '暗色' : '亮色';
     }
 
     updatePosition();

@@ -297,6 +297,8 @@ function updateTableFormat(wrapper, format) {
             table.style.width = 'auto';
             table.style.tableLayout = 'auto';
             wrapper.style.overflowX = 'visible';
+            wrapper.style.display = 'inline-block';
+            wrapper.style.maxWidth = '100%';
             break;
         case 'wrap':
             table.classList.add('table-format-wrap');

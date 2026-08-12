@@ -173,31 +173,33 @@
         <!-- 样式调节 -->
         <div class="panel-box" id="panel-style">
             <div class="panel-header" title="点击切换显示/隐藏">
-                <span class="panel-icon icon-rgb">
-                    <span class="rgb-dot rgb-r"></span>
-                    <span class="rgb-dot rgb-g"></span>
-                    <span class="rgb-dot rgb-b"></span>
-                </span>
+                <span class="panel-icon">🎨</span>
                 <span class="panel-title">样式调节</span>
             </div>
             <div class="panel-content">
                 <div class="control-group">
-                    <label>阅读主题：</label>
-                    <select id="reader-theme-select">
-                        <option value="custom">自定义 / 当前颜色</option>
-                        <option value="github-light">GitHub Light</option>
-                        <option value="github-dark">GitHub Dark</option>
+                    <label>日间主题：</label>
+                    <select id="light-theme-select">
+                        <option value="github-light">GitHub Light -- default</option>
                         <option value="claude-light">Claude 暖白</option>
-                        <option value="claude-dark">Claude 暗夜</option>
                         <option value="notion-light">Notion Light</option>
                         <option value="solarized-light">Solarized Light</option>
+                        <option value="catppuccin-latte">Catppuccin Latte</option>
+                        <option value="stack-overflow">Stack Overflow</option>
+                        <option value="texi2html">texi2html 纯粹经典</option>
+                        <option value="custom">自定义 / 当前颜色</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>夜间主题：</label>
+                    <select id="dark-theme-select">
+                        <option value="github-dark">GitHub Dark -- default</option>
+                        <option value="claude-dark">Claude 暗夜</option>
                         <option value="solarized-dark">Solarized Dark</option>
                         <option value="dracula">Dracula</option>
-                        <option value="stack-overflow">Stack Overflow</option>
-                        <option value="catppuccin-latte">Catppuccin Latte</option>
                         <option value="catppuccin-mocha">Catppuccin Mocha</option>
                         <option value="nord">Nord</option>
-                        <option value="texi2html">texi2html 纯粹经典</option>
+                        <option value="custom">自定义 / 当前颜色</option>
                     </select>
                 </div>
                 <div class="control-group">
@@ -225,7 +227,7 @@
                 <div class="control-group">
                     <label>显示格式：</label>
                     <select id="code-format-select">
-                        <option value="scroll">同宽 + 横向滚动</option>
+                        <option value="scroll">同宽 + 横向滚动 -- default</option>
                         <option value="wrap">同宽 + 自动换行</option>
                         <option value="adaptive">自适应最长行</option>
                     </select>
@@ -234,6 +236,7 @@
                 <div class="control-group">
                     <label>块级主题：</label>
                     <select id="code-theme-select">
+                        <option value="global">跟随全局主题 -- default</option>
                         <option value="default">默认浅色</option>
                         <option value="dark">暗黑极客</option>
                         <option value="github-dark">GitHub Dark</option>
@@ -246,13 +249,13 @@
                         <option value="wildcharm">Wildcharm</option>
                         <option value="nightfox">Nightfox</option>
                         <option value="tokyonight">TokyoNight</option>
-                        <option value="global">跟随全局阅读主题</option>
                     </select>
                 </div>
 
                 <div class="control-group">
                     <label>行内主题：</label>
                     <select id="code-inline-theme-select">
+                        <option value="global">跟随全局主题 -- default</option>
                         <option value="default">默认灰色</option>
                         <option value="dark">暗黑极客</option>
                         <option value="github">GitHub 风格</option>
@@ -262,7 +265,6 @@
                         <option value="sage">鼠尾草柔和</option>
                         <option value="lavender">淡紫柔和</option>
                         <option value="cream">奶油柔和</option>
-                        <option value="global">跟随全局阅读主题</option>
                     </select>
                 </div>
 
@@ -301,7 +303,7 @@
                 <div class="control-group">
                     <label>显示行号：</label>
                     <label class="switch">
-                        <input type="checkbox" id="code-line-numbers-toggle" checked>
+                        <input type="checkbox" id="code-line-numbers-toggle">
                         <span class="slider">
                             <span class="slider-text text-on">ON</span>
                             <span class="slider-text text-off">OFF</span>
@@ -313,7 +315,7 @@
                 <div class="control-group">
                     <label>顶部工具栏：</label>
                     <label class="switch">
-                        <input type="checkbox" id="code-header-toggle" checked>
+                        <input type="checkbox" id="code-header-toggle">
                         <span class="slider">
                             <span class="slider-text text-on">ON</span>
                             <span class="slider-text text-off">OFF</span>
@@ -324,7 +326,7 @@
             </div>
         </div>
 
-        <!-- 新增：表格样式调节 -->
+        <!-- 表格样式调节 -->
         <div class="panel-box" id="panel-table-style">
             <div class="panel-header" title="点击切换显示/隐藏">
                 <span class="panel-icon">⊞</span>
@@ -334,26 +336,26 @@
                 <div class="control-group">
                     <label>显示格式：</label>
                     <select id="table-format-select">
-                        <option value="adaptive">自适应内容</option>
+                        <option value="adaptive">自适应内容 -- default</option>
                         <option value="wrap">自动换行</option>
                         <option value="scroll">横向滚动</option>
                     </select>
                 </div>
 
-                <div class="control-group">
-                    <label>隐藏标题栏：</label>
-                    <label class="switch">
-                        <input type="checkbox" id="table-header-toggle">
-                        <span class="slider">
-                            <span class="slider-text text-on">ON</span>
-                            <span class="slider-text text-off">OFF</span>
-                            <span class="knob"></span>
-                        </span>
-                    </label>
-                </div>
+            <div class="control-group">
+                <label>显示标题栏：</label>
+                <label class="switch">
+                    <input type="checkbox" id="table-header-toggle">
+                    <span class="slider">
+                        <span class="slider-text text-on">ON</span>
+                        <span class="slider-text text-off">OFF</span>
+                        <span class="knob"></span>
+                    </span>
+                </label>
+            </div>
             </div>
         </div>
-    </div>
+    </div> <!-- 结束 right-dock-container -->
 
     <!-- 3. 正文核心包裹区 -->
     <div id="article-wrapper">
@@ -379,6 +381,11 @@
             <button id="bar-canvas" class="bar-btn" title="画布小手切换">
                 <span class="bar-icon">🖐️</span>
                 <span class="bar-label">小手</span>
+            </button>
+            <!-- 默认恢复按钮 -->
+            <button id="bar-default" class="bar-btn" title="切换为默认配置或恢复用户配置">
+                <span class="bar-icon">⟳</span>
+                <span class="bar-label">默认</span>
             </button>
         </div>
 

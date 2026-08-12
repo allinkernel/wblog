@@ -732,7 +732,7 @@ code:not(pre code)[contenteditable="true"]:focus {
     border-collapse: collapse;
     font-size: var(--font-size, 16px);
     margin: 0;
-    background: var(--theme-surface);
+    background: transparent;  /* 改为透明，避免自适应时残留背景 */
     color: var(--text-color);
 }
 

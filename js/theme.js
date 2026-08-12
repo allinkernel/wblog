@@ -41,7 +41,20 @@ const readerThemeMap = {
     'catppuccin-latte': {text:'#4c4f69', bg:'#eff1f5', surface:'#e6e9ef', surface2:'#e6e9ef', border:'#ccd0da', muted:'#7c7f93', link:'#1e66f5', hover:'#1250c7', accent:'#8839ef', quoteBg:'rgba(136,57,239,.08)', quoteBorder:'#b4befe', quoteMark:'rgba(76,79,105,.22)'},
     'catppuccin-mocha': {text:'#cdd6f4', bg:'#1e1e2e', surface:'#181825', surface2:'#313244', border:'#45475a', muted:'#a6adc8', link:'#89b4fa', hover:'#b4d0ff', accent:'#cba6f7', quoteBg:'rgba(203,166,247,.10)', quoteBorder:'#585b70', quoteMark:'rgba(205,214,244,.24)'},
     'nord': {text:'#d8dee9', bg:'#2e3440', surface:'#3b4252', surface2:'#434c5e', border:'#4c566a', muted:'#8fbcbb', link:'#88c0d0', hover:'#a3d7e3', accent:'#81a1c1', quoteBg:'rgba(136,192,208,.10)', quoteBorder:'#5e81ac', quoteMark:'rgba(216,222,233,.24)'},
-    'texi2html': {text:'#000000', bg:'#ffffff', surface:'#ffffff', surface2:'#ffffff', border:'#c8c8c8', muted:'#555555', link:'#0000ee', hover:'#551a8b', accent:'#000000', quoteBg:'transparent', quoteBorder:'#000000', quoteMark:'rgba(0,0,0,.22)'}
+    'texi2html': {
+        text: '#000000',
+        bg: '#ffffff',
+        surface: '#ffffff',
+        surface2: '#ffffff',
+        border: '#c8c8c8',
+        muted: '#555555',
+        link: '#0000ee',
+        hover: '#551a8b',
+        accent: '#000000',
+        quoteBg: 'transparent',
+        quoteBorder: '#000000',
+        quoteMark: 'rgba(0,0,0,.22)'
+    }
 };
 
 function setReaderThemeVariables(theme) {

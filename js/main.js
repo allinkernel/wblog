@@ -14,6 +14,15 @@ window.addEventListener('DOMContentLoaded', () => {
     loadArticleContent(currentPath);
     initArticleTree();
     restoreSavedSettings();
+
+    // 初始化默认按钮状态（读取保存的 isDefaultMode）
+    const isDefaultMode = localStorage.getItem('isDefaultMode') === 'true';
+    const defaultBtn = document.getElementById('bar-default');
+    if (defaultBtn) {
+        defaultBtn.classList.toggle('active', isDefaultMode);
+        defaultBtn.querySelector('.bar-icon').textContent = isDefaultMode ? '👤' : '⟳';
+        defaultBtn.querySelector('.bar-label').textContent = isDefaultMode ? '用户' : '默认';
+    }
 });
 
 // ==================== 底部 Bar 初始化（含拖拽） ====================
@@ -143,8 +152,17 @@ function initBottomBar() {
     // ----- 明暗主题切换按钮 -----
     const themeBtn = document.getElementById('bar-theme');
     if (themeBtn) {
-        // 点击事件：切换明暗模式
         themeBtn.addEventListener('click', toggleThemeMode);
+    }
+
+    // ----- 默认切换按钮 -----
+    const defaultBtn = document.getElementById('bar-default');
+    if (defaultBtn) {
+        const isDefault = localStorage.getItem('isDefaultMode') === 'true';
+        defaultBtn.classList.toggle('active', isDefault);
+        defaultBtn.querySelector('.bar-icon').textContent = isDefault ? '👤' : '⟳';
+        defaultBtn.querySelector('.bar-label').textContent = isDefault ? '用户' : '默认';
+        defaultBtn.addEventListener('click', toggleDefaultMode);
     }
 
     // ----- 画布小手 -----
@@ -448,29 +466,22 @@ function getCurrentThemeMode() {
 }
 
 function applyThemeMode(mode) {
-    // 根据模式选择最近使用的对应主题
     let themeName;
     if (mode === 'dark') {
-        // 切换到最近使用的暗色主题，如果没有则回退到 github-dark
         themeName = localStorage.getItem('last-dark-theme') || 'github-dark';
     } else {
-        // 切换到最近使用的亮色主题，如果没有则回退到 github-light
         themeName = localStorage.getItem('last-light-theme') || 'github-light';
     }
 
-    // 如果当前已经是该主题，则不做任何事（避免重复应用）
     const currentTheme = localStorage.getItem('blog-reader-theme') || 'github-light';
     if (currentTheme === themeName) {
-        // 如果主题相同但模式标记不同，只更新标记
         localStorage.setItem('blog-theme-mode', mode);
-        // 仍然应用一次，确保状态同步
     }
 
     applyReaderTheme(themeName);
     localStorage.setItem('blog-theme-mode', mode);
     localStorage.setItem('blog-reader-theme', themeName);
 
-    // 更新底部按钮状态
     const themeBtn = document.getElementById('bar-theme');
     if (themeBtn) {
         themeBtn.classList.toggle('active', mode === 'dark');
@@ -478,18 +489,21 @@ function applyThemeMode(mode) {
         themeBtn.querySelector('.bar-label').textContent = mode === 'dark' ? '暗色' : '亮色';
     }
 
-    // 同步右侧下拉选择器
-    const select = document.getElementById('reader-theme-select');
-    if (select) select.value = themeName;
+    const isDark = mode === 'dark';
+    const lightSelect = document.getElementById('light-theme-select');
+    const darkSelect = document.getElementById('dark-theme-select');
+    if (isDark) {
+        if (darkSelect) darkSelect.value = themeName;
+    } else {
+        if (lightSelect) lightSelect.value = themeName;
+    }
 
-    // 同步颜色选择器（如果是自定义主题）
     if (themeName === 'custom') {
         const theme = readerThemeMap.custom;
         const cText = document.getElementById('color-text');
         const cBg = document.getElementById('color-bg');
         if (cText) cText.value = theme.text;
         if (cBg) cBg.value = theme.bg;
-        // 应用自定义颜色
         applyCustomReaderColors(theme.text, theme.bg);
     }
 }
@@ -501,23 +515,158 @@ function toggleThemeMode() {
 }
 
 function initThemeMode() {
-    // 初始化时根据当前主题设置模式
     const currentTheme = localStorage.getItem('blog-reader-theme') || 'github-light';
     const isDark = currentTheme.includes('dark');
     const mode = isDark ? 'dark' : 'light';
     localStorage.setItem('blog-theme-mode', mode);
-    // 更新按钮状态
     const themeBtn = document.getElementById('bar-theme');
     if (themeBtn) {
         themeBtn.classList.toggle('active', isDark);
         themeBtn.querySelector('.bar-icon').textContent = isDark ? '🌙' : '☀️';
         themeBtn.querySelector('.bar-label').textContent = isDark ? '暗色' : '亮色';
     }
-    // 如果当前主题是暗色，确保 last-dark-theme 被设置
     if (isDark) {
         localStorage.setItem('last-dark-theme', currentTheme);
     } else {
         localStorage.setItem('last-light-theme', currentTheme);
+    }
+}
+
+// ==================== 默认配置切换 ====================
+
+function getDefaultConfig() {
+    return {
+        readerTheme: 'github-light',
+        lightTheme: 'github-light',
+        darkTheme: 'github-dark',
+        codeFormat: 'scroll',
+        codeTheme: 'global',
+        codeInlineTheme: 'global',
+        codeInlineOffset: -2,
+        codeInlinePad: 2,
+        codeBlockSize: 14,
+        codeLineNumbers: false,
+        codeHeader: false,
+        tableFormat: 'adaptive',
+        tableShowHeader: false,
+        quoteStyle: 'global',
+        pageWidth: 700,
+        fontSize: 18,
+        lineHeight: 1.7,
+        position: 0,
+        cText: '#222222',
+        cBg: '#fbfbfb',
+    };
+}
+
+let userConfigBackup = null;
+
+function saveUserConfig() {
+    userConfigBackup = {
+        readerTheme: localStorage.getItem('blog-reader-theme') || 'github-light',
+        lightTheme: localStorage.getItem('last-light-theme') || 'github-light',
+        darkTheme: localStorage.getItem('last-dark-theme') || 'github-dark',
+        codeFormat: localStorage.getItem('blog-code-format') || 'scroll',
+        codeTheme: localStorage.getItem('blog-code-theme') || 'global',
+        codeInlineTheme: localStorage.getItem('blog-code-inline-theme') || 'global',
+        codeInlineOffset: parseInt(localStorage.getItem('blog-code-inline-offset') ?? '-2'),
+        codeInlinePad: parseInt(localStorage.getItem('blog-code-inline-pad') ?? '2'),
+        codeBlockSize: parseInt(localStorage.getItem('blog-code-block-size') ?? '14'),
+        codeLineNumbers: localStorage.getItem('blog-code-line-numbers') === 'on',
+        codeHeader: localStorage.getItem('blog-code-header') === 'on',
+        tableFormat: localStorage.getItem('table-format') || 'adaptive',
+        tableShowHeader: localStorage.getItem('table-show-header') !== 'false',
+        quoteStyle: localStorage.getItem('blog-quote-style') || 'global',
+        pageWidth: parseInt(localStorage.getItem('blog-width') ?? '700'),
+        fontSize: parseInt(localStorage.getItem('blog-size') ?? '18'),
+        lineHeight: parseFloat(localStorage.getItem('blog-line') ?? '1.7'),
+        position: parseInt(localStorage.getItem('blog-pos') ?? '0'),
+        cText: localStorage.getItem('blog-ctext') || '#222222',
+        cBg: localStorage.getItem('blog-cbg') || '#fbfbfb',
+    };
+}
+
+function applyDefaultConfig() {
+    const def = getDefaultConfig();
+    localStorage.setItem('blog-reader-theme', def.readerTheme);
+    localStorage.setItem('last-light-theme', def.lightTheme);
+    localStorage.setItem('last-dark-theme', def.darkTheme);
+    localStorage.setItem('blog-theme-mode', 'light');
+    localStorage.setItem('blog-code-format', def.codeFormat);
+    localStorage.setItem('blog-code-theme', def.codeTheme);
+    localStorage.setItem('blog-code-inline-theme', def.codeInlineTheme);
+    localStorage.setItem('blog-code-inline-offset', String(def.codeInlineOffset));
+    localStorage.setItem('blog-code-inline-pad', String(def.codeInlinePad));
+    localStorage.setItem('blog-code-block-size', String(def.codeBlockSize));
+    localStorage.setItem('blog-code-line-numbers', def.codeLineNumbers ? 'on' : 'off');
+    localStorage.setItem('blog-code-header', def.codeHeader ? 'on' : 'off');
+    localStorage.setItem('table-format', def.tableFormat);
+    localStorage.setItem('table-show-header', def.tableShowHeader ? 'true' : 'false');
+    localStorage.setItem('quote-style', def.quoteStyle);
+    localStorage.setItem('blog-width', String(def.pageWidth));
+    localStorage.setItem('blog-size', String(def.fontSize));
+    localStorage.setItem('blog-line', String(def.lineHeight));
+    localStorage.setItem('blog-pos', String(def.position));
+    localStorage.setItem('blog-ctext', def.cText);
+    localStorage.setItem('blog-cbg', def.cBg);
+    const keys = Object.keys(localStorage);
+    keys.forEach(key => {
+        if (key.startsWith('table-format-override-')) {
+            localStorage.removeItem(key);
+        }
+    });
+    restoreSavedSettings();
+    location.reload();
+}
+
+function restoreUserConfig() {
+    if (!userConfigBackup) return;
+    const cfg = userConfigBackup;
+    localStorage.setItem('blog-reader-theme', cfg.readerTheme);
+    localStorage.setItem('last-light-theme', cfg.lightTheme);
+    localStorage.setItem('last-dark-theme', cfg.darkTheme);
+    localStorage.setItem('blog-theme-mode', cfg.readerTheme.includes('dark') ? 'dark' : 'light');
+    localStorage.setItem('blog-code-format', cfg.codeFormat);
+    localStorage.setItem('blog-code-theme', cfg.codeTheme);
+    localStorage.setItem('blog-code-inline-theme', cfg.codeInlineTheme);
+    localStorage.setItem('blog-code-inline-offset', String(cfg.codeInlineOffset));
+    localStorage.setItem('blog-code-inline-pad', String(cfg.codeInlinePad));
+    localStorage.setItem('blog-code-block-size', String(cfg.codeBlockSize));
+    localStorage.setItem('blog-code-line-numbers', cfg.codeLineNumbers ? 'on' : 'off');
+    localStorage.setItem('blog-code-header', cfg.codeHeader ? 'on' : 'off');
+    localStorage.setItem('table-format', cfg.tableFormat);
+    localStorage.setItem('table-show-header', cfg.tableShowHeader ? 'true' : 'false');
+    localStorage.setItem('quote-style', cfg.quoteStyle);
+    localStorage.setItem('blog-width', String(cfg.pageWidth));
+    localStorage.setItem('blog-size', String(cfg.fontSize));
+    localStorage.setItem('blog-line', String(cfg.lineHeight));
+    localStorage.setItem('blog-pos', String(cfg.position));
+    localStorage.setItem('blog-ctext', cfg.cText);
+    localStorage.setItem('blog-cbg', cfg.cBg);
+    restoreSavedSettings();
+    location.reload();
+}
+
+function toggleDefaultMode() {
+    const isDefault = localStorage.getItem('isDefaultMode') === 'true';
+    const defaultBtn = document.getElementById('bar-default');
+    if (isDefault) {
+        restoreUserConfig();
+        localStorage.setItem('isDefaultMode', 'false');
+        if (defaultBtn) {
+            defaultBtn.classList.remove('active');
+            defaultBtn.querySelector('.bar-icon').textContent = '⟳';
+            defaultBtn.querySelector('.bar-label').textContent = '默认';
+        }
+    } else {
+        saveUserConfig();
+        applyDefaultConfig();
+        localStorage.setItem('isDefaultMode', 'true');
+        if (defaultBtn) {
+            defaultBtn.classList.add('active');
+            defaultBtn.querySelector('.bar-icon').textContent = '👤';
+            defaultBtn.querySelector('.bar-label').textContent = '用户';
+        }
     }
 }
 
@@ -537,3 +686,4 @@ window.updateBatchButtons = updateBatchButtons;
 window.toggleAllPanels = toggleAllPanels;
 window.areAllPanelsVisible = areAllPanelsVisible;
 window.getPanelIdsBySide = getPanelIdsBySide;
+window.toggleDefaultMode = toggleDefaultMode;
