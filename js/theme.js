@@ -3,8 +3,34 @@ const root = document.documentElement;
 
 const readerThemeMap = {
     'custom': {text:'#222222', bg:'#fbfbfb', surface:'#ffffff', surface2:'#f6f8fa', border:'#d0d7de', muted:'#57606a', link:'#0969da', hover:'#0550ae', accent:'#1890ff', quoteBg:'rgba(0,0,0,.03)', quoteBorder:'#d0d7de', quoteMark:'rgba(0,0,0,.22)'},
-    'github-light': {text:'#1f2328', bg:'#ffffff', surface:'#ffffff', surface2:'#f6f8fa', border:'#d0d7de', muted:'#57606a', link:'#0969da', hover:'#0550ae', accent:'#0969da', quoteBg:'#f6f8fa', quoteBorder:'#d0d7de', quoteMark:'rgba(31,35,40,.22)'},
-    'github-dark': {text:'#c9d1d9', bg:'#0d1117', surface:'#161b22', surface2:'#21262d', border:'#30363d', muted:'#8b949e', link:'#58a6ff', hover:'#79c0ff', accent:'#58a6ff', quoteBg:'rgba(56,139,253,.12)', quoteBorder:'#3b82f6', quoteMark:'rgba(201,209,217,.25)'},
+    'github-light': {
+        text: '#1f2328',
+        bg: '#ffffff',
+        surface: '#ffffff',
+        surface2: '#f6f8fa',
+        border: '#d0d7de',
+        muted: '#57606a',
+        link: '#0969da',
+        hover: '#0550ae',
+        accent: '#0969da',
+        quoteBg: '#f6f8fa',
+        quoteBorder: '#d0d7de',
+        quoteMark: 'rgba(31,35,40,0.22)'
+    },
+    'github-dark': {
+        text: '#f0f6fc',
+        bg: '#0d1117',
+        surface: '#161b22',
+        surface2: '#21262d',
+        border: '#30363d',
+        muted: '#8b949e',
+        link: '#58a6ff',
+        hover: '#79c0ff',
+        accent: '#58a6ff',
+        quoteBg: 'rgba(56,139,253,0.12)',
+        quoteBorder: '#3b82f6',
+        quoteMark: 'rgba(240,246,252,0.25)'
+    },
     'claude-light': {text:'#3f3a36', bg:'#f7f4ee', surface:'#fbf9f5', surface2:'#eee9df', border:'#d9d1c5', muted:'#766d63', link:'#a75d32', hover:'#874621', accent:'#c66a3d', quoteBg:'#eee9df', quoteBorder:'#cfa98d', quoteMark:'rgba(92,69,53,.22)'},
     'claude-dark': {text:'#e8e1d9', bg:'#1f1d1a', surface:'#292622', surface2:'#332e29', border:'#4a433c', muted:'#a99f95', link:'#e0a27d', hover:'#f0b898', accent:'#d88b63', quoteBg:'rgba(216,139,99,.10)', quoteBorder:'#9b6a51', quoteMark:'rgba(232,225,217,.24)'},
     'notion-light': {text:'#37352f', bg:'#ffffff', surface:'#ffffff', surface2:'#f7f6f3', border:'#e6e6e3', muted:'#787774', link:'#2383e2', hover:'#1b6fbe', accent:'#2383e2', quoteBg:'#f7f6f3', quoteBorder:'#cfcfcb', quoteMark:'rgba(55,53,47,.22)'},

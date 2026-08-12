@@ -1,5 +1,8 @@
 // ==================== 主入口 ====================
 window.addEventListener('DOMContentLoaded', () => {
+    // 1. 先初始化主题（在加载文章之前）
+    initThemeMode();
+
     initBottomBar();
     bindControls();
     initCanvasPan();
@@ -36,6 +39,7 @@ function togglePanel(panelId) {
         if (barBtn) barBtn.classList.toggle('active', !isHidden);
     }
     localStorage.setItem(`panel-${panelId}`, isHidden ? 'hidden' : 'visible');
+    updateBatchButtons();
 }
 
 function setPanelVisible(panelId, visible) {
@@ -57,14 +61,55 @@ function setPanelVisible(panelId, visible) {
         if (barBtn) barBtn.classList.toggle('active', visible);
     }
     localStorage.setItem(`panel-${panelId}`, visible ? 'visible' : 'hidden');
+    updateBatchButtons();
 }
 
 function initPanelVisibility() {
     const panelIds = ['panel-tree', 'panel-toc', 'panel-config', 'panel-font', 'panel-style', 'panel-code-style', 'panel-table-style'];
     panelIds.forEach(id => {
         const state = localStorage.getItem(`panel-${id}`);
-        setPanelVisible(id, state !== 'hidden');
+        setPanelVisible(id, state === 'visible');
     });
+    updateBatchButtons();
+}
+
+// ==================== 批量面板切换 ====================
+function getPanelIdsBySide(side) {
+    if (side === 'left') {
+        return ['panel-tree', 'panel-toc'];
+    } else if (side === 'right') {
+        return ['panel-config', 'panel-font', 'panel-style', 'panel-code-style', 'panel-table-style'];
+    }
+    return [];
+}
+
+function areAllPanelsVisible(side) {
+    const ids = getPanelIdsBySide(side);
+    return ids.every(id => {
+        const panel = document.getElementById(id);
+        return panel && !panel.classList.contains('panel-hidden');
+    });
+}
+
+function toggleAllPanels(side) {
+    const ids = getPanelIdsBySide(side);
+    const allVisible = areAllPanelsVisible(side);
+    const newState = !allVisible;
+    ids.forEach(id => {
+        setPanelVisible(id, newState);
+    });
+    updateBatchButtons();
+}
+
+function updateBatchButtons() {
+    const leftAllBtn = document.getElementById('bar-left-all');
+    const rightAllBtn = document.getElementById('bar-right-all');
+    if (leftAllBtn) {
+        leftAllBtn.classList.toggle('active', areAllPanelsVisible('left'));
+    }
+    if (rightAllBtn) {
+        rightAllBtn.classList.toggle('active', areAllPanelsVisible('right'));
+    }
 }
 
 function loadBarPosition() {
@@ -95,6 +140,14 @@ function applyBarPosition() {
 function initBottomBar() {
     loadBarPosition();
 
+    // ----- 明暗主题切换按钮 -----
+    const themeBtn = document.getElementById('bar-theme');
+    if (themeBtn) {
+        // 点击事件：切换明暗模式
+        themeBtn.addEventListener('click', toggleThemeMode);
+    }
+
+    // ----- 画布小手 -----
     const canvasBtn = document.getElementById('bar-canvas');
     const canvasToggle = document.getElementById('canvas-toggle');
     if (canvasBtn && canvasToggle) {
@@ -110,6 +163,7 @@ function initBottomBar() {
         });
     }
 
+    // ----- 面板按钮映射 -----
     const panelMap = {
         'bar-tree': 'panel-tree',
         'bar-toc': 'panel-toc',
@@ -128,6 +182,7 @@ function initBottomBar() {
         });
     });
 
+    // ----- 面板标题栏点击切换 -----
     document.querySelectorAll('.panel-header').forEach(header => {
         const panelBox = header.closest('.panel-box');
         if (!panelBox) return;
@@ -140,9 +195,10 @@ function initBottomBar() {
         header.addEventListener('click', handler);
     });
 
+    // ----- 恢复面板状态（默认关闭） -----
     initPanelVisibility();
 
-    // 拖拽功能
+    // ----- 拖拽功能 -----
     const bar = document.getElementById('bottom-bar');
     const dragHandle = document.querySelector('.bar-drag-handle');
     if (!bar || !dragHandle) return;
@@ -385,7 +441,87 @@ function initImageLightbox() {
     });
 }
 
-// 导出全局
+// ==================== 明暗主题切换 ====================
+
+function getCurrentThemeMode() {
+    return localStorage.getItem('blog-theme-mode') || 'light';
+}
+
+function applyThemeMode(mode) {
+    // 根据模式选择最近使用的对应主题
+    let themeName;
+    if (mode === 'dark') {
+        // 切换到最近使用的暗色主题，如果没有则回退到 github-dark
+        themeName = localStorage.getItem('last-dark-theme') || 'github-dark';
+    } else {
+        // 切换到最近使用的亮色主题，如果没有则回退到 github-light
+        themeName = localStorage.getItem('last-light-theme') || 'github-light';
+    }
+
+    // 如果当前已经是该主题，则不做任何事（避免重复应用）
+    const currentTheme = localStorage.getItem('blog-reader-theme') || 'github-light';
+    if (currentTheme === themeName) {
+        // 如果主题相同但模式标记不同，只更新标记
+        localStorage.setItem('blog-theme-mode', mode);
+        // 仍然应用一次，确保状态同步
+    }
+
+    applyReaderTheme(themeName);
+    localStorage.setItem('blog-theme-mode', mode);
+    localStorage.setItem('blog-reader-theme', themeName);
+
+    // 更新底部按钮状态
+    const themeBtn = document.getElementById('bar-theme');
+    if (themeBtn) {
+        themeBtn.classList.toggle('active', mode === 'dark');
+        themeBtn.querySelector('.bar-icon').textContent = mode === 'dark' ? '🌙' : '☀️';
+        themeBtn.querySelector('.bar-label').textContent = mode === 'dark' ? '暗色' : '亮色';
+    }
+
+    // 同步右侧下拉选择器
+    const select = document.getElementById('reader-theme-select');
+    if (select) select.value = themeName;
+
+    // 同步颜色选择器（如果是自定义主题）
+    if (themeName === 'custom') {
+        const theme = readerThemeMap.custom;
+        const cText = document.getElementById('color-text');
+        const cBg = document.getElementById('color-bg');
+        if (cText) cText.value = theme.text;
+        if (cBg) cBg.value = theme.bg;
+        // 应用自定义颜色
+        applyCustomReaderColors(theme.text, theme.bg);
+    }
+}
+
+function toggleThemeMode() {
+    const current = getCurrentThemeMode();
+    const next = current === 'dark' ? 'light' : 'dark';
+    applyThemeMode(next);
+}
+
+function initThemeMode() {
+    // 初始化时根据当前主题设置模式
+    const currentTheme = localStorage.getItem('blog-reader-theme') || 'github-light';
+    const isDark = currentTheme.includes('dark');
+    const mode = isDark ? 'dark' : 'light';
+    localStorage.setItem('blog-theme-mode', mode);
+    // 更新按钮状态
+    const themeBtn = document.getElementById('bar-theme');
+    if (themeBtn) {
+        themeBtn.classList.toggle('active', isDark);
+        themeBtn.querySelector('.bar-icon').textContent = isDark ? '🌙' : '☀️';
+        themeBtn.querySelector('.bar-label').textContent = isDark ? '暗色' : '亮色';
+    }
+    // 如果当前主题是暗色，确保 last-dark-theme 被设置
+    if (isDark) {
+        localStorage.setItem('last-dark-theme', currentTheme);
+    } else {
+        localStorage.setItem('last-light-theme', currentTheme);
+    }
+}
+
+// ==================== 导出全局 ====================
 window.initBottomBar = initBottomBar;
 window.togglePanel = togglePanel;
 window.setPanelVisible = setPanelVisible;
@@ -393,3 +529,11 @@ window.initPanelVisibility = initPanelVisibility;
 window.loadBarPosition = loadBarPosition;
 window.saveBarPosition = saveBarPosition;
 window.applyBarPosition = applyBarPosition;
+window.initThemeMode = initThemeMode;
+window.applyThemeMode = applyThemeMode;
+window.toggleThemeMode = toggleThemeMode;
+window.getCurrentThemeMode = getCurrentThemeMode;
+window.updateBatchButtons = updateBatchButtons;
+window.toggleAllPanels = toggleAllPanels;
+window.areAllPanelsVisible = areAllPanelsVisible;
+window.getPanelIdsBySide = getPanelIdsBySide;

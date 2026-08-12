@@ -77,11 +77,11 @@ function bindControls() {
     const codeLineNumbersToggle = document.getElementById('code-line-numbers-toggle');
     const codeHeaderToggle = document.getElementById('code-header-toggle');
 
-    // ----- 表格样式调节 (新增) -----
+    // ----- 表格样式调节 -----
     const tableFormatSelect = document.getElementById('table-format-select');
     const tableHeaderToggle = document.getElementById('table-header-toggle');
 
-    // ----- 微调按钮（所有 slider 的 +/- 按钮）-----
+    // ----- 微调按钮 -----
     document.querySelectorAll('.slider-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             const targetId = btn.getAttribute('data-target');
@@ -151,6 +151,15 @@ function bindControls() {
         localStorage.setItem('blog-ctext', e.target.value);
         if (readerThemeSelect) readerThemeSelect.value = 'custom';
         localStorage.setItem('blog-reader-theme', 'custom');
+        // 自定义颜色视为亮色（因为用户可自由选择，但默认我们将其归类为亮色）
+        localStorage.setItem('last-light-theme', 'custom');
+        localStorage.setItem('blog-theme-mode', 'light');
+        const themeBtn = document.getElementById('bar-theme');
+        if (themeBtn) {
+            themeBtn.classList.remove('active');
+            themeBtn.querySelector('.bar-icon').textContent = '☀️';
+            themeBtn.querySelector('.bar-label').textContent = '亮色';
+        }
     });
 
     // ----- 背景颜色 -----
@@ -160,6 +169,15 @@ function bindControls() {
         localStorage.setItem('blog-cbg', e.target.value);
         if (readerThemeSelect) readerThemeSelect.value = 'custom';
         localStorage.setItem('blog-reader-theme', 'custom');
+        // 自定义颜色视为亮色
+        localStorage.setItem('last-light-theme', 'custom');
+        localStorage.setItem('blog-theme-mode', 'light');
+        const themeBtn = document.getElementById('bar-theme');
+        if (themeBtn) {
+            themeBtn.classList.remove('active');
+            themeBtn.querySelector('.bar-icon').textContent = '☀️';
+            themeBtn.querySelector('.bar-label').textContent = '亮色';
+        }
     });
 
     // ----- 阅读主题下拉 -----
@@ -170,6 +188,32 @@ function bindControls() {
         const theme = readerThemeMap[themeName] || readerThemeMap.custom;
         if (cText) cText.value = theme.text;
         if (cBg) cBg.value = theme.bg;
+
+        // ----- 同步底部明暗按钮状态 + 保存最近使用的亮色/暗色主题 -----
+        const isDarkTheme = themeName.includes('dark');
+        if (isDarkTheme) {
+            // 保存为最近使用的暗色主题
+            localStorage.setItem('last-dark-theme', themeName);
+            localStorage.setItem('blog-theme-mode', 'dark');
+            const themeBtn = document.getElementById('bar-theme');
+            if (themeBtn) {
+                themeBtn.classList.add('active');
+                themeBtn.querySelector('.bar-icon').textContent = '🌙';
+                themeBtn.querySelector('.bar-label').textContent = '暗色';
+            }
+        } else {
+            // 保存为最近使用的亮色主题（除了 'custom'，它已在前面处理）
+            if (themeName !== 'custom') {
+                localStorage.setItem('last-light-theme', themeName);
+            }
+            localStorage.setItem('blog-theme-mode', 'light');
+            const themeBtn = document.getElementById('bar-theme');
+            if (themeBtn) {
+                themeBtn.classList.remove('active');
+                themeBtn.querySelector('.bar-icon').textContent = '☀️';
+                themeBtn.querySelector('.bar-label').textContent = '亮色';
+            }
+        }
     });
 
     // ----- 代码显示格式 -----
@@ -235,16 +279,11 @@ function bindControls() {
         localStorage.setItem('blog-quote-style', e.target.value);
     });
 
-    // ============================================================
-    // 新增：表格样式控件
-    // ============================================================
-
     // ----- 表格显示格式 -----
     if (tableFormatSelect) {
         tableFormatSelect.addEventListener('change', (e) => {
             const format = e.target.value;
             localStorage.setItem('table-format', format);
-            // 应用到所有表格（覆盖独立设置）
             applyGlobalTableFormat(format);
         });
     }
@@ -278,7 +317,6 @@ function restoreSavedSettings() {
     const codeLineNumbersToggle = document.getElementById('code-line-numbers-toggle');
     const codeHeaderToggle = document.getElementById('code-header-toggle');
     const quoteStyleSelect = document.getElementById('quote-style-select');
-    // 表格控件
     const tableFormatSelect = document.getElementById('table-format-select');
     const tableHeaderToggle = document.getElementById('table-header-toggle');
 
@@ -288,11 +326,11 @@ function restoreSavedSettings() {
     const savedLine = localStorage.getItem('blog-line');
     const savedCText = localStorage.getItem('blog-ctext');
     const savedCBg = localStorage.getItem('blog-cbg');
-    const savedReaderTheme = localStorage.getItem('blog-reader-theme') || 'custom';
+    const savedReaderTheme = localStorage.getItem('blog-reader-theme') || 'github-light';
 
     const savedCodeFormat = localStorage.getItem('blog-code-format') || 'scroll';
-    const savedCodeTheme = localStorage.getItem('blog-code-theme') || 'default';
-    const savedCodeInlineTheme = localStorage.getItem('blog-code-inline-theme') || 'default';
+    const savedCodeTheme = localStorage.getItem('blog-code-theme') || 'global';
+    const savedCodeInlineTheme = localStorage.getItem('blog-code-inline-theme') || 'global';
     const savedCodeInlineOffset = localStorage.getItem('blog-code-inline-offset') ?? '-2';
     const savedCodeInlinePad = localStorage.getItem('blog-code-inline-pad') ?? '2';
     const savedCodeBlockSize = localStorage.getItem('blog-code-block-size');
@@ -300,7 +338,6 @@ function restoreSavedSettings() {
     const savedCodeHeader = localStorage.getItem('blog-code-header') || 'on';
     const savedQuoteStyle = localStorage.getItem('blog-quote-style') || 'global';
 
-    // 表格保存
     const savedTableFormat = localStorage.getItem('table-format') || 'adaptive';
     const savedTableShowHeader = localStorage.getItem('table-show-header') !== 'false';
 
@@ -335,10 +372,22 @@ function restoreSavedSettings() {
         if (cText) cText.value = customText;
         if (cBg) cBg.value = customBg;
         applyCustomReaderColors(customText, customBg);
+        // 自定义颜色视为亮色
+        localStorage.setItem('last-light-theme', 'custom');
+        localStorage.setItem('blog-theme-mode', 'light');
     } else {
         const savedTheme = readerThemeMap[savedReaderTheme] || readerThemeMap.custom;
         if (cText) cText.value = savedTheme.text;
         if (cBg) cBg.value = savedTheme.bg;
+        // 保存最近使用的主题
+        const isDark = savedReaderTheme.includes('dark');
+        if (isDark) {
+            localStorage.setItem('last-dark-theme', savedReaderTheme);
+            localStorage.setItem('blog-theme-mode', 'dark');
+        } else {
+            localStorage.setItem('last-light-theme', savedReaderTheme);
+            localStorage.setItem('blog-theme-mode', 'light');
+        }
     }
 
     // ----- 恢复代码设置 -----
@@ -407,11 +456,20 @@ function restoreSavedSettings() {
         tableHeaderToggle.checked = savedTableShowHeader;
     }
 
-    // 应用表格全局设置（但此时表格可能尚未渲染，因此延迟执行）
     setTimeout(() => {
         applyGlobalTableFormat(savedTableFormat);
         applyGlobalTableHeader(savedTableShowHeader);
     }, 100);
+
+    // ----- 恢复主题按钮状态 -----
+    const currentTheme = localStorage.getItem('blog-reader-theme') || 'github-light';
+    const isDark = currentTheme.includes('dark');
+    const themeBtn = document.getElementById('bar-theme');
+    if (themeBtn) {
+        themeBtn.classList.toggle('active', isDark);
+        themeBtn.querySelector('.bar-icon').textContent = isDark ? '🌙' : '☀️';
+        themeBtn.querySelector('.bar-label').textContent = isDark ? '暗色' : '亮色';
+    }
 
     updatePosition();
 }
@@ -420,19 +478,14 @@ function restoreSavedSettings() {
 function applyGlobalTableFormat(format) {
     const wrappers = document.querySelectorAll('.table-wrapper');
     wrappers.forEach(wrapper => {
-        // 清除 override 标记（但保留独立设置，因为用户可能单独调整过）
-        // 但我们希望全局设置覆盖所有，所以强制应用
         const table = wrapper.querySelector('table');
         if (table) {
-            // 更新 wrapper 的 data-table-format
             wrapper.dataset.tableFormat = format;
-            // 调用更新函数 (在 code.js 中定义)
             if (typeof updateTableFormat === 'function') {
                 updateTableFormat(wrapper, format);
             }
         }
     });
-    // 清除所有独立 override 存储（因为现在使用全局设置）
     const keys = Object.keys(localStorage);
     keys.forEach(key => {
         if (key.startsWith('table-format-override-')) {
