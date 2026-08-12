@@ -239,7 +239,7 @@ function loadArticleContent(path) {
     article.innerHTML = '<p>正在读取正文内容...</p>';
     let fileToFetch;
     if (path === '/' || path === '/index.html') {
-        fileToFetch = '/template/body.html';
+        fileToFetch = '/template/index.html';
     } else {
         fileToFetch = `/articles${path}`;
     }
