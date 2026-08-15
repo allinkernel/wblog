@@ -236,6 +236,8 @@ function loadArticleContent(path) {
     let fileToFetch;
     if (path === '/' || path === '/index.html') {
         fileToFetch = '/template/index.html';
+    } else if (path.endsWith('/index')) {
+        fileToFetch = `/articles${path}.html`;
     } else {
         fileToFetch = `/articles${path}`;
     }
