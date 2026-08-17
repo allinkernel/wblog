@@ -61,4 +61,4 @@ wblog_new 前端模板（`template/`）的架构地图、关键机制、验证�
 
 - 只改 `template/` 下前端文件；不动 `kernel/`、构建产物 `out/dist/`、`build/`。
 - `template/todo.md` 第 0 条是无关遗留，勿动。
-- 项目总体背景（构建/部署/主题机制）见 `build/deepseek.md`。
+- 项目背景（构建/部署/主题机制/设计原则）已并入 `.codewhale/instructions.md`（自动加载），无需再读 `build/deepseek.md`。
