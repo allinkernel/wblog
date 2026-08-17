@@ -152,10 +152,10 @@
                             <label>文本行距：</label>
                             <div class="slider-container">
                                 <button class="slider-btn" data-target="line-slider" data-step="-0.1">-</button>
-                                <input type="range" id="line-slider" min="1.2" max="2.5" step="0.1" value="1.7">
+                                <input type="range" id="line-slider" min="1.2" max="2.5" step="0.1" value="1.4">
                                 <button class="slider-btn" data-target="line-slider" data-step="0.1">+</button>
                             </div>
-                            <span class="val-badge" id="line-val">1.7</span>
+                            <span class="val-badge" id="line-val">1.4</span>
                         </div>
                     </div>
                     <div class="settings-group">
@@ -420,10 +420,10 @@
                             <label>行内边距：</label>
                             <div class="slider-container">
                                 <button class="slider-btn" data-target="code-inline-pad-slider" data-step="-1">-</button>
-                                <input type="range" id="code-inline-pad-slider" min="0" max="6" step="1" value="0">
+                                <input type="range" id="code-inline-pad-slider" min="0" max="6" step="1" value="1">
                                 <button class="slider-btn" data-target="code-inline-pad-slider" data-step="1">+</button>
                             </div>
-                            <span class="val-badge" id="code-inline-pad-val">0px</span>
+                            <span class="val-badge" id="code-inline-pad-val">1px</span>
                         </div>
                     </div>
                 </div>
@@ -556,7 +556,7 @@
             <span class="drag-dot"></span><span class="drag-dot"></span><span class="drag-dot"></span>
         </div>
 
-        <div class="bar-group">
+                <div class="bar-group">
             <!-- 明暗主题切换 -->
             <button id="bar-theme" class="bar-btn" title="切换明暗主题">
                 <span class="bar-icon">☀️</span>
@@ -573,23 +573,8 @@
             </button>
             <!-- 配置方案抽屉 -->
             <div id="profile-drawer" class="profile-drawer" hidden>
-                <div class="profile-drawer-head">配置方案（当前：<span id="profile-current-name">用户1</span>）</div>
-                <button type="button" class="profile-item" data-profile="default">
-                    <span class="profile-item-name">默认</span>
-                    <span class="profile-item-desc">恢复出厂配置</span>
-                </button>
-                <button type="button" class="profile-item" data-profile="user1">
-                    <span class="profile-item-name">用户1</span>
-                    <span class="profile-item-desc" id="profile-desc-user1">出厂起点</span>
-                </button>
-                <button type="button" class="profile-item" data-profile="user2">
-                    <span class="profile-item-name">用户2</span>
-                    <span class="profile-item-desc" id="profile-desc-user2">出厂起点</span>
-                </button>
-                <button type="button" class="profile-item" data-profile="user3">
-                    <span class="profile-item-name">用户3</span>
-                    <span class="profile-item-desc" id="profile-desc-user3">出厂起点</span>
-                </button>
+                <div class="profile-drawer-head" id="profile-drawer-head">配置方案（当前：<span id="profile-current-name">用户1</span>）</div>
+                <div id="profile-list"></div>
             </div>
         </div>
 
@@ -616,10 +601,44 @@
         </div>
     </div>
 
+<!-- 废弃属性提示弹窗 -->
+        <div id="config-deprecated-modal" class="config-modal" hidden>
+            <div class="config-modal-box">
+                <div class="config-modal-title">配置文件中包含已废弃的属性字段</div>
+                <div class="config-modal-body">
+                    <p>以下字段当前版本已不再支持，已忽略；其余受支持属性已正常应用：</p>
+                    <ul id="config-deprecated-list"></ul>
+                </div>
+                <div class="config-modal-actions">
+                    <button type="button" class="config-modal-btn" id="config-deprecated-ok">知道了</button>
+                </div>
+            </div>
+        </div>
+
+    <!-- 配置目录文件列表弹窗 -->
+    <div id="config-dir-modal" class="config-modal" hidden>
+        <div class="config-modal-box">
+            <div class="config-modal-title">配置目录：<span id="dir-modal-name"></span></div>
+            <div class="config-modal-body">
+                <ul id="dir-file-list"></ul>
+            </div>
+            <div class="config-modal-actions">
+                <button type="button" class="config-modal-btn config-modal-btn-ghost" id="dir-refresh-btn">刷新</button>
+                <button type="button" class="config-modal-btn config-modal-btn-ghost" id="dir-change-btn">更换目录</button>
+                <button type="button" class="config-modal-btn" id="dir-close-btn">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 右键菜单容器 -->
+    <div id="context-menu" class="context-menu" hidden></div>
+
     <script src="/template/js/theme.js"></script>
     <script src="/template/js/code.js"></script>
     <script src="/template/js/navigation.js"></script>
     <script src="/template/js/controls.js"></script>
+    <script src="/template/js/contextmenu.js"></script>
+    <script src="/template/js/config.js"></script>
     <script src="/template/js/main.js"></script>
 </body>
 </html>

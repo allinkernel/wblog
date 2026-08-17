@@ -166,6 +166,29 @@
     text-align: left;
     transition: background 0.15s ease;
 }
+.profile-item-main {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    min-width: 0;
+    overflow: hidden;
+}
+.profile-folder-btn {
+    flex-shrink: 0;
+    border: none;
+    background: transparent;
+    font-size: 13px;
+    line-height: 1;
+    padding: 3px 5px;
+    border-radius: 4px;
+    cursor: pointer;
+    opacity: 0.65;
+    transition: opacity 0.15s ease, background 0.15s ease;
+}
+.profile-folder-btn:hover {
+    opacity: 1;
+    background: var(--theme-panel-hover);
+}
 .profile-item:hover {
     background: var(--theme-panel-hover);
 }
@@ -177,4 +200,99 @@
     font-size: 10px;
     color: var(--theme-muted);
     margin-left: 8px;
+}
+
+
+/* ---- 废弃属性提示弹窗 ---- */
+.config-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 20000;
+}
+.config-modal[hidden] {
+    display: none;
+}
+.config-modal-box {
+    width: 420px;
+    max-width: 90vw;
+    background: var(--theme-surface);
+    border: 1px solid var(--theme-border);
+    border-radius: 12px;
+    box-shadow: var(--theme-shadow, 0 8px 24px rgba(0, 0, 0, 0.2));
+    padding: 16px 18px;
+}
+.config-modal-title {
+    font-size: 14px;
+    font-weight: bold;
+    color: var(--text-color);
+    margin-bottom: 8px;
+}
+.config-modal-body {
+    font-size: 12px;
+    color: var(--theme-muted);
+    line-height: 1.6;
+    max-height: 40vh;
+    overflow-y: auto;
+}
+.config-modal-body ul {
+    margin: 8px 0 0;
+    padding-left: 20px;
+    font-family: Consolas, monospace;
+    font-size: 11px;
+}
+.config-modal-actions {
+    text-align: right;
+    margin-top: 14px;
+}
+.config-modal-btn {
+    padding: 6px 18px;
+    border: 1px solid var(--theme-border);
+    border-radius: 6px;
+    background: var(--theme-link);
+    color: #fff;
+    font-size: 12px;
+    cursor: pointer;
+}
+.config-modal-btn:hover {
+    background: var(--theme-link-hover);
+}
+
+.config-modal-btn-ghost {
+    background: transparent;
+    color: var(--text-color);
+}
+.config-modal-btn-ghost:hover {
+    background: var(--theme-panel-hover);
+}
+#dir-file-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    font-family: Consolas, monospace;
+    font-size: 11px;
+    max-height: 45vh;
+    overflow-y: auto;
+}
+#dir-file-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 3px 6px;
+    border-radius: 4px;
+}
+#dir-file-list li:nth-child(odd) {
+    background: var(--theme-surface-2);
+}
+#dir-file-list .dir-file-size {
+    color: var(--theme-muted);
+    margin-left: 10px;
+    font-size: 10px;
+}
+#dir-file-list .dir-file-empty {
+    color: var(--theme-muted);
+    font-style: italic;
 }

@@ -11,11 +11,14 @@ function makeReadOnlyEditable(el) {
     el.addEventListener('drop', (e) => e.preventDefault());
 }
 
-// ---------- 增强所有行内代码及代码行区域 ----------
+// ---------- 增强代码行区域 ----------
+// 注意：只处理代码块的行容器（.code-lines），
+// 行内代码（code:not(pre code)）必须保持普通文本 —— 若设 contenteditable，
+// 可编辑区域与正文之间的拖选/复制会被浏览器割裂（跨区域选择丢失内容）。
 function enhanceAllCode() {
     const article = document.getElementById('article-container');
     if (!article) return;
-    const targets = article.querySelectorAll('code:not(pre code), .code-lines');
+    const targets = article.querySelectorAll('.code-lines');
     targets.forEach(el => makeReadOnlyEditable(el));
 }
 

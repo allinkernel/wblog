@@ -764,9 +764,9 @@ function restoreSavedSettings() {
     const savedCodeTheme = localStorage.getItem('blog-code-theme') || 'global';
     const savedCodeInlineTheme = localStorage.getItem('blog-code-inline-theme') || 'global';
     const savedCodeInlineOffset = localStorage.getItem('blog-code-inline-offset') ?? '-2';
-    const savedCodeInlinePad = localStorage.getItem('blog-code-inline-pad') ?? '0';
+    const savedCodeInlinePad = localStorage.getItem('blog-code-inline-pad') ?? '1';
     const savedCodeBlockSize = localStorage.getItem('blog-code-block-size');
-    const savedCodeLineNumbers = localStorage.getItem('blog-code-line-numbers') || 'off'; // 默认关
+    const savedCodeLineNumbers = localStorage.getItem('blog-code-line-numbers') || 'on'; // 默认开
     const savedCodeHeader = localStorage.getItem('blog-code-header') || 'off'; // 默认关
     const savedQuoteStyle = localStorage.getItem('blog-quote-style') || 'global';
 

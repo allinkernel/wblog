@@ -35,7 +35,17 @@ wblog_new 前端模板（`template/`）的架构地图、关键机制、验证�
    - `adaptive`：wrapper 必须 `width:fit-content; min-width:0`（`max-width:none !important` 覆盖 JS 内联 `max-width:100%`）。**短表格背景跟随表格宽度，长表格背景跟随内容宽度** — 不要加 `min-width:100%`（那会把短表格背景撑到版面宽，视觉断裂）。
    - `wrap`：`width:100%` + `table-layout:fixed` + 单元格 `break-word`。
    - `updateTableFormat` 重置段必须清理 `wrapper.style.width/minWidth/maxWidth`，防止切格式残留。
-7. **配置方案抽屉（默认 / 用户1~3）**：`main.js` 多配置系统 — 散键 = 实时状态（现有机制不变）；`wblog-active-profile` 记当前激活槽；`wblog-profile-userN` 存完整配置快照。切换时先 `saveProfile(old)`（collectUserConfig 收集散键）再 `loadProfile(new)`（default=出厂 `applyDefaultConfig`，userN 空槽=出厂起点）；默认槽只读。`applyDefaultConfig` 主题跟随当前亮/暗模式。UI：`#bar-default` 弹抽屉（`#profile-drawer` 4 项），按钮 label 显示当前配置名。
+7. **配置方案管理（默认 / 默认调整 / 用户1~3 / 外部方案）**：独立模块 `js/config.js`。散键 = 实时状态（现有机制）；`wblog-active-profile` 记当前槽；`wblog-config-<名>` 存 JSON 快照（localStorage 回退）或授权目录下的 `<名>.json` 文件。核心机制：
+   - **写时复制（CoW）**：激活【默认】（只读）时用户改任何参数 → 自动删除旧「默认调整」→ 保存当前 → 激活「默认调整」。（需求：切回默认再调整 = 重建）
+   - **延迟创建**：选择不存在的用户方案 → 按默认呈现；首次调整时自动创建文件。
+   - **触发方式**：monkey-patch `Storage.prototype.setItem`（jsdom/浏览器中**实例属性赋值无效，必须 patch 原型**，且 wrapper 内必须 `origSetItem.call(this, k, v)` 保持 Storage 实例 this，否则 WebIDL 报错）；`applyDefaultConfig`/`applyConfig` 期间 `suppressSave = true` 防止误触发 CoW。
+   - **文件系统（需求 4/5）**：File System Access API（`showDirectoryPicker` + IndexedDB 存 handle）→ 配置存真实 JSON/YAML 文件；30s 轮询扫描目录，新文件自动进方案列表；无 API 时静默降级 localStorage。**浏览器无法直接打开系统文件管理器**，用目录选择器 + 重新授权最接近。
+   - **版本校验（需求 6）**：`validateConfig` 用 `SUPPORTED_KEYS` 白名单；废弃字段 → 弹窗（`#config-deprecated-modal`，**必须放 body 层级**，放 #bottom-bar 内会因 transform 使 fixed 定位失效）。
+   - **默认值**：行距 1.4、行内字号 -2px/边距 1px、行号默认开、版面宽度自动 = 37×字号 px（37 汉字宽）；标题默认字体 `"Microsoft YaHei", ...sans-serif`（不随正文 LXGW WenKai）。
+   - **初始化抑制窗口**：页面加载时的恢复写入（restoreSavedSettings 等）也会走 setItem patch → 若不抑制，点【默认】后 reload 恢复过程会误触发 CoW 生成「默认调整」。initConfigModule 需 `suppressSave = true` 直到 load 后 500ms（保险 3s）再释放。
+   - **File System Access API 目录**：`showDirectoryPicker({mode:'readwrite', id:'wblog-config'})`（`id` 让 Chrome 记住并定位上次目录）。**打开目录交互**：已连接目录 → `requestPermission` 重授权（granted 直接返回）→ **打开目录文件列表弹窗**（`#config-dir-modal`：文件名+大小+刷新/更换目录/关闭）；未连接/授权失败 → 弹选择器 → 连接即导出当前配置 → 打开弹窗。IndexedDB 存 handle（单例 db）用于启动自动加载。**生产 http 站点不可用（需 HTTPS/localhost）**；headless 无手势 → showDirectoryPicker 抛错走 catch。
+   - **右键菜单（`js/contextmenu.js`）**：行内代码右键【复制行内代码】（替代被移除的 contenteditable 内 Ctrl+A）；代码块右键【复制代码块】【全屏查看】【调整格式（scroll/wrap/adaptive/跟随全局）】【调整显示样式（14 种代码主题）】【调整字体大小（12~18px 或跟随全局，写 wrapper 的 `--code-block-size`）】；表格右键【复制表格内容】（Tab 分隔）。实现：全局 `contextmenu` 监听 + `e.target.closest` 判定目标 → 自定义菜单（子菜单 hover 展开、✓ 标记、视口边缘翻转）+ `copyToClipboard` Promise → toast。菜单容器 `#context-menu` 与样式在 panels.css，需在 e2e jsFiles 里加 `contextmenu.js`。
+   - **文本选择高亮（真正的坑）**：行内代码曾被 `makeReadOnlyEditable` 设为 `contenteditable="true"`（当年为 Ctrl+A 全选加的）→ 可编辑区域与正文之间的拖选/复制被浏览器**割裂**：选区视觉不高亮、**Ctrl+C 复制内容缺失行内代码**、行首代码选不中。修复：`enhanceAllCode` 只处理 `.code-lines`，行内代码保持普通文本（正文与行内代码属性一致，天然可跨区域选择；`initCodeSelectAll` 的块内全选用 `range.selectNodeContents` 实现，不依赖行内代码可编辑）。验证：Playwright mouse 拖选 + `navigator.clipboard.readText()` 确认复制含行内代码。另保留 `overflow-wrap:anywhere`（断行能力）+ 高对比 `::selection` 蓝底白字（部分选中可见性）。
 
 ## Typora 主题移植
 

@@ -61,7 +61,7 @@ window.queryLocalFonts = () => Promise.resolve([
     { family: 'Test Sans Y' },
     { family: 'Test Serif Z' }
 ]);
-const jsFiles = ['theme.js', 'code.js', 'navigation.js', 'controls.js', 'main.js'];
+const jsFiles = ['theme.js', 'code.js', 'navigation.js', 'controls.js', 'config.js', 'contextmenu.js', 'main.js'];
 const bundle = jsFiles.map(f => fs.readFileSync(path.join(ROOT, 'template/js', f), 'utf8')).join('\n;\n');
 try {
     window.eval(bundle);
@@ -287,18 +287,18 @@ setTimeout(() => {
         window.localStorage.setItem('blog-width', '800');
         window.location.reload = () => {}; // jsdom 无 reload
         window.switchProfile('user2'); // 切换时先保存 user1 快照
-        const savedUser1 = JSON.parse(window.localStorage.getItem('wblog-profile-user1') || 'null');
-        check('切槽时保存 user1 快照', savedUser1 && savedUser1.pageWidth === 800);
+        const savedUser1 = JSON.parse(window.localStorage.getItem('wblog-config-user1') || 'null');
+        check('切槽时保存 user1 快照', savedUser1 && savedUser1['blog-width'] === 800);
         check('切换到 user2', window.getActiveProfile() === 'user2' && $('#bar-profile-label').textContent === '用户2');
-        check('user2 空槽 → 出厂宽度', window.localStorage.getItem('blog-width') === '700');
+        check('user2 空槽 → 出厂宽度（自动 37×18=666）', window.localStorage.getItem('blog-width') === '666');
         window.switchProfile('user1');
         check('切回 user1 恢复宽度', window.localStorage.getItem('blog-width') === '800');
-        check('恢复后主题 = user1 快照值', window.localStorage.getItem('blog-reader-theme') === savedUser1.readerTheme);
+        check('恢复后主题 = user1 快照值', window.localStorage.getItem('blog-reader-theme') === savedUser1['blog-reader-theme']);
 
         // 默认槽：跟随当前亮暗 + 默认主题 lightmind
         window.localStorage.setItem('blog-theme-mode', 'dark');
         window.switchProfile('default');
-        check('默认槽恢复出厂 + 跟随暗色（lightmind-dark）', window.localStorage.getItem('blog-reader-theme') === 'lightmind-dark' && window.localStorage.getItem('blog-width') === '700');
+        check('默认槽恢复出厂 + 跟随暗色（lightmind-dark）', window.localStorage.getItem('blog-reader-theme') === 'lightmind-dark' && window.localStorage.getItem('blog-width') === '666');
         window.switchProfile('user1');
         check('默认后再切回 user1 仍恢复', window.localStorage.getItem('blog-width') === '800');
 
@@ -309,6 +309,88 @@ setTimeout(() => {
         check('关闭抽屉', $('#profile-drawer').hidden === true);
         check('抽屉项点击切换（user2）', (() => { $('.profile-item[data-profile="user2"]').click(); return window.getActiveProfile() === 'user2'; })());
         window.switchProfile('user1');
+
+
+        // ---- 11. 配置方案管理（CoW / 延迟创建 / 版本校验 / 默认值）----
+        const sleep = ms => new Promise(r => setTimeout(r, ms));
+        // 默认值检查（需求 3）
+        window.switchProfile('default');
+        check('默认行距 1.4', window.localStorage.getItem('blog-line') === '1.4');
+        check('默认行内边距 1px', window.localStorage.getItem('blog-code-inline-pad') === '1');
+        check('默认行号开', window.localStorage.getItem('blog-code-line-numbers') === 'on');
+        check('默认版面宽度自动 666px（37汉字）', window.localStorage.getItem('blog-width') === '666');
+
+        // 版本兼容校验（需求 6）
+        const v = window.validateConfig({ 'blog-width': 700, 'isDefaultMode': true, 'unknown-key': 1 });
+        check('校验：受支持字段保留', v.supported['blog-width'] === 700);
+        check('校验：废弃字段列出', v.deprecated.includes('isDefaultMode') && v.deprecated.includes('unknown-key'));
+
+        // 打开目录：无 File System API 时安全降级（需求 4）
+        let openError = null;
+        try { window.openConfigDir(); } catch (e) { openError = e.message; }
+        check('openConfigDir 无 API 时不抛错', openError === null || /showDirectoryPicker/.test(openError || ''));
+
+        // CoW（需求 1）：默认下调整 → 自动创建「默认调整」并激活
+        window.localStorage.setItem('blog-size', '22');
+        await sleep(450);
+        check('CoW：激活切到「默认调整」', window.getActiveProfile() === '默认调整');
+        const cow1 = JSON.parse(window.localStorage.getItem('wblog-config-默认调整') || 'null');
+        check('CoW：默认调整保存新值', cow1 && cow1['blog-size'] === 22);
+        check('CoW：默认调整出现在列表', $('#profile-list .profile-item[data-profile="默认调整"]') !== null);
+
+        // CoW 重建（需求 1.3）：切回默认再调整 → 删除旧默认调整重新生成
+        window.switchProfile('default');
+        window.localStorage.setItem('blog-line', '1.6');
+        await sleep(450);
+        const cow2 = JSON.parse(window.localStorage.getItem('wblog-config-默认调整') || 'null');
+        check('CoW 重建：旧默认调整删除后重建（line=1.6，size 回出厂 18）', window.getActiveProfile() === '默认调整' && cow2 && cow2['blog-line'] === 1.6 && cow2['blog-size'] === 18);
+
+        // 延迟创建（需求 2.2）：选择不存在的 user3 → 按默认呈现 → 调整后自动生成
+        window.switchProfile('user3');
+        check('user3 空槽按默认呈现', window.localStorage.getItem('blog-size') === '18');
+        window.localStorage.setItem('blog-pos', '30');
+        await sleep(450);
+        const u3 = JSON.parse(window.localStorage.getItem('wblog-config-user3') || 'null');
+        check('user3 调整后自动创建', u3 && u3['blog-pos'] === 30);
+
+        // 已存在配置优先加载（需求 2.3）
+        window.writeProfile('user2', { 'blog-width': 850, 'blog-quote-style': 'accent' });
+        window.switchProfile('user2');
+        check('已存在 user2 优先加载', window.localStorage.getItem('blog-width') === '850');
+        window.switchProfile('user1'); // 恢复
+
+
+        // ---- 12. 右键菜单（行内代码 / 代码块 / 表格）----
+        const ctxEvent = (x, y) => new window.MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: x, clientY: y });
+        // 行内代码
+        const pCode = document.querySelector('#article-container p code');
+        pCode.dispatchEvent(ctxEvent(120, 120));
+        check('行内代码右键菜单出现', !$('#context-menu').hidden);
+        check('菜单含「复制行内代码」', [...document.querySelectorAll('#context-menu .ctx-label')].some(l => l.textContent === '复制行内代码'));
+        window.hideContextMenu();
+        check('隐藏菜单', $('#context-menu').hidden === true);
+        // 代码块
+        const codeWrapper = document.querySelector('.code-block-wrapper');
+        codeWrapper.dispatchEvent(ctxEvent(150, 150));
+        const labels = [...document.querySelectorAll('#context-menu .ctx-label')].map(l => l.textContent);
+        check('代码块菜单含复制/全屏', labels.includes('复制代码块') && labels.includes('全屏查看'));
+        check('代码块菜单含调整格式/样式/字号', labels.includes('调整代码块格式') && labels.includes('调整代码块显示样式') && labels.includes('调整代码块字体大小'));
+        const formatSub = [...document.querySelectorAll('#context-menu .ctx-item')].find(i => i.querySelector('.ctx-label') && i.querySelector('.ctx-label').textContent === '调整代码块格式');
+        const subLabels = [...formatSub.querySelectorAll('.ctx-submenu .ctx-label')].map(l => l.textContent);
+        check('格式子菜单含 4 项', subLabels.join(',') === '跟随全局,横向滚动,自动换行,自适应最长行');
+        const themeSub = [...document.querySelectorAll('#context-menu .ctx-item')].find(i => i.querySelector('.ctx-label') && i.querySelector('.ctx-label').textContent === '调整代码块显示样式');
+        check('主题子菜单含跟随全局/暗黑极客', [...themeSub.querySelectorAll('.ctx-submenu .ctx-label')].some(l => l.textContent === '跟随全局') && [...themeSub.querySelectorAll('.ctx-submenu .ctx-label')].some(l => l.textContent === '暗黑极客'));
+        // 点击「横向滚动」生效
+        const scrollItem = [...formatSub.querySelectorAll('.ctx-submenu .ctx-item-btn')].find(b => b.querySelector('.ctx-label').textContent === '横向滚动');
+        scrollItem.click();
+        check('菜单点击后隐藏', $('#context-menu').hidden === true);
+        check('代码块 data-code-format=scroll', codeWrapper.getAttribute('data-code-format') === 'scroll');
+        // 表格
+        window.hideContextMenu();
+        const tbl = document.querySelector('.table-enhanced-inner');
+        tbl.dispatchEvent(ctxEvent(180, 180));
+        check('表格右键菜单含复制表格内容', [...document.querySelectorAll('#context-menu .ctx-label')].some(l => l.textContent === '复制表格内容'));
+        window.hideContextMenu();
 
     })().then(() => {
         console.log(fail === 0 ? '\n=== 端到端测试全部通过 ===' : `\n=== ${fail} 项失败 ===`);

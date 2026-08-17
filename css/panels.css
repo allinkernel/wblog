@@ -570,3 +570,102 @@
 .font-local-status.warn {
     color: #e6a23c;
 }
+
+/* ---- 右键菜单 ---- */
+.context-menu {
+    position: fixed;
+    z-index: 30000;
+    min-width: 190px;
+    max-width: 260px;
+    background: var(--theme-surface);
+    border: 1px solid var(--theme-border);
+    border-radius: 8px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+    padding: 4px;
+    user-select: none;
+}
+.context-menu[hidden] {
+    display: none;
+}
+.ctx-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.ctx-item {
+    position: relative;
+}
+.ctx-item-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    padding: 6px 10px;
+    border: none;
+    background: transparent;
+    color: var(--text-color);
+    font-size: 12px;
+    cursor: pointer;
+    border-radius: 5px;
+    text-align: left;
+    white-space: nowrap;
+}
+.ctx-item-btn:hover {
+    background: var(--theme-panel-hover);
+}
+.ctx-check {
+    width: 14px;
+    text-align: center;
+    color: var(--theme-link);
+    flex-shrink: 0;
+}
+.ctx-arrow {
+    margin-left: 8px;
+    color: var(--theme-muted);
+    font-size: 12px;
+}
+.ctx-divider {
+    height: 1px;
+    background: var(--theme-border);
+    margin: 4px 6px;
+    list-style: none;
+}
+.ctx-submenu {
+    display: none;
+    position: absolute;
+    left: calc(100% - 2px);
+    top: -5px;
+    min-width: 180px;
+    background: var(--theme-surface);
+    border: 1px solid var(--theme-border);
+    border-radius: 8px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+    padding: 4px;
+    z-index: 30001;
+}
+.ctx-item:hover > .ctx-submenu {
+    display: block;
+}
+.ctx-submenu .ctx-item-btn {
+    padding: 5px 10px;
+}
+
+/* 轻量提示 */
+.ctx-toast {
+    position: fixed;
+    bottom: 70px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.78);
+    color: #fff;
+    padding: 6px 16px;
+    border-radius: 6px;
+    font-size: 12px;
+    z-index: 40000;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+}
+.ctx-toast.show {
+    opacity: 1;
+}

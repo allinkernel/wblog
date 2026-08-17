@@ -5,7 +5,7 @@
 :root {
     --page-width: 700px;  
     --font-size: 18px;   
-    --line-height: 1.7;    
+    --line-height: 1.4;    
     --text-color: #222222; 
     --bg-color: #fbfbfb;
 
@@ -23,7 +23,7 @@
     
     /* 代码相关 */
     --code-inline-size: calc(1em - 2px);
-    --code-inline-pad-y: 0px;
+    --code-inline-pad-y: 1px;
     --code-inline-pad-x: 6px;
     --code-block-size: 14px;
 }
@@ -172,7 +172,7 @@ body::-webkit-scrollbar-thumb:hover,
     --font-inline-code: "LXGW WenKai Mono", "JetBrains Mono", Consolas, "Noto Sans Mono CJK SC", monospace;
     --font-code-block-code: "JetBrains Mono", "Cascadia Code", Consolas, "Liberation Mono", monospace;
     --font-code-block-comment: "LXGW WenKai Mono", "LXGW WenKai", "Noto Sans Mono CJK SC", "Noto Serif CJK SC", serif;
-    --font-heading: inherit;
+    --font-heading: "Microsoft YaHei", "微软雅黑", "PingFang SC", "Noto Sans CJK SC", "Source Han Sans SC", sans-serif;
     --font-link: inherit;
     --font-quote: inherit;
 }

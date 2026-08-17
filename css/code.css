@@ -6,9 +6,22 @@
     padding: var(--code-inline-pad-y, 2px) var(--code-inline-pad-x, 6px);
     border-radius: 4px;
     transition: all 0.2s ease;
-    /* 允许在任意字符处拆分行内代码，避免长行内代码导致 justify 拉伸字间距 */
-    word-break: break-all;
+    /* 允许行内代码断行（避免长行内代码导致 justify 拉伸字间距）；
+       用 overflow-wrap 而非 break-all（break-all 是 Chromium 选区渲染 bug 的诱因） */
     overflow-wrap: anywhere;
+    user-select: text;
+    -webkit-user-select: text;
+}
+/* 高对比选区：行内代码选中时蓝底白字，保证部分选中（拖选经过时）也清晰可见 */
+#article-container code:not(pre code)::selection,
+#article-container kbd::selection,
+#article-container samp::selection {
+    background: rgba(24, 144, 255, 0.55);
+    color: #ffffff;
+}
+::selection {
+    background: rgba(24, 144, 255, 0.35);
+    color: inherit;
 }
 
 /* 行内主题 */
