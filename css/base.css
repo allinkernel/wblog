@@ -168,7 +168,7 @@ body::-webkit-scrollbar-thumb:hover,
     --font-stack-sans-mono: Consolas, "Fira Code", Monaco, monospace;
     --font-stack-serif-mono: "Courier New", Courier, "Iosevka Slab", monospace;
 
-    --font-body: inherit;
+    --font-body: "LXGW WenKai", "LXGW WenKai GB", "Noto Serif CJK SC", "Source Han Serif SC", serif;
     --font-inline-code: var(--font-stack-sans-mono);
     --font-code-block: var(--font-stack-sans-mono);
     --font-heading: inherit;

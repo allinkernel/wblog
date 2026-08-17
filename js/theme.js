@@ -3,6 +3,36 @@ const root = document.documentElement;
 
 const readerThemeMap = {
     'custom': {text:'#222222', bg:'#fbfbfb', surface:'#ffffff', surface2:'#f6f8fa', border:'#d0d7de', muted:'#57606a', link:'#0969da', hover:'#0550ae', accent:'#1890ff', quoteBg:'rgba(0,0,0,.03)', quoteBorder:'#d0d7de', quoteMark:'rgba(0,0,0,.22)'},
+    // lightmind：山林氛围 Typora 主题（input/lightmind.css）适配
+    'lightmind': {
+        text: '#2c3a32',
+        bg: '#f4f1e8',
+        surface: '#faf7ef',
+        surface2: '#ece8db',
+        border: 'rgba(74,124,89,0.30)',
+        muted: '#6b7a6f',
+        link: '#4a7c59',
+        hover: '#2f5a40',
+        accent: '#4a7c59',
+        quoteBg: '#ecefe6',
+        quoteBorder: '#8fb39b',
+        quoteMark: 'rgba(44,58,50,0.22)'
+    },
+    // lightmind-dark：暗夜森林版（input/lightmind-dark.css）适配
+    'lightmind-dark': {
+        text: '#d4dccf',
+        bg: '#161d1a',
+        surface: '#1d2622',
+        surface2: '#232d28',
+        border: 'rgba(127,190,146,0.28)',
+        muted: '#9ba89e',
+        link: '#7fbe92',
+        hover: '#a8d4b6',
+        accent: '#7fbe92',
+        quoteBg: '#1d2722',
+        quoteBorder: '#5a7d68',
+        quoteMark: 'rgba(212,220,207,0.25)'
+    },
     'github-light': {
         text: '#1f2328',
         bg: '#ffffff',

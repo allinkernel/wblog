@@ -486,12 +486,12 @@ function getCurrentThemeMode() {
 function applyThemeMode(mode) {
     let themeName;
     if (mode === 'dark') {
-        themeName = localStorage.getItem('last-dark-theme') || 'github-dark';
+        themeName = localStorage.getItem('last-dark-theme') || 'lightmind-dark';
     } else {
-        themeName = localStorage.getItem('last-light-theme') || 'github-light';
+        themeName = localStorage.getItem('last-light-theme') || 'lightmind';
     }
 
-    const currentTheme = localStorage.getItem('blog-reader-theme') || 'github-light';
+    const currentTheme = localStorage.getItem('blog-reader-theme') || 'lightmind';
     if (currentTheme === themeName) {
         localStorage.setItem('blog-theme-mode', mode);
     }
@@ -520,9 +520,9 @@ function applyThemeMode(mode) {
         }
     };
     if (isDark) {
-        setSelectIfValid(darkSelect, themeName, 'github-dark');
+        setSelectIfValid(darkSelect, themeName, 'lightmind-dark');
     } else {
-        setSelectIfValid(lightSelect, themeName, 'github-light');
+        setSelectIfValid(lightSelect, themeName, 'lightmind');
     }
 
     if (themeName === 'custom') {
@@ -542,7 +542,7 @@ function toggleThemeMode() {
 }
 
 function initThemeMode() {
-    const currentTheme = localStorage.getItem('blog-reader-theme') || 'github-light';
+    const currentTheme = localStorage.getItem('blog-reader-theme') || 'lightmind';
     const isDark = currentTheme.includes('dark');
     const mode = isDark ? 'dark' : 'light';
     localStorage.setItem('blog-theme-mode', mode);
@@ -594,9 +594,9 @@ function writeFontSettingsToStorage(fonts) {
 
 function getDefaultConfig() {
     return {
-        readerTheme: 'github-light',
-        lightTheme: 'github-light',
-        darkTheme: 'github-dark',
+        readerTheme: 'lightmind',
+        lightTheme: 'lightmind',
+        darkTheme: 'lightmind-dark',
         codeFormat: 'global',
         codeTheme: 'global',
         codeInlineTheme: 'global',
@@ -622,9 +622,9 @@ let userConfigBackup = null;
 
 function saveUserConfig() {
     userConfigBackup = {
-        readerTheme: localStorage.getItem('blog-reader-theme') || 'github-light',
-        lightTheme: localStorage.getItem('last-light-theme') || 'github-light',
-        darkTheme: localStorage.getItem('last-dark-theme') || 'github-dark',
+        readerTheme: localStorage.getItem('blog-reader-theme') || 'lightmind',
+        lightTheme: localStorage.getItem('last-light-theme') || 'lightmind',
+        darkTheme: localStorage.getItem('last-dark-theme') || 'lightmind-dark',
         codeFormat: localStorage.getItem('blog-code-format') || 'global',
         codeTheme: localStorage.getItem('blog-code-theme') || 'global',
         codeInlineTheme: localStorage.getItem('blog-code-inline-theme') || 'global',

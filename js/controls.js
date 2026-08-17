@@ -752,11 +752,11 @@ function restoreSavedSettings() {
     const savedCText = localStorage.getItem('blog-ctext');
     const savedCBg = localStorage.getItem('blog-cbg');
     // 当前主题
-    const savedTheme = localStorage.getItem('blog-reader-theme') || 'github-light';
+    const savedTheme = localStorage.getItem('blog-reader-theme') || 'lightmind';
     // 日间/夜间主题选择器的默认值：根据当前主题是亮还是暗决定
     const isDark = savedTheme.includes('dark');
-    const defaultLightTheme = localStorage.getItem('last-light-theme') || 'github-light';
-    const defaultDarkTheme = localStorage.getItem('last-dark-theme') || 'github-dark';
+    const defaultLightTheme = localStorage.getItem('last-light-theme') || 'lightmind';
+    const defaultDarkTheme = localStorage.getItem('last-dark-theme') || 'lightmind-dark';
 
     // 代码默认设置
     const savedCodeFormat = localStorage.getItem('blog-code-format') || 'global';
@@ -807,7 +807,7 @@ function restoreSavedSettings() {
         localStorage.setItem('blog-theme-mode', 'light');
     } else {
         applyReaderTheme(savedTheme);
-        const theme = readerThemeMap[savedTheme] || readerThemeMap['github-light'];
+        const theme = readerThemeMap[savedTheme] || readerThemeMap['lightmind'];
         if (cText) cText.value = theme.text;
         if (cBg) cBg.value = theme.bg;
         if (isDark) {
@@ -826,10 +826,10 @@ function restoreSavedSettings() {
         return fallback;
     };
     if (lightThemeSelect) {
-        lightThemeSelect.value = resolveSelectValue(lightThemeSelect, isDark ? defaultLightTheme : savedTheme, 'github-light');
+        lightThemeSelect.value = resolveSelectValue(lightThemeSelect, isDark ? defaultLightTheme : savedTheme, 'lightmind');
     }
     if (darkThemeSelect) {
-        darkThemeSelect.value = resolveSelectValue(darkThemeSelect, isDark ? savedTheme : defaultDarkTheme, 'github-dark');
+        darkThemeSelect.value = resolveSelectValue(darkThemeSelect, isDark ? savedTheme : defaultDarkTheme, 'lightmind-dark');
     }
 
     // ----- 恢复代码设置 -----

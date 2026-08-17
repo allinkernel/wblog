@@ -34,6 +34,10 @@ wblog_new 前端模板（`template/`）的架构地图、关键机制、验证�
    - `wrap`：`width:100%` + `table-layout:fixed` + 单元格 `break-word`。
    - `updateTableFormat` 重置段必须清理 `wrapper.style.width/minWidth/maxWidth`，防止切格式残留。
 
+## Typora 主题移植
+
+把 `input/` 下的 Typora 主题 CSS 接入模板可选阅读主题（亮/暗各一套）：读 `references/typora-theme-port.md`（令牌映射表 → 下拉/默认值改动清单 → 验证 → 踩坑）。触发词：用户给 Typora 主题 css 要求加入可选主题、或要求改默认主题。
+
 ## 验证工作流（每次 UI 调整必须走）
 
 1. 语法：`node --check template/js/*.js`

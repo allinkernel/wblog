@@ -259,7 +259,7 @@ function loadArticleContent(path) {
             updateActiveTreeLink(path);
 
             // ===== 关键修复：重新应用当前用户选择的主题（而不是强制 github 主题） =====
-            const currentTheme = localStorage.getItem('blog-reader-theme') || 'github-light';
+            const currentTheme = localStorage.getItem('blog-reader-theme') || 'lightmind';
             applyReaderTheme(currentTheme);
 
             // 同步底部主题按钮状态：根据当前主题名称是否包含 'dark' 判断明暗
