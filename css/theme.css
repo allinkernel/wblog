@@ -572,3 +572,102 @@ body {
 #article-container[data-reader-theme="texi2html"] blockquote { background: transparent; }
 #article-container[data-reader-theme="texi2html"] .tree-link,
 #article-container[data-reader-theme="texi2html"] .toc-tree a { text-decoration: underline; }
+
+/* ========== mdmdt / mdmdt-dark 主题细节（Typora 原样迁移） ========== */
+
+/* --- 标题：字号层级 + h1 下边框 + 字距 --- */
+#article-container[data-reader-theme="mdmdt"] h1,
+#article-container[data-reader-theme="mdmdt"] h2,
+#article-container[data-reader-theme="mdmdt"] h3,
+#article-container[data-reader-theme="mdmdt"] h4,
+#article-container[data-reader-theme="mdmdt"] h5,
+#article-container[data-reader-theme="mdmdt"] h6,
+#article-container[data-reader-theme="mdmdt-dark"] h1,
+#article-container[data-reader-theme="mdmdt-dark"] h2,
+#article-container[data-reader-theme="mdmdt-dark"] h3,
+#article-container[data-reader-theme="mdmdt-dark"] h4,
+#article-container[data-reader-theme="mdmdt-dark"] h5,
+#article-container[data-reader-theme="mdmdt-dark"] h6 {
+    color: var(--text-color);
+    opacity: 1;
+    letter-spacing: 2px;
+    margin-top: 32px;
+    margin-bottom: 18px;
+}
+#article-container[data-reader-theme="mdmdt"] h1,
+#article-container[data-reader-theme="mdmdt-dark"] h1 { font-size: 32px; border-bottom: 1px solid var(--theme-border); padding-bottom: 0.25em; }
+#article-container[data-reader-theme="mdmdt"] h2,
+#article-container[data-reader-theme="mdmdt-dark"] h2 { font-size: 28px; }
+#article-container[data-reader-theme="mdmdt"] h3,
+#article-container[data-reader-theme="mdmdt-dark"] h3 { font-size: 24px; }
+#article-container[data-reader-theme="mdmdt"] h4,
+#article-container[data-reader-theme="mdmdt-dark"] h4 { font-size: 20px; }
+#article-container[data-reader-theme="mdmdt"] h5,
+#article-container[data-reader-theme="mdmdt-dark"] h5 { font-size: 18px; }
+#article-container[data-reader-theme="mdmdt"] h6,
+#article-container[data-reader-theme="mdmdt-dark"] h6 { font-size: 16px; }
+
+/* --- 引用：蓝色淡底 + 左侧 4px 主蓝条 + 圆角（继承主题时生效） --- */
+#article-container[data-reader-theme="mdmdt"][data-quote-style="global"] blockquote,
+#article-container[data-reader-theme="mdmdt-dark"][data-quote-style="global"] blockquote {
+    background: var(--theme-quote-bg);
+    border-left: 4px solid var(--theme-quote-border);
+    border-top: 1px solid transparent;
+    border-right: 1px solid transparent;
+    border-bottom: 1px solid transparent;
+    border-radius: 8px;
+    padding: 16px;
+    color: var(--text-color);
+}
+
+/* --- 表格：1px 边框 + 表头灰底 + 隔行条纹 + 列分隔线 --- */
+#article-container[data-reader-theme="mdmdt"] .table-enhanced-inner,
+#article-container[data-reader-theme="mdmdt-dark"] .table-enhanced-inner {
+    border: 1px solid var(--theme-border);
+    border-collapse: collapse;
+    background: var(--theme-surface);
+}
+#article-container[data-reader-theme="mdmdt"] .table-enhanced-inner thead th,
+#article-container[data-reader-theme="mdmdt-dark"] .table-enhanced-inner thead th {
+    background: var(--theme-surface-2);
+    color: var(--text-color);
+    border-bottom: 1px solid var(--theme-border);
+}
+#article-container[data-reader-theme="mdmdt"] .table-enhanced-inner td,
+#article-container[data-reader-theme="mdmdt-dark"] .table-enhanced-inner td {
+    border-left: 1px solid var(--theme-border);
+    border-top: 1px solid var(--theme-border);
+}
+#article-container[data-reader-theme="mdmdt"] .table-enhanced-inner tbody tr:nth-child(odd) td,
+#article-container[data-reader-theme="mdmdt-dark"] .table-enhanced-inner tbody tr:nth-child(odd) td {
+    background: var(--theme-surface);
+}
+#article-container[data-reader-theme="mdmdt"] .table-enhanced-inner tbody tr:nth-child(even) td,
+#article-container[data-reader-theme="mdmdt-dark"] .table-enhanced-inner tbody tr:nth-child(even) td {
+    background: var(--theme-surface-2);
+}
+#article-container[data-reader-theme="mdmdt"] .table-enhanced-inner tr > :first-child,
+#article-container[data-reader-theme="mdmdt-dark"] .table-enhanced-inner tr > :first-child {
+    border-left: none;
+}
+
+/* --- 行内代码：蓝色淡底 + 代码蓝文字（行内主题为 global 时生效） --- */
+#article-container[data-reader-theme="mdmdt"][data-code-inline-theme="global"] code:not(pre code) {
+    background: rgba(62, 105, 215, 0.15);
+    color: #2f479f;
+    border: none;
+}
+#article-container[data-reader-theme="mdmdt-dark"][data-code-inline-theme="global"] code:not(pre code) {
+    background: rgba(62, 105, 215, 0.3);
+    color: #bbc7fd;
+    border: none;
+}
+
+/* --- 分隔线：1px 实线 --- */
+#article-container[data-reader-theme="mdmdt"] hr,
+#article-container[data-reader-theme="mdmdt-dark"] hr {
+    border: none;
+    height: 1px;
+    background: var(--theme-border);
+    margin: 2em 0;
+}

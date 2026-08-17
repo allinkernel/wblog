@@ -122,6 +122,14 @@ setTimeout(() => {
     check('lightmind 应用后 --theme-link', document.documentElement.style.getPropertyValue('--theme-link') === '#4a7c59');
     window.applyReaderTheme('lightmind-dark');
     check('lightmind-dark 应用后 --bg-color', document.documentElement.style.getPropertyValue('--bg-color') === '#161d1a');
+    check('readerThemeMap 含 mdmdt 两主题', !!window.readerThemeMap['mdmdt'] && !!window.readerThemeMap['mdmdt-dark']);
+    check('日间下拉含 mdmdt', [...$('#light-theme-select').options].some(o => o.value === 'mdmdt'));
+    check('夜间下拉含 mdmdt-dark', [...$('#dark-theme-select').options].some(o => o.value === 'mdmdt-dark'));
+    window.applyReaderTheme('mdmdt');
+    check('mdmdt 应用后 --bg-color', document.documentElement.style.getPropertyValue('--bg-color') === '#fafafc');
+    check('mdmdt 应用后 --theme-link', document.documentElement.style.getPropertyValue('--theme-link') === '#3e69d7');
+    window.applyReaderTheme('mdmdt-dark');
+    check('mdmdt-dark 应用后 --bg-color', document.documentElement.style.getPropertyValue('--bg-color') === '#1b1b1f');
     // lightmind 标题装饰迁移（Typora 原样：h1/h2 横线 + h3 绿色小条）
     const themeCss = fs.readFileSync(path.join(ROOT, 'template/css/theme.css'), 'utf8');
     check('lightmind h1 横线（CSS）', /\[data-reader-theme="lightmind"\] h1[^{]*\{[^}]*border-bottom: 2px solid var\(--theme-accent\)/.test(themeCss));
@@ -176,6 +184,8 @@ setTimeout(() => {
     check('选择字体后 --font-body 生效', document.documentElement.style.getPropertyValue('--font-body') === 'Consolas, monospace');
     check('字体选择写入 localStorage', window.localStorage.getItem('font-body-family') === 'Consolas, monospace');
     check('下拉 title 显示选中项全名', bodySelect.title === 'Consolas');
+    check('等宽开关 ON 文字为「等宽」', document.querySelector('.font-region[data-font-group="heading"] .font-mono-toggle').parentElement.querySelector('.text-on').textContent === '等宽');
+    check('开关 OFF 文字使用主题正文色（对比度修复）', /\.font-switch-item \.text-off \{[^}]*color: var\(--text-color\)/.test(fs.readFileSync(path.join(ROOT, 'template/css/panels.css'), 'utf8')));
 
     // 行内代码 / 代码块独立控制 CSS 变量
     const inlineSel = inlineCodeRegion.querySelector('.font-family-select');
@@ -214,6 +224,18 @@ setTimeout(() => {
     check('表格格式切换重置 wrapper 宽度（JS）', /\.style\.width = '';[^}]*\.style\.minWidth = '';[^}]*\.style\.maxWidth = '';/s.test(codeJs));
     check('code/pre 字体分离（CSS）', /--font-inline-code/.test(baseCss) && /--font-code-block-code/.test(baseCss) && /--font-code-block-comment/.test(baseCss) && /var\(--font-code-block-code\), var\(--font-code-block-comment\)/.test(baseCss));
     check('默认字体：行内 WenKai Mono / 代码 JetBrains / 注释 WenKai Mono（CSS）', /--font-inline-code:[^;]*LXGW WenKai Mono/.test(baseCss) && /--font-code-block-code:[^;]*JetBrains Mono/.test(baseCss) && /--font-code-block-comment:[^;]*LXGW WenKai Mono/.test(baseCss));
+    check('tree 竖线贯穿整行（CSS）', /\.toc-tree li li::before[^{]*\{[^}]*left: -0\.85rem[^}]*top: 0[^}]*bottom: 0/.test(fs.readFileSync(path.join(ROOT, 'template/css/panels.css'), 'utf8')));
+    check('tree 横线在行中（CSS）', /\.toc-tree li li::after[^{]*\{[^}]*top: calc\(0\.2rem \+ 0\.7em\)[^}]*width: 0\.65rem[^}]*border-bottom/.test(fs.readFileSync(path.join(ROOT, 'template/css/panels.css'), 'utf8')));
+    check('末节点竖线截断（CSS）', /\.toc-tree li li:last-child::before[^{]*\{[^}]*height: calc\(0\.2rem \+ 0\.7em\)/.test(fs.readFileSync(path.join(ROOT, 'template/css/panels.css'), 'utf8')));
+    check('树紧凑行高（CSS）', /\.toc-item,[^{]*\{[^}]*padding-top: 0\.2rem[^}]*line-height: 1\.4/.test(fs.readFileSync(path.join(ROOT, 'template/css/panels.css'), 'utf8')));
+    check('顶层不绘制引导线（CSS）', !/\.toc-tree > li[^{]*::before/.test(fs.readFileSync(path.join(ROOT, 'template/css/panels.css'), 'utf8')) && !/\.toc-tree > li[^{]*::after/.test(fs.readFileSync(path.join(ROOT, 'template/css/panels.css'), 'utf8')));
+    check('根节点无左上拐角（CSS）', !/toc-tree > li:first-child > \.toc-item-row::before[^{]*\{[^}]*border-top/.test(fs.readFileSync(path.join(ROOT, 'template/css/panels.css'), 'utf8')));
+    check('树虚线残留已清除（CSS）', !/article-tree ul[^{]*\{[^}]*dashed/.test(fs.readFileSync(path.join(ROOT, 'template/css/panels.css'), 'utf8')));
+    check('树链接不换行（CSS）', /\.toc-tree a,[^{]*\{[^}]*white-space: nowrap/.test(fs.readFileSync(path.join(ROOT, 'template/css/panels.css'), 'utf8')));
+    check('tree 三角图标移除（CSS）', /\.toc-toggle, \.toc-spacer, \.tree-toggle, \.tree-spacer \{[^}]*display: none/.test(fs.readFileSync(path.join(ROOT, 'template/css/panels.css'), 'utf8')));
+    check('选中节点胶囊样式（CSS）', /\.toc-tree a\.active,[^{]*\.tree-link\.active \{[^}]*color-mix\(in srgb, var\(--theme-link\) 20%[^}]*border-radius: 6px/.test(fs.readFileSync(path.join(ROOT, 'template/css/panels.css'), 'utf8')));
+    check('大纲代码小胶囊（CSS）', /\.toc-tree code[^{]*\{[^}]*border-radius: 6px[^}]*display: inline-block/.test(fs.readFileSync(path.join(ROOT, 'template/css/panels.css'), 'utf8')));
+    check('标题 H 标记 CSS（::after hover）', /#article-container h1::after[^{]*\{[^}]*content: 'H1'/.test(baseCss) && /#article-container h2:hover::after[^{]*\{[^}]*opacity: 1/.test(baseCss));
 
     // ---- 6. 面板按钮映射与关闭 ----
     $('#bar-settings').click();

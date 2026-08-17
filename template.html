@@ -63,6 +63,7 @@
                             <label>日间主题：</label>
                             <select id="light-theme-select">
                                 <option value="lightmind">lightmind 默认</option>
+                                <option value="mdmdt">mdmdt</option>
                                 <option value="github-light">GitHub Light</option>
                                 <option value="claude-light">Claude 暖白</option>
                                 <option value="notion-light">Notion Light</option>
@@ -76,6 +77,7 @@
                             <label>夜间主题：</label>
                             <select id="dark-theme-select">
                                 <option value="lightmind-dark">lightmind-dark 默认</option>
+                                <option value="mdmdt-dark">mdmdt-dark</option>
                                 <option value="github-dark">GitHub Dark</option>
                                 <option value="claude-dark">Claude 暗夜</option>
                                 <option value="solarized-dark">Solarized Dark</option>
@@ -173,23 +175,21 @@
                             <div class="font-region-title">标题</div>
                             <div class="font-region-row">
                                 <span class="font-switch-item">
-                                    <span class="font-switch-label">等宽</span>
                                     <label class="switch">
                                         <input type="checkbox" class="font-mono-toggle">
                                         <span class="slider">
-                                            <span class="slider-text text-on">ON</span>
-                                            <span class="slider-text text-off">OFF</span>
+                                            <span class="slider-text text-on">等宽</span>
+                                            <span class="slider-text text-off">变宽</span>
                                             <span class="knob"></span>
                                         </span>
                                     </label>
                                 </span>
                                 <span class="font-switch-item">
-                                    <span class="font-switch-label">衬线</span>
                                     <label class="switch">
                                         <input type="checkbox" class="font-serif-toggle">
                                         <span class="slider">
-                                            <span class="slider-text text-on">ON</span>
-                                            <span class="slider-text text-off">OFF</span>
+                                            <span class="slider-text text-on">衬线</span>
+                                            <span class="slider-text text-off">无衬</span>
                                             <span class="knob"></span>
                                         </span>
                                     </label>
@@ -204,23 +204,21 @@
                             <div class="font-region-title">正文</div>
                             <div class="font-region-row">
                                 <span class="font-switch-item">
-                                    <span class="font-switch-label">等宽</span>
                                     <label class="switch">
                                         <input type="checkbox" class="font-mono-toggle">
                                         <span class="slider">
-                                            <span class="slider-text text-on">ON</span>
-                                            <span class="slider-text text-off">OFF</span>
+                                            <span class="slider-text text-on">等宽</span>
+                                            <span class="slider-text text-off">变宽</span>
                                             <span class="knob"></span>
                                         </span>
                                     </label>
                                 </span>
                                 <span class="font-switch-item">
-                                    <span class="font-switch-label">衬线</span>
                                     <label class="switch">
                                         <input type="checkbox" class="font-serif-toggle">
                                         <span class="slider">
-                                            <span class="slider-text text-on">ON</span>
-                                            <span class="slider-text text-off">OFF</span>
+                                            <span class="slider-text text-on">衬线</span>
+                                            <span class="slider-text text-off">无衬</span>
                                             <span class="knob"></span>
                                         </span>
                                     </label>
@@ -235,23 +233,21 @@
                             <div class="font-region-title">行内代码</div>
                             <div class="font-region-row">
                                 <span class="font-switch-item">
-                                    <span class="font-switch-label">等宽</span>
                                     <label class="switch">
                                         <input type="checkbox" class="font-mono-toggle">
                                         <span class="slider">
-                                            <span class="slider-text text-on">ON</span>
-                                            <span class="slider-text text-off">OFF</span>
+                                            <span class="slider-text text-on">等宽</span>
+                                            <span class="slider-text text-off">变宽</span>
                                             <span class="knob"></span>
                                         </span>
                                     </label>
                                 </span>
                                 <span class="font-switch-item">
-                                    <span class="font-switch-label">衬线</span>
                                     <label class="switch">
                                         <input type="checkbox" class="font-serif-toggle">
                                         <span class="slider">
-                                            <span class="slider-text text-on">ON</span>
-                                            <span class="slider-text text-off">OFF</span>
+                                            <span class="slider-text text-on">衬线</span>
+                                            <span class="slider-text text-off">无衬</span>
                                             <span class="knob"></span>
                                         </span>
                                     </label>
@@ -266,23 +262,21 @@
                             <div class="font-region-title">代码块代码</div>
                             <div class="font-region-row">
                                 <span class="font-switch-item">
-                                    <span class="font-switch-label">等宽</span>
                                     <label class="switch">
                                         <input type="checkbox" class="font-mono-toggle">
                                         <span class="slider">
-                                            <span class="slider-text text-on">ON</span>
-                                            <span class="slider-text text-off">OFF</span>
+                                            <span class="slider-text text-on">等宽</span>
+                                            <span class="slider-text text-off">变宽</span>
                                             <span class="knob"></span>
                                         </span>
                                     </label>
                                 </span>
                                 <span class="font-switch-item">
-                                    <span class="font-switch-label">衬线</span>
                                     <label class="switch">
                                         <input type="checkbox" class="font-serif-toggle">
                                         <span class="slider">
-                                            <span class="slider-text text-on">ON</span>
-                                            <span class="slider-text text-off">OFF</span>
+                                            <span class="slider-text text-on">衬线</span>
+                                            <span class="slider-text text-off">无衬</span>
                                             <span class="knob"></span>
                                         </span>
                                     </label>
@@ -297,23 +291,21 @@
                             <div class="font-region-title">代码块注释</div>
                             <div class="font-region-row">
                                 <span class="font-switch-item">
-                                    <span class="font-switch-label">等宽</span>
                                     <label class="switch">
                                         <input type="checkbox" class="font-mono-toggle">
                                         <span class="slider">
-                                            <span class="slider-text text-on">ON</span>
-                                            <span class="slider-text text-off">OFF</span>
+                                            <span class="slider-text text-on">等宽</span>
+                                            <span class="slider-text text-off">变宽</span>
                                             <span class="knob"></span>
                                         </span>
                                     </label>
                                 </span>
                                 <span class="font-switch-item">
-                                    <span class="font-switch-label">衬线</span>
                                     <label class="switch">
                                         <input type="checkbox" class="font-serif-toggle">
                                         <span class="slider">
-                                            <span class="slider-text text-on">ON</span>
-                                            <span class="slider-text text-off">OFF</span>
+                                            <span class="slider-text text-on">衬线</span>
+                                            <span class="slider-text text-off">无衬</span>
                                             <span class="knob"></span>
                                         </span>
                                     </label>
@@ -328,23 +320,21 @@
                             <div class="font-region-title">链接</div>
                             <div class="font-region-row">
                                 <span class="font-switch-item">
-                                    <span class="font-switch-label">等宽</span>
                                     <label class="switch">
                                         <input type="checkbox" class="font-mono-toggle">
                                         <span class="slider">
-                                            <span class="slider-text text-on">ON</span>
-                                            <span class="slider-text text-off">OFF</span>
+                                            <span class="slider-text text-on">等宽</span>
+                                            <span class="slider-text text-off">变宽</span>
                                             <span class="knob"></span>
                                         </span>
                                     </label>
                                 </span>
                                 <span class="font-switch-item">
-                                    <span class="font-switch-label">衬线</span>
                                     <label class="switch">
                                         <input type="checkbox" class="font-serif-toggle">
                                         <span class="slider">
-                                            <span class="slider-text text-on">ON</span>
-                                            <span class="slider-text text-off">OFF</span>
+                                            <span class="slider-text text-on">衬线</span>
+                                            <span class="slider-text text-off">无衬</span>
                                             <span class="knob"></span>
                                         </span>
                                     </label>
@@ -359,23 +349,21 @@
                             <div class="font-region-title">引用</div>
                             <div class="font-region-row">
                                 <span class="font-switch-item">
-                                    <span class="font-switch-label">等宽</span>
                                     <label class="switch">
                                         <input type="checkbox" class="font-mono-toggle">
                                         <span class="slider">
-                                            <span class="slider-text text-on">ON</span>
-                                            <span class="slider-text text-off">OFF</span>
+                                            <span class="slider-text text-on">等宽</span>
+                                            <span class="slider-text text-off">变宽</span>
                                             <span class="knob"></span>
                                         </span>
                                     </label>
                                 </span>
                                 <span class="font-switch-item">
-                                    <span class="font-switch-label">衬线</span>
                                     <label class="switch">
                                         <input type="checkbox" class="font-serif-toggle">
                                         <span class="slider">
-                                            <span class="slider-text text-on">ON</span>
-                                            <span class="slider-text text-off">OFF</span>
+                                            <span class="slider-text text-on">衬线</span>
+                                            <span class="slider-text text-off">无衬</span>
                                             <span class="knob"></span>
                                         </span>
                                     </label>

@@ -159,9 +159,8 @@
 .topic-item:hover { background: var(--theme-panel-hover); color: var(--theme-link); }
 
 .article-tree, .article-tree ul { list-style: none !important; padding-left: 0 !important; margin: 0 !important; }
-.article-tree ul { padding-left: 14px !important; border-left: 1px dashed var(--theme-border); margin-top: 2px; margin-bottom: 2px; }
 
-.tree-node-row { display: inline-flex; align-items: center; gap: 4px; padding: 2px 0; }
+
 .tree-toggle { cursor: pointer; font-size: 9px; color: var(--theme-muted); width: 12px; text-align: center; user-select: none; }
 .tree-toggle:hover { color: var(--theme-link); }
 .tree-spacer { width: 12px; display: inline-block; }
@@ -170,15 +169,6 @@
 .tree-link:hover { color: var(--theme-link); text-decoration: underline; }
 .tree-link.active { background-color: var(--theme-accent) !important; color: #fff !important; font-weight: bold; }
 
-/* 大纲样式 - 无小圆点 */
-.toc-tree,
-.toc-tree ul {
-    list-style: none !important;
-    padding-left: 0 !important;
-}
-.toc-tree .toc-tree {
-    padding-left: 12px !important;
-}
 .toc-item {
     margin-bottom: 4px;
 }
@@ -286,7 +276,7 @@
     max-width: 150px;
 }
 
-/* Switch 开关 */
+/* Switch 开关（全局默认：胶囊形，供画布/行号/标题栏等通用开关使用） */
 .switch {
     position: relative;
     display: inline-block;
@@ -336,6 +326,36 @@
 .switch input:checked + .slider .knob { transform: translateX(24px); }
 .switch input:checked + .slider .text-on { opacity: 1; }
 .switch input:checked + .slider .text-off { opacity: 0; }
+
+/* 字体等宽/衬线开关（仅 .font-switch-item 内，不影响其它开关/按钮）：
+   方形 + 微软雅黑文字 + 主题同步高对比 */
+.font-switch-item .switch {
+    width: 58px; /* 两字宽度，无需四字那么长 */
+    height: 24px;
+}
+.font-switch-item .slider {
+    border-radius: 4px;
+}
+.font-switch-item .knob {
+    border-radius: 3px;
+    bottom: 4px;
+}
+.font-switch-item .slider-text {
+    font-family: "Microsoft YaHei", "微软雅黑", "PingFang SC", sans-serif !important;
+    font-size: 11px; /* 微软雅黑 + 稍大字号，更清晰 */
+}
+.font-switch-item .text-off {
+    color: var(--text-color); /* OFF 文字 = 主题正文色，亮/暗自动适应 */
+}
+.font-switch-item input:checked + .slider {
+    background-color: color-mix(in srgb, var(--theme-accent) 82%, #000000); /* accent 压暗配白字，浅紫 accent 也可读 */
+}
+.font-switch-item .text-on {
+    color: #ffffff;
+}
+.font-switch-item input:checked + .slider .knob {
+    transform: translateX(36px); /* 58 - 16 - 6 */
+}
 
 /* 面板隐藏控制 */
 .panel-box.panel-hidden { display: none !important; }
@@ -668,4 +688,103 @@
 }
 .ctx-toast.show {
     opacity: 1;
+}
+
+/* ---- 大纲 / 文档树引导线（移植 input/3.html 参考实现的标准树算法） ----
+   竖线画在嵌套 li::before（left:-0.85rem 落在 ul padding 区，height:100% 贯穿整行，
+   行间自然连续）；横线 li::after（top:1.1rem 行中文字处）；末节点竖线截断；
+   顶层（根容器）不绘制任何引导线。 */
+.toc-tree, .toc-tree ul, .article-tree, .article-tree ul {
+    list-style: none !important;
+    margin: 0 !important;
+}
+.toc-tree, .article-tree {
+    padding-left: 0 !important;
+}
+.toc-tree ul, .article-tree ul {
+    padding-left: 1.4rem !important; /* 每层缩进，连接线画在 padding 区内 */
+}
+.toc-item,
+.article-tree li {
+    position: relative;
+    padding-top: 0.2rem;   /* 紧凑行高：0.2rem ×2 + 1.4em ≈ 26px（原 0.35rem×2 + 1.5em ≈ 35px） */
+    padding-bottom: 0.2rem;
+    line-height: 1.4;
+}
+.toc-item {
+    margin-bottom: 0;
+}
+.toc-item-row,
+.tree-node-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    line-height: 1.4;
+}
+/* 树链接：不换行（行高恒定），无下划线；垂直 padding 0 避免撑高行（active 胶囊除外） */
+.toc-tree a,
+.article-tree a {
+    color: var(--text-color);
+    text-decoration: none;
+    border-radius: 6px;
+    white-space: nowrap;
+    padding: 0 4px;
+}
+/* 移除折叠/展开三角图标与占位 */
+.toc-toggle, .toc-spacer, .tree-toggle, .tree-spacer {
+    display: none !important;
+}
+
+/* 嵌套层级垂直连接线：贯穿整行（top:0 + bottom:0 拉伸，height:100% 在绝对定位伪元素上不可靠） */
+.toc-tree li li::before,
+.article-tree li li::before {
+    content: "";
+    position: absolute;
+    left: -0.85rem;
+    top: 0;
+    bottom: 0;
+    border-left: 1px solid var(--theme-border);
+    pointer-events: none;
+}
+/* 最后一个子节点：垂直线截断到横线处，不向下延伸 */
+.toc-tree li li:last-child::before,
+.article-tree li li:last-child::before {
+    top: 0;
+    height: calc(0.2rem + 0.7em);
+    bottom: auto;
+}
+/* 水平分支连接线：行内文字中线处（calc 跟随行高，改行距不错位） */
+.toc-tree li li::after,
+.article-tree li li::after {
+    content: "";
+    position: absolute;
+    left: -0.85rem;
+    top: calc(0.2rem + 0.7em);
+    width: 0.65rem;
+    border-bottom: 1px solid var(--theme-border);
+    pointer-events: none;
+}
+
+/* 行内代码胶囊（树标题内，如 Makefile.build / $(obj)/） */
+.toc-tree code,
+.article-tree code {
+    font-family: var(--font-inline-code);
+    font-size: 0.825em;
+    background: var(--theme-surface-2);
+    border: 1px solid var(--theme-border);
+    color: var(--theme-link);
+    padding: 0.15rem 0.5rem;
+    border-radius: 6px;
+    display: inline-block;
+    line-height: 1.4;
+}
+/* 选中/激活节点：胶囊 */
+.toc-tree a.active,
+.tree-link.active {
+    background: color-mix(in srgb, var(--theme-link) 20%, var(--theme-surface-2)) !important;
+    color: var(--theme-link) !important;
+    padding: 0.2rem 0.55rem;
+    border-radius: 6px;
+    font-weight: 500;
 }

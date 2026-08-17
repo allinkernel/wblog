@@ -33,6 +33,36 @@ const readerThemeMap = {
         quoteBorder: '#5a7d68',
         quoteMark: 'rgba(212,220,207,0.25)'
     },
+    // mdmdt：Typora 主题（input/mdmdt.css）适配 — 极浅蓝白纸面 + 主蓝强调
+    'mdmdt': {
+        text: '#000000',
+        bg: '#fafafc',
+        surface: '#fafafc',
+        surface2: '#ececee',
+        border: '#d2d2d2',
+        muted: '#666666',
+        link: '#3e69d7',
+        hover: '#2f56b8',
+        accent: '#3e69d7',
+        quoteBg: 'rgba(62,105,215,0.06)',
+        quoteBorder: '#3e69d7',
+        quoteMark: 'rgba(0,0,0,0.20)'
+    },
+    // mdmdt-dark：暗夜版（input/mdmdt-dark.css）适配
+    'mdmdt-dark': {
+        text: '#d0d0d0',
+        bg: '#1b1b1f',
+        surface: '#1b1b1f',
+        surface2: '#282a32',
+        border: '#464b50',
+        muted: '#9aa0a8',
+        link: '#3e69d7',
+        hover: '#5a83e0',
+        accent: '#3e69d7',
+        quoteBg: 'rgba(62,105,215,0.12)',
+        quoteBorder: '#3e69d7',
+        quoteMark: 'rgba(208,208,208,0.22)'
+    },
     'github-light': {
         text: '#1f2328',
         bg: '#ffffff',

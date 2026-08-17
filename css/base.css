@@ -182,6 +182,39 @@ body::-webkit-scrollbar-thumb:hover,
 /* 代码块：代码字形用 code 字体栈，汉字（注释/字符串）自动回退到 comment 字体栈 */
 #article-container pre, #article-container pre code { font-family: var(--font-code-block-code), var(--font-code-block-comment), monospace !important; }
 #article-container h1, #article-container h2, #article-container h3, #article-container h4, #article-container h5, #article-container h6 { font-family: var(--font-heading); }
+/* 标题 hover 提示：版面左侧显示 H 级别（Typora 风格，仅提醒不占位） */
+#article-container h1, #article-container h2, #article-container h3, #article-container h4, #article-container h5, #article-container h6 {
+    position: relative;
+}
+#article-container h1::after { content: 'H1'; }
+#article-container h2::after { content: 'H2'; }
+#article-container h3::after { content: 'H3'; }
+#article-container h4::after { content: 'H4'; }
+#article-container h5::after { content: 'H5'; }
+#article-container h6::after { content: 'H6'; }
+#article-container h1, #article-container h2, #article-container h3,
+#article-container h4, #article-container h5, #article-container h6 {
+    position: relative;
+}
+#article-container h1::after, #article-container h2::after, #article-container h3::after,
+#article-container h4::after, #article-container h5::after, #article-container h6::after {
+    position: absolute;
+    left: -52px;
+    top: 0.55em;
+    font-size: 11px;
+    font-weight: 600;
+    font-family: Consolas, "JetBrains Mono", monospace;
+    color: var(--theme-muted);
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    pointer-events: none;
+    user-select: none;
+    white-space: nowrap;
+}
+#article-container h1:hover::after, #article-container h2:hover::after, #article-container h3:hover::after,
+#article-container h4:hover::after, #article-container h5:hover::after, #article-container h6:hover::after {
+    opacity: 1;
+}
 #article-container a { 
     font-family: var(--font-link);
     color: var(--theme-link);
