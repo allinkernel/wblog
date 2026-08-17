@@ -36,11 +36,7 @@ function togglePanel(panelId) {
     const barMap = {
         'panel-tree': 'bar-tree',
         'panel-toc': 'bar-toc',
-        'panel-config': 'bar-config',
-        'panel-font': 'bar-font',
-        'panel-style': 'bar-style',
-        'panel-code-style': 'bar-code',
-        'panel-table-style': 'bar-table'
+        'panel-settings': 'bar-settings'
     };
     const barId = barMap[panelId];
     if (barId) {
@@ -58,11 +54,7 @@ function setPanelVisible(panelId, visible) {
     const barMap = {
         'panel-tree': 'bar-tree',
         'panel-toc': 'bar-toc',
-        'panel-config': 'bar-config',
-        'panel-font': 'bar-font',
-        'panel-style': 'bar-style',
-        'panel-code-style': 'bar-code',
-        'panel-table-style': 'bar-table'
+        'panel-settings': 'bar-settings'
     };
     const barId = barMap[panelId];
     if (barId) {
@@ -74,7 +66,7 @@ function setPanelVisible(panelId, visible) {
 }
 
 function initPanelVisibility() {
-    const panelIds = ['panel-tree', 'panel-toc', 'panel-config', 'panel-font', 'panel-style', 'panel-code-style', 'panel-table-style'];
+    const panelIds = ['panel-tree', 'panel-toc', 'panel-settings'];
     panelIds.forEach(id => {
         const state = localStorage.getItem(`panel-${id}`);
         setPanelVisible(id, state === 'visible');
@@ -87,7 +79,7 @@ function getPanelIdsBySide(side) {
     if (side === 'left') {
         return ['panel-tree', 'panel-toc'];
     } else if (side === 'right') {
-        return ['panel-config', 'panel-font', 'panel-style', 'panel-code-style', 'panel-table-style'];
+        return ['panel-settings'];
     }
     return [];
 }
@@ -185,11 +177,7 @@ function initBottomBar() {
     const panelMap = {
         'bar-tree': 'panel-tree',
         'bar-toc': 'panel-toc',
-        'bar-config': 'panel-config',
-        'bar-font': 'panel-font',
-        'bar-style': 'panel-style',
-        'bar-code': 'panel-code-style',
-        'bar-table': 'panel-table-style'
+        'bar-settings': 'panel-settings'
     };
     Object.keys(panelMap).forEach(barId => {
         const btn = document.getElementById(barId);
@@ -200,17 +188,29 @@ function initBottomBar() {
         });
     });
 
+    // ----- 设置面板 Tab 页签切换 -----
+    initSettingsTabs();
+
     // ----- 面板标题栏点击切换 -----
     document.querySelectorAll('.panel-header').forEach(header => {
         const panelBox = header.closest('.panel-box');
         if (!panelBox) return;
         header.removeEventListener('click', header._panelToggleHandler);
         const handler = function(e) {
-            if (e.target.closest('.min-btn')) return;
+            if (e.target.closest('.min-btn, .panel-close-btn')) return;
             togglePanel(panelBox.id);
         };
         header._panelToggleHandler = handler;
         header.addEventListener('click', handler);
+    });
+
+    // ----- 面板关闭按钮（✕）-----
+    document.querySelectorAll('.panel-close-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const panelBox = btn.closest('.panel-box');
+            if (panelBox) setPanelVisible(panelBox.id, false);
+        });
     });
 
     // ----- 恢复面板状态（默认关闭） -----
@@ -264,6 +264,24 @@ function initBottomBar() {
         if (barOffsetY > window.innerHeight - 10) barOffsetY = window.innerHeight - 10;
         applyBarPosition();
         saveBarPosition();
+    });
+}
+
+// ==================== 设置面板 Tab 切换 ====================
+function initSettingsTabs() {
+    const tabBar = document.getElementById('settings-tab-bar');
+    if (!tabBar) return;
+    tabBar.addEventListener('click', (e) => {
+        const tab = e.target.closest('.settings-tab');
+        if (!tab) return;
+        const tabId = tab.dataset.tab;
+        if (!tabId) return;
+        tabBar.querySelectorAll('.settings-tab').forEach(t => {
+            t.classList.toggle('active', t === tab);
+        });
+        document.querySelectorAll('.settings-pane').forEach(pane => {
+            pane.classList.toggle('active', pane.id === tabId);
+        });
     });
 }
 
@@ -492,10 +510,19 @@ function applyThemeMode(mode) {
     const isDark = mode === 'dark';
     const lightSelect = document.getElementById('light-theme-select');
     const darkSelect = document.getElementById('dark-theme-select');
+    // custom 选项已移除：仅当下拉中存在该值时才选中，否则回退到默认主题
+    const setSelectIfValid = (sel, val, fallback) => {
+        if (!sel) return;
+        if (val && Array.from(sel.options).some(o => o.value === val)) {
+            sel.value = val;
+        } else {
+            sel.value = fallback;
+        }
+    };
     if (isDark) {
-        if (darkSelect) darkSelect.value = themeName;
+        setSelectIfValid(darkSelect, themeName, 'github-dark');
     } else {
-        if (lightSelect) lightSelect.value = themeName;
+        setSelectIfValid(lightSelect, themeName, 'github-light');
     }
 
     if (themeName === 'custom') {
@@ -534,12 +561,43 @@ function initThemeMode() {
 
 // ==================== 默认配置切换 ====================
 
+const FONT_GROUPS = ['heading', 'body', 'code', 'link', 'quote'];
+
+function getDefaultFontSettings() {
+    const defaults = {};
+    FONT_GROUPS.forEach(g => {
+        defaults[g] = { mono: false, serif: false, family: 'inherit' };
+    });
+    return defaults;
+}
+
+function readFontSettingsFromStorage() {
+    const fonts = {};
+    FONT_GROUPS.forEach(g => {
+        fonts[g] = {
+            mono: localStorage.getItem(`font-${g}-mono`) === 'on',
+            serif: localStorage.getItem(`font-${g}-serif`) === 'on',
+            family: localStorage.getItem(`font-${g}-family`) || 'inherit'
+        };
+    });
+    return fonts;
+}
+
+function writeFontSettingsToStorage(fonts) {
+    FONT_GROUPS.forEach(g => {
+        const s = (fonts && fonts[g]) || {};
+        localStorage.setItem(`font-${g}-mono`, s.mono ? 'on' : 'off');
+        localStorage.setItem(`font-${g}-serif`, s.serif ? 'on' : 'off');
+        localStorage.setItem(`font-${g}-family`, s.family || 'inherit');
+    });
+}
+
 function getDefaultConfig() {
     return {
         readerTheme: 'github-light',
         lightTheme: 'github-light',
         darkTheme: 'github-dark',
-        codeFormat: 'scroll',
+        codeFormat: 'global',
         codeTheme: 'global',
         codeInlineTheme: 'global',
         codeInlineOffset: -2,
@@ -556,6 +614,7 @@ function getDefaultConfig() {
         position: 0,
         cText: '#222222',
         cBg: '#fbfbfb',
+        fonts: getDefaultFontSettings(),
     };
 }
 
@@ -566,7 +625,7 @@ function saveUserConfig() {
         readerTheme: localStorage.getItem('blog-reader-theme') || 'github-light',
         lightTheme: localStorage.getItem('last-light-theme') || 'github-light',
         darkTheme: localStorage.getItem('last-dark-theme') || 'github-dark',
-        codeFormat: localStorage.getItem('blog-code-format') || 'scroll',
+        codeFormat: localStorage.getItem('blog-code-format') || 'global',
         codeTheme: localStorage.getItem('blog-code-theme') || 'global',
         codeInlineTheme: localStorage.getItem('blog-code-inline-theme') || 'global',
         codeInlineOffset: parseInt(localStorage.getItem('blog-code-inline-offset') ?? '-2'),
@@ -583,6 +642,7 @@ function saveUserConfig() {
         position: parseInt(localStorage.getItem('blog-pos') ?? '0'),
         cText: localStorage.getItem('blog-ctext') || '#222222',
         cBg: localStorage.getItem('blog-cbg') || '#fbfbfb',
+        fonts: readFontSettingsFromStorage(),
     };
 }
 
@@ -609,6 +669,7 @@ function applyDefaultConfig() {
     localStorage.setItem('blog-pos', String(def.position));
     localStorage.setItem('blog-ctext', def.cText);
     localStorage.setItem('blog-cbg', def.cBg);
+    writeFontSettingsToStorage(def.fonts);
     const keys = Object.keys(localStorage);
     keys.forEach(key => {
         if (key.startsWith('table-format-override-')) {
@@ -643,6 +704,7 @@ function restoreUserConfig() {
     localStorage.setItem('blog-pos', String(cfg.position));
     localStorage.setItem('blog-ctext', cfg.cText);
     localStorage.setItem('blog-cbg', cfg.cBg);
+    writeFontSettingsToStorage(cfg.fonts);
     restoreSavedSettings();
     location.reload();
 }

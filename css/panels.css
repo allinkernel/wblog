@@ -373,3 +373,161 @@
 .toc-tree a:hover {
     text-decoration: underline !important; /* 悬停时显示下划线，提示可点击 */
 }
+
+/* ==========================================================================
+   设置面板（合并原五个右侧面板，Windows 系统属性窗口式 Tab 架构）
+   ========================================================================== */
+
+#panel-settings {
+    width: 340px;
+    min-width: 280px;
+    max-width: 380px;
+    overflow: hidden; /* 面板整体不滚动，内部内容区独立滚动 */
+}
+
+/* 面板标题栏上的 ✕ 关闭按钮 */
+.panel-close-btn {
+    background: none;
+    border: none;
+    font-size: 12px;
+    color: var(--theme-muted);
+    cursor: pointer;
+    padding: 0 2px;
+    flex-shrink: 0;
+    line-height: 1;
+    opacity: 0.7;
+    transition: opacity 0.15s;
+}
+.panel-close-btn:hover {
+    opacity: 1;
+    color: var(--text-color);
+}
+
+/* ---- 一级菜单（Tab 页签栏）---- */
+.settings-tab-bar {
+    display: flex;
+    flex-shrink: 0;
+    background: var(--theme-surface-2);
+    border-bottom: 1px solid var(--theme-border);
+    padding: 4px 6px 0;
+    gap: 2px;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+.settings-tab-bar::-webkit-scrollbar { height: 3px; }
+.settings-tab-bar::-webkit-scrollbar-thumb { background: var(--theme-border); border-radius: 3px; }
+
+.settings-tab {
+    background: transparent;
+    border: 1px solid transparent;
+    border-bottom: none;
+    padding: 5px 8px;
+    font-size: 12px;
+    cursor: pointer;
+    color: var(--text-color);
+    border-radius: 6px 6px 0 0;
+    white-space: nowrap;
+    flex-shrink: 0;
+    user-select: none;
+}
+.settings-tab:hover {
+    background: var(--theme-panel-hover);
+}
+.settings-tab.active {
+    background: var(--theme-surface);
+    border-color: var(--theme-border);
+    border-bottom-color: var(--theme-surface);
+    font-weight: bold;
+    color: var(--theme-link);
+}
+
+/* ---- 二级内容区：保持顶部 Tab 栏固定，内容独立滚动 ---- */
+#panel-settings .panel-content.settings-panel-content {
+    padding: 0;
+    gap: 0;
+    overflow: hidden;
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.settings-pane {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 12px;
+    display: none;
+    flex-direction: column;
+    gap: 12px;
+}
+.settings-pane.active {
+    display: flex;
+}
+
+/* ---- 卡片式分组 ---- */
+.settings-group {
+    border: 1px solid var(--theme-border);
+    border-radius: 6px;
+    background: var(--theme-surface);
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex-shrink: 0;
+}
+.settings-group-title {
+    font-size: 11px;
+    font-weight: bold;
+    color: var(--theme-muted);
+    letter-spacing: 0.5px;
+    padding-bottom: 4px;
+    border-bottom: 1px dashed var(--theme-border);
+}
+
+/* ---- 字体配置区域（等宽/衬线开关 + 动态字体下拉）---- */
+.font-region {
+    border: 1px solid var(--theme-border);
+    border-radius: 6px;
+    background: var(--theme-surface-2);
+    padding: 8px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.font-region-title {
+    font-size: 12px;
+    font-weight: bold;
+    color: var(--text-color);
+}
+.font-region-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.font-switch-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.font-switch-label {
+    font-size: 11px;
+    color: var(--text-color);
+}
+/* 字体下拉单独一行，宽度撑满；名称过长时通过悬停 Tooltip 查看全名 */
+.font-family-select {
+    width: 100%;
+    max-width: 100%;
+    padding: 3px 6px;
+    border: 1px solid var(--theme-border);
+    border-radius: 4px;
+    background: var(--theme-control-bg);
+    color: var(--theme-control-text);
+    font-size: 11px;
+    cursor: pointer;
+}
+.font-family-select option {
+    background: var(--theme-control-bg);
+    color: var(--theme-control-text);
+}

@@ -35,324 +35,436 @@
 
     <!-- 2. 右侧悬浮坞 -->
     <div id="right-dock-container">
-        <!-- 版面调节 -->
-        <div class="panel-box" id="panel-config">
+        <!-- 设置面板（合并原：版面调节 / 字体调节 / 样式调节 / 代码样式调节 / 表格样式调节） -->
+        <div class="panel-box" id="panel-settings">
             <div class="panel-header" title="点击切换显示/隐藏">
                 <span class="panel-icon">⚙️</span>
-                <span class="panel-title">版面调节</span>
+                <span class="panel-title">设置</span>
+                <span class="panel-close-btn" title="关闭面板">✕</span>
             </div>
-            <div class="panel-content">
-                <!-- 画布小手 Switch -->
-                <div class="control-group">
-                    <label>画布小手：</label>
-                    <label class="switch">
-                        <input type="checkbox" id="canvas-toggle">
-                        <span class="slider">
-                            <span class="slider-text text-on">ON</span>
-                            <span class="slider-text text-off">OFF</span>
-                            <span class="knob"></span>
-                        </span>
-                    </label>
-                </div>
 
-                <div class="control-group">
-                    <label>版面宽度：</label>
-                    <div class="slider-container">
-                        <button class="slider-btn" data-target="width-slider" data-step="-20">-</button>
-                        <input type="range" id="width-slider" min="400" max="1200" value="700" step="10">
-                        <button class="slider-btn" data-target="width-slider" data-step="20">+</button>
+            <!-- 一级菜单（Tab 页签） -->
+            <div class="settings-tab-bar" id="settings-tab-bar">
+                <button class="settings-tab active" data-tab="tab-theme">主题</button>
+                <button class="settings-tab" data-tab="tab-layout">版面</button>
+                <button class="settings-tab" data-tab="tab-font">字体</button>
+                <button class="settings-tab" data-tab="tab-inline-code">行内代码</button>
+                <button class="settings-tab" data-tab="tab-code-block">代码块</button>
+                <button class="settings-tab" data-tab="tab-quote">引用</button>
+                <button class="settings-tab" data-tab="tab-table">表格</button>
+            </div>
+
+            <div class="panel-content settings-panel-content">
+                <!-- 【主题】 -->
+                <div class="settings-pane active" id="tab-theme">
+                    <div class="settings-group">
+                        <div class="settings-group-title">阅读主题</div>
+                        <div class="control-group">
+                            <label>日间主题：</label>
+                            <select id="light-theme-select">
+                                <option value="github-light">GitHub Light -- default</option>
+                                <option value="claude-light">Claude 暖白</option>
+                                <option value="notion-light">Notion Light</option>
+                                <option value="solarized-light">Solarized Light</option>
+                                <option value="catppuccin-latte">Catppuccin Latte</option>
+                                <option value="stack-overflow">Stack Overflow</option>
+                                <option value="texi2html">texi2html 纯粹经典</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label>夜间主题：</label>
+                            <select id="dark-theme-select">
+                                <option value="github-dark">GitHub Dark -- default</option>
+                                <option value="claude-dark">Claude 暗夜</option>
+                                <option value="solarized-dark">Solarized Dark</option>
+                                <option value="dracula">Dracula</option>
+                                <option value="catppuccin-mocha">Catppuccin Mocha</option>
+                                <option value="nord">Nord</option>
+                            </select>
+                        </div>
                     </div>
-                    <span class="val-badge" id="width-val">700px</span>
-                </div>
-
-                <div class="control-group">
-                    <label>版面位置：</label>
-                    <div class="slider-container">
-                        <button class="slider-btn" data-target="position-slider" data-step="-10">-</button>
-                        <input type="range" id="position-slider" min="-100" max="100" value="0">
-                        <button class="slider-btn" data-target="position-slider" data-step="10">+</button>
+                    <div class="settings-group">
+                        <div class="settings-group-title">自定义颜色</div>
+                        <div class="control-group">
+                            <label>文字颜色：</label>
+                            <input type="color" id="color-text" value="#222222">
+                            <label style="margin-left: 6px;">背景：</label>
+                            <input type="color" id="color-bg" value="#fbfbfb">
+                        </div>
                     </div>
-                    <span class="val-badge" id="position-val">居中</span>
                 </div>
-            </div>
-        </div>
 
-        <!-- 字体调节 -->
-        <div class="panel-box" id="panel-font">
-            <div class="panel-header" title="点击切换显示/隐藏">
-                <span class="panel-icon icon-aa">Aa</span>
-                <span class="panel-title">字体调节</span>
-            </div>
-            <div class="panel-content">
-                <div class="control-group">
-                    <label>文字大小：</label>
-                    <div class="slider-container">
-                        <button class="slider-btn" data-target="size-slider" data-step="-1">-</button>
-                        <input type="range" id="size-slider" min="14" max="32" value="18">
-                        <button class="slider-btn" data-target="size-slider" data-step="1">+</button>
+                <!-- 【版面】 -->
+                <div class="settings-pane" id="tab-layout">
+                    <div class="settings-group">
+                        <div class="settings-group-title">画布</div>
+                        <div class="control-group">
+                            <label>画布小手：</label>
+                            <label class="switch">
+                                <input type="checkbox" id="canvas-toggle">
+                                <span class="slider">
+                                    <span class="slider-text text-on">ON</span>
+                                    <span class="slider-text text-off">OFF</span>
+                                    <span class="knob"></span>
+                                </span>
+                            </label>
+                        </div>
                     </div>
-                    <span class="val-badge" id="size-val">18px</span>
-                </div>
-
-                <div class="control-group">
-                    <label>文本行距：</label>
-                    <div class="slider-container">
-                        <button class="slider-btn" data-target="line-slider" data-step="-0.1">-</button>
-                        <input type="range" id="line-slider" min="1.2" max="2.5" step="0.1" value="1.7">
-                        <button class="slider-btn" data-target="line-slider" data-step="0.1">+</button>
+                    <div class="settings-group">
+                        <div class="settings-group-title">版面尺寸</div>
+                        <div class="control-group">
+                            <label>版面宽度：</label>
+                            <div class="slider-container">
+                                <button class="slider-btn" data-target="width-slider" data-step="-20">-</button>
+                                <input type="range" id="width-slider" min="400" max="1200" value="700" step="10">
+                                <button class="slider-btn" data-target="width-slider" data-step="20">+</button>
+                            </div>
+                            <span class="val-badge" id="width-val">700px</span>
+                        </div>
+                        <div class="control-group">
+                            <label>版面位置：</label>
+                            <div class="slider-container">
+                                <button class="slider-btn" data-target="position-slider" data-step="-10">-</button>
+                                <input type="range" id="position-slider" min="-100" max="100" value="0">
+                                <button class="slider-btn" data-target="position-slider" data-step="10">+</button>
+                            </div>
+                            <span class="val-badge" id="position-val">居中</span>
+                        </div>
                     </div>
-                    <span class="val-badge" id="line-val">1.7</span>
                 </div>
 
-                <div class="control-group">
-                    <label>文字颜色：</label>
-                    <input type="color" id="color-text" value="#222222">
-                    <label style="margin-left: 6px;">背景：</label>
-                    <input type="color" id="color-bg" value="#fbfbfb">
-                </div>
-
-                <div class="panel-inner-divider"></div>
-
-                <table class="font-matrix-table">
-                    <thead>
-                        <tr>
-                            <th>区域</th>
-                            <th title="原生/继承">继承</th>
-                            <th title="无衬线不等宽"><span class="font-sample sample-sans-prop">AiaI</span></th>
-                            <th title="衬线不等宽"><span class="font-sample sample-serif-prop">AiaI</span></th>
-                            <th title="无衬线等宽"><span class="font-sample sample-sans-mono">AiaI</span></th>
-                            <th title="衬线等宽"><span class="font-sample sample-serif-mono">AiaI</span></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td class="row-label">正文</td>
-                            <td><input type="radio" name="font-body" value="inherit" checked></td>
-                            <td><input type="radio" name="font-body" value="sans-prop"></td>
-                            <td><input type="radio" name="font-body" value="serif-prop"></td>
-                            <td><input type="radio" name="font-body" value="sans-mono"></td>
-                            <td><input type="radio" name="font-body" value="serif-mono"></td>
-                        </tr>
-                        <tr>
-                            <td class="row-label">代码</td>
-                            <td><input type="radio" name="font-code" value="inherit"></td>
-                            <td><input type="radio" name="font-code" value="sans-prop"></td>
-                            <td><input type="radio" name="font-code" value="serif-prop"></td>
-                            <td><input type="radio" name="font-code" value="sans-mono" checked></td>
-                            <td><input type="radio" name="font-code" value="serif-mono"></td>
-                        </tr>
-                        <tr>
-                            <td class="row-label">标题</td>
-                            <td><input type="radio" name="font-heading" value="inherit" checked></td>
-                            <td><input type="radio" name="font-heading" value="sans-prop"></td>
-                            <td><input type="radio" name="font-heading" value="serif-prop"></td>
-                            <td><input type="radio" name="font-heading" value="sans-mono"></td>
-                            <td><input type="radio" name="font-heading" value="serif-mono"></td>
-                        </tr>
-                        <tr>
-                            <td class="row-label">链接</td>
-                            <td><input type="radio" name="font-link" value="inherit" checked></td>
-                            <td><input type="radio" name="font-link" value="sans-prop"></td>
-                            <td><input type="radio" name="font-link" value="serif-prop"></td>
-                            <td><input type="radio" name="font-link" value="sans-mono"></td>
-                            <td><input type="radio" name="font-link" value="serif-mono"></td>
-                        </tr>
-                        <tr>
-                            <td class="row-label">引用</td>
-                            <td><input type="radio" name="font-quote" value="inherit" checked></td>
-                            <td><input type="radio" name="font-quote" value="sans-prop"></td>
-                            <td><input type="radio" name="font-quote" value="serif-prop"></td>
-                            <td><input type="radio" name="font-quote" value="sans-mono"></td>
-                            <td><input type="radio" name="font-quote" value="serif-mono"></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- 样式调节 -->
-        <div class="panel-box" id="panel-style">
-            <div class="panel-header" title="点击切换显示/隐藏">
-                <span class="panel-icon">🎨</span>
-                <span class="panel-title">样式调节</span>
-            </div>
-            <div class="panel-content">
-                <div class="control-group">
-                    <label>日间主题：</label>
-                    <select id="light-theme-select">
-                        <option value="github-light">GitHub Light -- default</option>
-                        <option value="claude-light">Claude 暖白</option>
-                        <option value="notion-light">Notion Light</option>
-                        <option value="solarized-light">Solarized Light</option>
-                        <option value="catppuccin-latte">Catppuccin Latte</option>
-                        <option value="stack-overflow">Stack Overflow</option>
-                        <option value="texi2html">texi2html 纯粹经典</option>
-                        <option value="custom">自定义 / 当前颜色</option>
-                    </select>
-                </div>
-                <div class="control-group">
-                    <label>夜间主题：</label>
-                    <select id="dark-theme-select">
-                        <option value="github-dark">GitHub Dark -- default</option>
-                        <option value="claude-dark">Claude 暗夜</option>
-                        <option value="solarized-dark">Solarized Dark</option>
-                        <option value="dracula">Dracula</option>
-                        <option value="catppuccin-mocha">Catppuccin Mocha</option>
-                        <option value="nord">Nord</option>
-                        <option value="custom">自定义 / 当前颜色</option>
-                    </select>
-                </div>
-                <div class="control-group">
-                    <label>引用样式：</label>
-                    <select id="quote-style-select">
-                        <option value="global">跟随全局主题</option>
-                        <option value="default">默认左边框</option>
-                        <option value="accent">强调色块</option>
-                        <option value="card">卡片高亮</option>
-                        <option value="mark">大引号风格</option>
-                        <option value="plain">极简无边框</option>
-                        <option value="dashed">虚线边框</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-
-        <!-- 代码样式调节 -->
-        <div class="panel-box" id="panel-code-style">
-            <div class="panel-header" title="点击切换显示/隐藏">
-                <span class="panel-icon icon-code">&lt;/&gt;</span>
-                <span class="panel-title">代码样式调节</span>
-            </div>
-            <div class="panel-content">
-                <div class="control-group">
-                    <label>显示格式：</label>
-                    <select id="code-format-select">
-                        <option value="scroll">同宽 + 横向滚动 -- default</option>
-                        <option value="wrap">同宽 + 自动换行</option>
-                        <option value="adaptive">自适应最长行</option>
-                    </select>
-                </div>
-
-                <div class="control-group">
-                    <label>块级主题：</label>
-                    <select id="code-theme-select">
-                        <option value="global">跟随全局主题 -- default</option>
-                        <option value="default">默认浅色</option>
-                        <option value="dark">暗黑极客</option>
-                        <option value="github-dark">GitHub Dark</option>
-                        <option value="solarized">Solarized Dark</option>
-                        <option value="github-light">GitHub Light</option>
-                        <option value="dracula">Dracula</option>
-                        <option value="nord">Nord</option>
-                        <option value="one-dark">One Dark</option>
-                        <option value="one-light">Atom One Light</option>
-                        <option value="wildcharm">Wildcharm</option>
-                        <option value="nightfox">Nightfox</option>
-                        <option value="tokyonight">TokyoNight</option>
-                    </select>
-                </div>
-
-                <div class="control-group">
-                    <label>行内主题：</label>
-                    <select id="code-inline-theme-select">
-                        <option value="global">跟随全局主题 -- default</option>
-                        <option value="default">默认灰色</option>
-                        <option value="dark">暗黑极客</option>
-                        <option value="github">GitHub 风格</option>
-                        <option value="warm">柔和暖红</option>
-                        <option value="amber">琥珀黄</option>
-                        <option value="mist">雾蓝柔和</option>
-                        <option value="sage">鼠尾草柔和</option>
-                        <option value="lavender">淡紫柔和</option>
-                        <option value="cream">奶油柔和</option>
-                    </select>
-                </div>
-
-                <div class="control-group">
-                    <label>行内字号：</label>
-                    <div class="slider-container">
-                        <button class="slider-btn" data-target="code-inline-slider" data-step="-1">-</button>
-                        <input type="range" id="code-inline-slider" min="-8" max="8" step="1" value="-2">
-                        <button class="slider-btn" data-target="code-inline-slider" data-step="1">+</button>
+                <!-- 【字体】 -->
+                <div class="settings-pane" id="tab-font">
+                    <div class="settings-group">
+                        <div class="settings-group-title">文字排版</div>
+                        <div class="control-group">
+                            <label>文字大小：</label>
+                            <div class="slider-container">
+                                <button class="slider-btn" data-target="size-slider" data-step="-1">-</button>
+                                <input type="range" id="size-slider" min="14" max="32" value="18">
+                                <button class="slider-btn" data-target="size-slider" data-step="1">+</button>
+                            </div>
+                            <span class="val-badge" id="size-val">18px</span>
+                        </div>
+                        <div class="control-group">
+                            <label>文本行距：</label>
+                            <div class="slider-container">
+                                <button class="slider-btn" data-target="line-slider" data-step="-0.1">-</button>
+                                <input type="range" id="line-slider" min="1.2" max="2.5" step="0.1" value="1.7">
+                                <button class="slider-btn" data-target="line-slider" data-step="0.1">+</button>
+                            </div>
+                            <span class="val-badge" id="line-val">1.7</span>
+                        </div>
                     </div>
-                    <span class="val-badge" id="code-inline-val">-2px</span>
-                </div>
+                    <div class="settings-group">
+                        <div class="settings-group-title">元素字体</div>
 
-                <div class="control-group">
-                    <label>行内边距：</label>
-                    <div class="slider-container">
-                        <button class="slider-btn" data-target="code-inline-pad-slider" data-step="-1">-</button>
-                        <input type="range" id="code-inline-pad-slider" min="0" max="6" step="1" value="2">
-                        <button class="slider-btn" data-target="code-inline-pad-slider" data-step="1">+</button>
+                        <div class="font-region" data-font-group="heading">
+                            <div class="font-region-title">标题</div>
+                            <div class="font-region-row">
+                                <span class="font-switch-item">
+                                    <span class="font-switch-label">等宽</span>
+                                    <label class="switch">
+                                        <input type="checkbox" class="font-mono-toggle">
+                                        <span class="slider">
+                                            <span class="slider-text text-on">ON</span>
+                                            <span class="slider-text text-off">OFF</span>
+                                            <span class="knob"></span>
+                                        </span>
+                                    </label>
+                                </span>
+                                <span class="font-switch-item">
+                                    <span class="font-switch-label">衬线</span>
+                                    <label class="switch">
+                                        <input type="checkbox" class="font-serif-toggle">
+                                        <span class="slider">
+                                            <span class="slider-text text-on">ON</span>
+                                            <span class="slider-text text-off">OFF</span>
+                                            <span class="knob"></span>
+                                        </span>
+                                    </label>
+                                </span>
+                            </div>
+                            <div class="font-region-row">
+                                <select class="font-family-select" data-font-family="heading" title="字体选择"></select>
+                            </div>
+                        </div>
+
+                        <div class="font-region" data-font-group="body">
+                            <div class="font-region-title">正文</div>
+                            <div class="font-region-row">
+                                <span class="font-switch-item">
+                                    <span class="font-switch-label">等宽</span>
+                                    <label class="switch">
+                                        <input type="checkbox" class="font-mono-toggle">
+                                        <span class="slider">
+                                            <span class="slider-text text-on">ON</span>
+                                            <span class="slider-text text-off">OFF</span>
+                                            <span class="knob"></span>
+                                        </span>
+                                    </label>
+                                </span>
+                                <span class="font-switch-item">
+                                    <span class="font-switch-label">衬线</span>
+                                    <label class="switch">
+                                        <input type="checkbox" class="font-serif-toggle">
+                                        <span class="slider">
+                                            <span class="slider-text text-on">ON</span>
+                                            <span class="slider-text text-off">OFF</span>
+                                            <span class="knob"></span>
+                                        </span>
+                                    </label>
+                                </span>
+                            </div>
+                            <div class="font-region-row">
+                                <select class="font-family-select" data-font-family="body" title="字体选择"></select>
+                            </div>
+                        </div>
+
+                        <div class="font-region" data-font-group="code">
+                            <div class="font-region-title">代码</div>
+                            <div class="font-region-row">
+                                <span class="font-switch-item">
+                                    <span class="font-switch-label">等宽</span>
+                                    <label class="switch">
+                                        <input type="checkbox" class="font-mono-toggle">
+                                        <span class="slider">
+                                            <span class="slider-text text-on">ON</span>
+                                            <span class="slider-text text-off">OFF</span>
+                                            <span class="knob"></span>
+                                        </span>
+                                    </label>
+                                </span>
+                                <span class="font-switch-item">
+                                    <span class="font-switch-label">衬线</span>
+                                    <label class="switch">
+                                        <input type="checkbox" class="font-serif-toggle">
+                                        <span class="slider">
+                                            <span class="slider-text text-on">ON</span>
+                                            <span class="slider-text text-off">OFF</span>
+                                            <span class="knob"></span>
+                                        </span>
+                                    </label>
+                                </span>
+                            </div>
+                            <div class="font-region-row">
+                                <select class="font-family-select" data-font-family="code" title="字体选择"></select>
+                            </div>
+                        </div>
+
+                        <div class="font-region" data-font-group="link">
+                            <div class="font-region-title">链接</div>
+                            <div class="font-region-row">
+                                <span class="font-switch-item">
+                                    <span class="font-switch-label">等宽</span>
+                                    <label class="switch">
+                                        <input type="checkbox" class="font-mono-toggle">
+                                        <span class="slider">
+                                            <span class="slider-text text-on">ON</span>
+                                            <span class="slider-text text-off">OFF</span>
+                                            <span class="knob"></span>
+                                        </span>
+                                    </label>
+                                </span>
+                                <span class="font-switch-item">
+                                    <span class="font-switch-label">衬线</span>
+                                    <label class="switch">
+                                        <input type="checkbox" class="font-serif-toggle">
+                                        <span class="slider">
+                                            <span class="slider-text text-on">ON</span>
+                                            <span class="slider-text text-off">OFF</span>
+                                            <span class="knob"></span>
+                                        </span>
+                                    </label>
+                                </span>
+                            </div>
+                            <div class="font-region-row">
+                                <select class="font-family-select" data-font-family="link" title="字体选择"></select>
+                            </div>
+                        </div>
+
+                        <div class="font-region" data-font-group="quote">
+                            <div class="font-region-title">引用</div>
+                            <div class="font-region-row">
+                                <span class="font-switch-item">
+                                    <span class="font-switch-label">等宽</span>
+                                    <label class="switch">
+                                        <input type="checkbox" class="font-mono-toggle">
+                                        <span class="slider">
+                                            <span class="slider-text text-on">ON</span>
+                                            <span class="slider-text text-off">OFF</span>
+                                            <span class="knob"></span>
+                                        </span>
+                                    </label>
+                                </span>
+                                <span class="font-switch-item">
+                                    <span class="font-switch-label">衬线</span>
+                                    <label class="switch">
+                                        <input type="checkbox" class="font-serif-toggle">
+                                        <span class="slider">
+                                            <span class="slider-text text-on">ON</span>
+                                            <span class="slider-text text-off">OFF</span>
+                                            <span class="knob"></span>
+                                        </span>
+                                    </label>
+                                </span>
+                            </div>
+                            <div class="font-region-row">
+                                <select class="font-family-select" data-font-family="quote" title="字体选择"></select>
+                            </div>
+                        </div>
                     </div>
-                    <span class="val-badge" id="code-inline-pad-val">2px</span>
                 </div>
 
-                <div class="control-group">
-                    <label>块级字号：</label>
-                    <div class="slider-container">
-                        <button class="slider-btn" data-target="code-block-slider" data-step="-1">-</button>
-                        <input type="range" id="code-block-slider" min="10" max="26" value="14">
-                        <button class="slider-btn" data-target="code-block-slider" data-step="1">+</button>
+                <!-- 【行内代码】 -->
+                <div class="settings-pane" id="tab-inline-code">
+                    <div class="settings-group">
+                        <div class="settings-group-title">行内代码</div>
+                        <div class="control-group">
+                            <label>行内主题：</label>
+                            <select id="code-inline-theme-select">
+                                <option value="global">跟随全局主题 -- default</option>
+                                <option value="default">默认灰色</option>
+                                <option value="dark">暗黑极客</option>
+                                <option value="github">GitHub 风格</option>
+                                <option value="warm">柔和暖红</option>
+                                <option value="amber">琥珀黄</option>
+                                <option value="mist">雾蓝柔和</option>
+                                <option value="sage">鼠尾草柔和</option>
+                                <option value="lavender">淡紫柔和</option>
+                                <option value="cream">奶油柔和</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label>行内字号：</label>
+                            <div class="slider-container">
+                                <button class="slider-btn" data-target="code-inline-slider" data-step="-1">-</button>
+                                <input type="range" id="code-inline-slider" min="-8" max="8" step="1" value="-2">
+                                <button class="slider-btn" data-target="code-inline-slider" data-step="1">+</button>
+                            </div>
+                            <span class="val-badge" id="code-inline-val">-2px</span>
+                        </div>
+                        <div class="control-group">
+                            <label>行内边距：</label>
+                            <div class="slider-container">
+                                <button class="slider-btn" data-target="code-inline-pad-slider" data-step="-1">-</button>
+                                <input type="range" id="code-inline-pad-slider" min="0" max="6" step="1" value="2">
+                                <button class="slider-btn" data-target="code-inline-pad-slider" data-step="1">+</button>
+                            </div>
+                            <span class="val-badge" id="code-inline-pad-val">2px</span>
+                        </div>
                     </div>
-                    <span class="val-badge" id="code-block-val">14px</span>
                 </div>
 
-                <div class="panel-inner-divider"></div>
-
-                <div class="control-group">
-                    <label>显示行号：</label>
-                    <label class="switch">
-                        <input type="checkbox" id="code-line-numbers-toggle">
-                        <span class="slider">
-                            <span class="slider-text text-on">ON</span>
-                            <span class="slider-text text-off">OFF</span>
-                            <span class="knob"></span>
-                        </span>
-                    </label>
+                <!-- 【代码块】 -->
+                <div class="settings-pane" id="tab-code-block">
+                    <div class="settings-group">
+                        <div class="settings-group-title">代码块</div>
+                        <div class="control-group">
+                            <label>显示格式：</label>
+                            <select id="code-format-select">
+                                <option value="global" selected>继承主题</option>
+                                <option value="scroll">横向滚动</option>
+                                <option value="wrap">自动换行</option>
+                                <option value="adaptive">自适应宽</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label>块级主题：</label>
+                            <select id="code-theme-select">
+                                <option value="global" selected>继承主题</option>
+                                <option value="default">默认浅色</option>
+                                <option value="dark">暗黑极客</option>
+                                <option value="github-dark">GitHub Dark</option>
+                                <option value="solarized">Solarized Dark</option>
+                                <option value="github-light">GitHub Light</option>
+                                <option value="dracula">Dracula</option>
+                                <option value="nord">Nord</option>
+                                <option value="one-dark">One Dark</option>
+                                <option value="one-light">Atom One Light</option>
+                                <option value="wildcharm">Wildcharm</option>
+                                <option value="nightfox">Nightfox</option>
+                                <option value="tokyonight">TokyoNight</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label>块级字号：</label>
+                            <div class="slider-container">
+                                <button class="slider-btn" data-target="code-block-slider" data-step="-1">-</button>
+                                <input type="range" id="code-block-slider" min="10" max="26" value="14">
+                                <button class="slider-btn" data-target="code-block-slider" data-step="1">+</button>
+                            </div>
+                            <span class="val-badge" id="code-block-val">14px</span>
+                        </div>
+                        <div class="control-group">
+                            <label>显示行号：</label>
+                            <label class="switch">
+                                <input type="checkbox" id="code-line-numbers-toggle">
+                                <span class="slider">
+                                    <span class="slider-text text-on">ON</span>
+                                    <span class="slider-text text-off">OFF</span>
+                                    <span class="knob"></span>
+                                </span>
+                            </label>
+                        </div>
+                        <div class="control-group">
+                            <label>顶部工具栏：</label>
+                            <label class="switch">
+                                <input type="checkbox" id="code-header-toggle">
+                                <span class="slider">
+                                    <span class="slider-text text-on">ON</span>
+                                    <span class="slider-text text-off">OFF</span>
+                                    <span class="knob"></span>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="control-group">
-                    <label>顶部工具栏：</label>
-                    <label class="switch">
-                        <input type="checkbox" id="code-header-toggle">
-                        <span class="slider">
-                            <span class="slider-text text-on">ON</span>
-                            <span class="slider-text text-off">OFF</span>
-                            <span class="knob"></span>
-                        </span>
-                    </label>
-                </div>
-            </div>
-        </div>
-
-        <!-- 表格样式调节 -->
-        <div class="panel-box" id="panel-table-style">
-            <div class="panel-header" title="点击切换显示/隐藏">
-                <span class="panel-icon">⊞</span>
-                <span class="panel-title">表格样式调节</span>
-            </div>
-            <div class="panel-content">
-                <div class="control-group">
-                    <label>显示格式：</label>
-                    <select id="table-format-select">
-                        <option value="adaptive">自适应内容 -- default</option>
-                        <option value="wrap">自动换行</option>
-                        <option value="scroll">横向滚动</option>
-                    </select>
+                <!-- 【引用】 -->
+                <div class="settings-pane" id="tab-quote">
+                    <div class="settings-group">
+                        <div class="settings-group-title">引用</div>
+                        <div class="control-group">
+                            <label>引用样式：</label>
+                            <select id="quote-style-select">
+                                <option value="global">跟随全局主题</option>
+                                <option value="default">默认左边框</option>
+                                <option value="accent">强调色块</option>
+                                <option value="card">卡片高亮</option>
+                                <option value="mark">大引号风格</option>
+                                <option value="plain">极简无边框</option>
+                                <option value="dashed">虚线边框</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
 
-            <div class="control-group">
-                <label>显示标题栏：</label>
-                <label class="switch">
-                    <input type="checkbox" id="table-header-toggle">
-                    <span class="slider">
-                        <span class="slider-text text-on">ON</span>
-                        <span class="slider-text text-off">OFF</span>
-                        <span class="knob"></span>
-                    </span>
-                </label>
-            </div>
+                <!-- 【表格】 -->
+                <div class="settings-pane" id="tab-table">
+                    <div class="settings-group">
+                        <div class="settings-group-title">表格</div>
+                        <div class="control-group">
+                            <label>显示格式：</label>
+                            <select id="table-format-select">
+                                <option value="adaptive">自适应内容 -- default</option>
+                                <option value="wrap">自动换行</option>
+                                <option value="scroll">横向滚动</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label>显示标题栏：</label>
+                            <label class="switch">
+                                <input type="checkbox" id="table-header-toggle">
+                                <span class="slider">
+                                    <span class="slider-text text-on">ON</span>
+                                    <span class="slider-text text-off">OFF</span>
+                                    <span class="knob"></span>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div> <!-- 结束 right-dock-container -->
@@ -405,25 +517,9 @@
         <div class="bar-divider"></div>
 
         <div class="bar-group">
-            <button id="bar-config" class="bar-btn" title="版面调节">
+            <button id="bar-settings" class="bar-btn" title="设置面板">
                 <span class="bar-icon">⚙️</span>
-                <span class="bar-label">版面</span>
-            </button>
-            <button id="bar-font" class="bar-btn" title="字体调节">
-                <span class="bar-icon">Aa</span>
-                <span class="bar-label">字体</span>
-            </button>
-            <button id="bar-style" class="bar-btn" title="样式调节">
-                <span class="bar-icon">🎨</span>
-                <span class="bar-label">样式</span>
-            </button>
-            <button id="bar-code" class="bar-btn" title="代码样式">
-                <span class="bar-icon">&lt;/&gt;</span>
-                <span class="bar-label">代码</span>
-            </button>
-            <button id="bar-table" class="bar-btn" title="表格样式">
-                <span class="bar-icon">⊞</span>
-                <span class="bar-label">表格</span>
+                <span class="bar-label">设置</span>
             </button>
         </div>
     </div>

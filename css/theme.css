@@ -244,33 +244,51 @@ body {
 }
 .toc-toggle:hover { color: var(--theme-link) !important; }
 
-/* 字体矩阵：四个 AiaI 样本各自使用真正对应的字体 */
-.font-matrix-table {
-    color: var(--text-color) !important;
-}
-.font-matrix-table th,
-.font-matrix-table td {
+/* 设置面板卡片分组 / 字体区域的主题适配 */
+.settings-group,
+.font-region {
+    background: var(--theme-surface) !important;
     border-color: var(--theme-border) !important;
 }
-.font-matrix-table th {
+.font-region {
     background: var(--theme-surface-2) !important;
+}
+.settings-group-title,
+.font-region-title,
+.font-switch-label {
     color: var(--text-color) !important;
 }
-.font-matrix-table .row-label {
+.settings-tab-bar {
     background: var(--theme-surface-2) !important;
+    border-bottom-color: var(--theme-border) !important;
+}
+.settings-tab {
     color: var(--text-color) !important;
 }
-.font-sample {
-    display: inline-block;
-    font-size: 12px;
-    line-height: 1;
-    font-weight: 600;
-    letter-spacing: -0.03em;
+.settings-tab:hover {
+    background: var(--theme-panel-hover) !important;
 }
-.font-sample.sample-sans-prop { font-family: var(--font-stack-sans-prop) !important; }
-.font-sample.sample-serif-prop { font-family: var(--font-stack-serif-prop) !important; }
-.font-sample.sample-sans-mono { font-family: var(--font-stack-sans-mono) !important; }
-.font-sample.sample-serif-mono { font-family: var(--font-stack-serif-mono) !important; }
+.settings-tab.active {
+    background: var(--theme-surface) !important;
+    border-color: var(--theme-border) !important;
+    border-bottom-color: var(--theme-surface) !important;
+    color: var(--theme-link) !important;
+}
+.font-family-select {
+    background: var(--theme-control-bg) !important;
+    color: var(--theme-control-text) !important;
+    border-color: var(--theme-control-border) !important;
+}
+.font-family-select option {
+    background: var(--theme-control-bg);
+    color: var(--theme-control-text);
+}
+.panel-close-btn {
+    color: var(--theme-muted) !important;
+}
+.panel-close-btn:hover {
+    color: var(--text-color) !important;
+}
 
 /* 纯粹 texi2html 风格：白底、黑字、标题下划线 */
 #article-container[data-reader-theme="texi2html"] h1,

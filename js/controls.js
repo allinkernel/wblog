@@ -1,20 +1,186 @@
 // ==================== 控件绑定与设置管理 ====================
 
-const fontValueMap = {
-    'inherit': 'inherit',
-    'sans-prop': 'var(--font-stack-sans-prop)',
-    'serif-prop': 'var(--font-stack-serif-prop)',
-    'sans-mono': 'var(--font-stack-sans-mono)',
-    'serif-mono': 'var(--font-stack-serif-mono)'
+// ==================== 动态字体配置（等宽/衬线开关 + 字体下拉） ====================
+
+// 预置的跨平台常见系统字体库，按「等宽 / 衬线」两个维度分为四类
+const FONT_LIBRARY = {
+    'mono-sans': [
+        { label: 'Consolas', stack: 'Consolas, monospace' },
+        { label: 'Menlo', stack: 'Menlo, monospace' },
+        { label: 'Monaco', stack: 'Monaco, monospace' },
+        { label: 'DejaVu Sans Mono', stack: '"DejaVu Sans Mono", monospace' },
+        { label: 'Liberation Mono', stack: '"Liberation Mono", monospace' },
+        { label: 'Cascadia Code', stack: '"Cascadia Code", monospace' },
+        { label: 'Ubuntu Mono', stack: '"Ubuntu Mono", monospace' },
+        { label: 'SF Mono', stack: '"SF Mono", monospace' },
+        { label: 'JetBrains Mono', stack: '"JetBrains Mono", monospace' },
+        { label: 'Fira Code', stack: '"Fira Code", monospace' },
+        { label: 'Noto Sans Mono', stack: '"Noto Sans Mono", monospace' },
+        { label: '通用等宽字体', stack: 'monospace' }
+    ],
+    'mono-serif': [
+        { label: 'Courier New', stack: '"Courier New", monospace' },
+        { label: 'Courier', stack: 'Courier, monospace' },
+        { label: 'Nimbus Mono PS', stack: '"Nimbus Mono PS", monospace' },
+        { label: 'Iosevka Slab', stack: '"Iosevka Slab", monospace' },
+        { label: '通用等宽衬线', stack: '"Courier New", Courier, monospace' }
+    ],
+    'prop-sans': [
+        { label: 'Arial', stack: 'Arial, sans-serif' },
+        { label: 'Helvetica', stack: 'Helvetica, sans-serif' },
+        { label: 'Segoe UI', stack: '"Segoe UI", sans-serif' },
+        { label: '微软雅黑', stack: '"Microsoft YaHei", sans-serif' },
+        { label: '苹方', stack: '"PingFang SC", sans-serif' },
+        { label: '思源黑体', stack: '"Noto Sans CJK SC", sans-serif' },
+        { label: 'Source Han Sans SC', stack: '"Source Han Sans SC", sans-serif' },
+        { label: 'Roboto', stack: 'Roboto, sans-serif' },
+        { label: 'Open Sans', stack: '"Open Sans", sans-serif' },
+        { label: 'Verdana', stack: 'Verdana, sans-serif' },
+        { label: 'Tahoma', stack: 'Tahoma, sans-serif' },
+        { label: 'Ubuntu', stack: 'Ubuntu, sans-serif' },
+        { label: 'Noto Sans', stack: '"Noto Sans", sans-serif' },
+        { label: '通用无衬线字体', stack: 'sans-serif' }
+    ],
+    'prop-serif': [
+        { label: 'Times New Roman', stack: '"Times New Roman", serif' },
+        { label: 'Georgia', stack: 'Georgia, serif' },
+        { label: '宋体-简', stack: '"Songti SC", serif' },
+        { label: '宋体', stack: '"SimSun", serif' },
+        { label: '华文宋体', stack: '"STSong", serif' },
+        { label: '思源宋体', stack: '"Noto Serif CJK SC", serif' },
+        { label: 'Source Han Serif SC', stack: '"Source Han Serif SC", serif' },
+        { label: 'Cambria', stack: 'Cambria, serif' },
+        { label: 'Garamond', stack: 'Garamond, serif' },
+        { label: 'Palatino', stack: 'Palatino, serif' },
+        { label: '通用衬线字体', stack: 'serif' }
+    ]
 };
 
-const radioVarMap = {
-    'font-body': '--font-body',
-    'font-code': '--font-code',
-    'font-heading': '--font-heading',
-    'font-link': '--font-link',
-    'font-quote': '--font-quote'
+// 五个文本元素 -> CSS 变量映射
+const fontGroupMap = {
+    'heading': '--font-heading',
+    'body': '--font-body',
+    'code': '--font-code',
+    'link': '--font-link',
+    'quote': '--font-quote'
 };
+
+// 根据两个开关状态决定字体类别
+function getFontCategory(monoOn, serifOn) {
+    if (monoOn && serifOn) return 'mono-serif';
+    if (monoOn) return 'mono-sans';
+    if (serifOn) return 'prop-serif';
+    return 'prop-sans';
+}
+
+// 填充字体下拉列表：首位固定「默认（跟随全局）」，其余按类别动态列出
+function populateFontSelect(select, category, savedValue) {
+    select.innerHTML = '';
+    const defaultOpt = document.createElement('option');
+    defaultOpt.value = 'inherit';
+    defaultOpt.textContent = '默认（跟随全局）';
+    select.appendChild(defaultOpt);
+    (FONT_LIBRARY[category] || []).forEach(f => {
+        const opt = document.createElement('option');
+        opt.value = f.stack;
+        opt.textContent = f.label;
+        opt.title = f.label; // 长字体名悬停显示全名
+        select.appendChild(opt);
+    });
+    const valid = savedValue && [...select.options].some(o => o.value === savedValue);
+    select.value = valid ? savedValue : 'inherit';
+    // 选中项悬停（Tooltip）显示完整名称
+    select.title = select.selectedOptions[0] ? select.selectedOptions[0].textContent : '';
+    select.dataset.current = select.value;
+}
+
+// 初始化五个字体配置区域（开关联动 + 下拉动态筛选）
+function initFontRegions() {
+    document.querySelectorAll('.font-region').forEach(region => {
+        const group = region.dataset.fontGroup;
+        if (!group || !fontGroupMap[group]) return;
+        const monoToggle = region.querySelector('.font-mono-toggle');
+        const serifToggle = region.querySelector('.font-serif-toggle');
+        const familySelect = region.querySelector('.font-family-select');
+        if (!monoToggle || !serifToggle || !familySelect) return;
+
+        const refreshList = () => {
+            const category = getFontCategory(monoToggle.checked, serifToggle.checked);
+            populateFontSelect(familySelect, category, familySelect.dataset.savedValue || 'inherit');
+        };
+
+        monoToggle.addEventListener('change', () => {
+            localStorage.setItem(`font-${group}-mono`, monoToggle.checked ? 'on' : 'off');
+            refreshList();
+        });
+        serifToggle.addEventListener('change', () => {
+            localStorage.setItem(`font-${group}-serif`, serifToggle.checked ? 'on' : 'off');
+            refreshList();
+        });
+        familySelect.addEventListener('change', (e) => {
+            const val = e.target.value;
+            familySelect.dataset.savedValue = val;
+            if (val === 'inherit') {
+                root.style.removeProperty(fontGroupMap[group]);
+            } else {
+                root.style.setProperty(fontGroupMap[group], val);
+            }
+            localStorage.setItem(`font-${group}-family`, val);
+            e.target.title = e.target.selectedOptions[0] ? e.target.selectedOptions[0].textContent : '';
+            e.target.dataset.current = val;
+        });
+
+        refreshList();
+    });
+}
+
+// 恢复（并迁移旧版字体矩阵设置）
+function restoreFontRegions() {
+    const groups = ['heading', 'body', 'code', 'link', 'quote'];
+    const hasOldMatrix = localStorage.getItem('matrix-font-body') !== null;
+
+    groups.forEach(group => {
+        const region = document.querySelector(`.font-region[data-font-group="${group}"]`);
+        if (!region) return;
+        const monoToggle = region.querySelector('.font-mono-toggle');
+        const serifToggle = region.querySelector('.font-serif-toggle');
+        const familySelect = region.querySelector('.font-family-select');
+
+        // 旧版字体矩阵迁移（仅在无新版设置时执行一次）
+        if (hasOldMatrix && !localStorage.getItem(`font-${group}-family`)) {
+            const oldVal = localStorage.getItem(`matrix-font-${group}`);
+            const matrixMap = {
+                'sans-prop': { mono: 'off', serif: 'off', family: 'sans-serif' },
+                'serif-prop': { mono: 'off', serif: 'on', family: 'serif' },
+                'sans-mono': { mono: 'on', serif: 'off', family: 'monospace' },
+                'serif-mono': { mono: 'on', serif: 'on', family: '"Courier New", monospace' }
+            };
+            const mapped = matrixMap[oldVal];
+            if (mapped) {
+                localStorage.setItem(`font-${group}-mono`, mapped.mono);
+                localStorage.setItem(`font-${group}-serif`, mapped.serif);
+                localStorage.setItem(`font-${group}-family`, mapped.family);
+            } else {
+                localStorage.setItem(`font-${group}-family`, 'inherit');
+            }
+        }
+
+        const monoOn = localStorage.getItem(`font-${group}-mono`) === 'on';
+        const serifOn = localStorage.getItem(`font-${group}-serif`) === 'on';
+        const savedFamily = localStorage.getItem(`font-${group}-family`) || 'inherit';
+
+        monoToggle.checked = monoOn;
+        serifToggle.checked = serifOn;
+        familySelect.dataset.savedValue = savedFamily;
+
+        // 应用已保存字体（含旧矩阵迁移结果）
+        if (savedFamily !== 'inherit') {
+            root.style.setProperty(fontGroupMap[group], savedFamily);
+        }
+        const category = getFontCategory(monoOn, serifOn);
+        populateFontSelect(familySelect, category, savedFamily);
+    });
+}
 
 function updatePosition() {
     const wrapper = document.getElementById('article-wrapper');
@@ -124,18 +290,8 @@ function bindControls() {
     pSlider?.addEventListener('input', updatePosition);
     window.addEventListener('resize', updatePosition);
 
-    // ----- 字体矩阵（radio）-----
-    document.querySelector('.font-matrix-table')?.addEventListener('change', (e) => {
-        if (e.target.type === 'radio') {
-            const groupName = e.target.name;
-            const fontType = e.target.value;
-            const varName = radioVarMap[groupName];
-            if (varName && fontValueMap[fontType]) {
-                root.style.setProperty(varName, fontValueMap[fontType]);
-                localStorage.setItem(`matrix-${groupName}`, fontType);
-            }
-        }
-    });
+    // ----- 动态字体配置区域（等宽/衬线开关 + 字体下拉）-----
+    initFontRegions();
 
     // ----- 行距 -----
     lSlider?.addEventListener('input', (e) => {
@@ -160,11 +316,6 @@ function bindControls() {
             themeBtn.querySelector('.bar-icon').textContent = '☀️';
             themeBtn.querySelector('.bar-label').textContent = '亮色';
         }
-        // 同步下拉框（如果有日间主题下拉则选中 custom）
-        if (lightThemeSelect) lightThemeSelect.value = 'custom';
-        if (darkThemeSelect && darkThemeSelect.value === 'custom') {
-            // 如果当前夜间主题是 custom，则不清除，但日间已是 custom
-        }
     });
 
     // ----- 背景颜色 -----
@@ -181,7 +332,6 @@ function bindControls() {
             themeBtn.querySelector('.bar-icon').textContent = '☀️';
             themeBtn.querySelector('.bar-label').textContent = '亮色';
         }
-        if (lightThemeSelect) lightThemeSelect.value = 'custom';
     });
 
     // ----- 日间主题下拉 -----
@@ -356,7 +506,7 @@ function restoreSavedSettings() {
     const defaultDarkTheme = localStorage.getItem('last-dark-theme') || 'github-dark';
 
     // 代码默认设置
-    const savedCodeFormat = localStorage.getItem('blog-code-format') || 'scroll';
+    const savedCodeFormat = localStorage.getItem('blog-code-format') || 'global';
     const savedCodeTheme = localStorage.getItem('blog-code-theme') || 'global';
     const savedCodeInlineTheme = localStorage.getItem('blog-code-inline-theme') || 'global';
     const savedCodeInlineOffset = localStorage.getItem('blog-code-inline-offset') ?? '-2';
@@ -416,13 +566,17 @@ function restoreSavedSettings() {
         }
     }
 
-    // 设置下拉框值
+    // 设置下拉框值（custom 选项已移除：若保存值无效则回退到对应默认主题）
+    const resolveSelectValue = (select, value, fallback) => {
+        if (!select) return fallback;
+        if (value && Array.from(select.options).some(o => o.value === value)) return value;
+        return fallback;
+    };
     if (lightThemeSelect) {
-        // 如果当前是暗色，日间下拉选最近使用的亮色，否则选当前主题
-        lightThemeSelect.value = isDark ? defaultLightTheme : savedTheme;
+        lightThemeSelect.value = resolveSelectValue(lightThemeSelect, isDark ? defaultLightTheme : savedTheme, 'github-light');
     }
     if (darkThemeSelect) {
-        darkThemeSelect.value = isDark ? savedTheme : defaultDarkTheme;
+        darkThemeSelect.value = resolveSelectValue(darkThemeSelect, isDark ? savedTheme : defaultDarkTheme, 'github-dark');
     }
 
     // ----- 恢复代码设置 -----
@@ -461,27 +615,8 @@ function restoreSavedSettings() {
         if (valEl) valEl.innerText = `${savedCodeBlockSize}px`;
     }
 
-    // ----- 恢复字体矩阵 radio -----
-    const fontTable = document.querySelector('.font-matrix-table');
-    if (fontTable) {
-        Object.keys(radioVarMap).forEach((groupName) => {
-            const savedValue = localStorage.getItem(`matrix-${groupName}`);
-            let targetRadio = null;
-            if (savedValue) {
-                targetRadio = fontTable.querySelector(`input[name="${groupName}"][value="${savedValue}"]`);
-            }
-            if (!targetRadio) {
-                targetRadio = fontTable.querySelector(`input[name="${groupName}"]:checked`);
-            }
-            if (targetRadio) {
-                targetRadio.checked = true;
-                const fontType = targetRadio.value;
-                if (fontValueMap[fontType]) {
-                    root.style.setProperty(radioVarMap[groupName], fontValueMap[fontType]);
-                }
-            }
-        });
-    }
+    // ----- 恢复动态字体配置区域（含旧矩阵迁移）-----
+    restoreFontRegions();
 
     // ----- 恢复表格设置 -----
     if (tableFormatSelect) tableFormatSelect.value = savedTableFormat;
