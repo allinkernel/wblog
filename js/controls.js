@@ -65,6 +65,20 @@ const fontGroupMap = {
     'quote': '--font-quote'
 };
 
+// ==================== 本机字体读取（Local Font Access API） ====================
+// 浏览器安全策略：仅 HTTPS 或 localhost 环境可用；Chrome/Edge 桌面版 103+ 支持
+const LOCAL_FONTS_KEY = 'wblog-local-fonts-v1';
+const FONT_CATEGORIES = ['mono-sans', 'mono-serif', 'prop-sans', 'prop-serif'];
+let localFontCategories = { 'mono-sans': [], 'mono-serif': [], 'prop-sans': [], 'prop-serif': [] };
+
+// 判断字体是否已存在于预置库（按字体栈首个族名比较，避免下拉列表重复）
+function familyInLibrary(family, category) {
+    return (FONT_LIBRARY[category] || []).some(f => {
+        const first = String(f.stack).split(',')[0].trim().replace(/^["']|["']$/g, '');
+        return first.toLowerCase() === String(family).toLowerCase();
+    });
+}
+
 // 根据两个开关状态决定字体类别
 function getFontCategory(monoOn, serifOn) {
     if (monoOn && serifOn) return 'mono-serif';
@@ -87,6 +101,20 @@ function populateFontSelect(select, category, savedValue) {
         opt.title = f.label; // 长字体名悬停显示全名
         select.appendChild(opt);
     });
+    // 本机字体（Local Font Access API 读取，按类别筛选并与预置库去重）
+    const locals = (localFontCategories[category] || []).filter(f => !familyInLibrary(f, category));
+    if (locals.length) {
+        const og = document.createElement('optgroup');
+        og.label = `本机字体（${locals.length}）`;
+        locals.forEach(family => {
+            const opt = document.createElement('option');
+            opt.value = `"${String(family).replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
+            opt.textContent = family;
+            opt.title = family; // 长字体名悬停显示全名
+            og.appendChild(opt);
+        });
+        select.appendChild(og);
+    }
     const valid = savedValue && [...select.options].some(o => o.value === savedValue);
     select.value = valid ? savedValue : 'inherit';
     // 选中项悬停（Tooltip）显示完整名称
@@ -180,6 +208,193 @@ function restoreFontRegions() {
         const category = getFontCategory(monoOn, serifOn);
         populateFontSelect(familySelect, category, savedFamily);
     });
+
+    // 本机字体读取区域（在字体下拉填充完毕后初始化）
+    initLocalFontRegion();
+}
+
+// ==================== 本机字体读取实现（Local Font Access API） ====================
+
+// 用 Canvas 探测字体特征：是否等宽、是否衬线（用于自动分类到四类字体库）
+function detectFontFeatures(family) {
+    const safe = String(family).replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    // 字体不可用时直接归为默认类（document.fonts.check 无法确认则继续尝试测量）
+    if (document.fonts && typeof document.fonts.check === 'function') {
+        try {
+            if (!document.fonts.check(`64px "${safe}"`)) return { mono: false, serif: false };
+        } catch (e) { /* 忽略异常，继续测量 */ }
+    }
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    // 无 2D 上下文（如无头环境）时无法测量，按默认类处理
+    if (!ctx) return { mono: false, serif: false };
+    // 等宽检测：等宽字体中 'i' 与 'm' 宽度相同（均为 1em）
+    ctx.font = `64px "${safe}"`;
+    const wI = ctx.measureText('i').width;
+    const wM = ctx.measureText('m').width;
+    const mono = Math.abs(wI - wM) < 1.5;
+    // 等宽字体（如 Consolas/DejaVu Sans Mono）的 'I' 常带横杠占满字格，衬线判别不可靠，统一归入 mono-sans；
+    // 等宽衬线字体（Courier New 等）已由预置库的 mono-serif 类覆盖
+    if (mono) return { mono: true, serif: false };
+    // 衬线检测：渲染大写 'I'，比较字形最顶行与中部的水平跨度。
+    // serif 字体顶部有横向衬线横杠（跨度远大于竖线），sans 字体顶部仅竖线本身
+    const size = 96;
+    ctx.font = `${size}px "${safe}"`;
+    const iw = Math.ceil(ctx.measureText('I').width);
+    canvas.width = iw + 16; // 重置画布
+    canvas.height = size + 16;
+    ctx.font = `${size}px "${safe}"`; // 画布尺寸变化后需重新设置字体
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = '#000';
+    ctx.fillText('I', 8, size);
+    const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+    const rowSpans = [];
+    for (let y = 0; y < canvas.height; y++) {
+        let minX = -1, maxX = -1;
+        for (let x = 0; x < canvas.width; x++) {
+            if (data[(y * canvas.width + x) * 4 + 3] > 0) {
+                if (minX < 0) minX = x;
+                maxX = x;
+            }
+        }
+        if (minX >= 0) rowSpans.push(maxX - minX + 1);
+    }
+    let serif = false;
+    if (rowSpans.length >= 3) {
+        const topSpan = rowSpans[0];
+        const midSpan = rowSpans[Math.floor(rowSpans.length / 2)];
+        // 顶部衬线跨度显著大于竖线笔画跨度 => 衬线字体
+        serif = midSpan > 0 && topSpan > midSpan * 1.6;
+    }
+    return { mono, serif };
+}
+
+// 重新填充所有字体下拉（本机字体读取/恢复缓存后调用）
+function repopulateAllFontSelects() {
+    document.querySelectorAll('.font-region').forEach(region => {
+        const group = region.dataset.fontGroup;
+        if (!group || !fontGroupMap[group]) return;
+        const monoToggle = region.querySelector('.font-mono-toggle');
+        const serifToggle = region.querySelector('.font-serif-toggle');
+        const familySelect = region.querySelector('.font-family-select');
+        if (!monoToggle || !serifToggle || !familySelect) return;
+        const saved = familySelect.dataset.savedValue || familySelect.value || 'inherit';
+        populateFontSelect(familySelect, getFontCategory(monoToggle.checked, serifToggle.checked), saved);
+    });
+}
+
+function setLocalFontStatus(msg, cls) {
+    const status = document.getElementById('font-local-status');
+    if (!status) return;
+    status.textContent = msg;
+    status.className = 'font-local-status' + (cls ? ' ' + cls : '');
+}
+
+// 读取系统已安装字体：queryLocalFonts() -> 去重 -> Canvas 自动分类 -> 写入缓存并刷新下拉
+async function readLocalFonts() {
+    const btn = document.getElementById('font-local-btn');
+    if (!btn) return;
+    if (!window.queryLocalFonts) {
+        setLocalFontStatus('当前浏览器不支持 Local Font Access API（需 Chrome/Edge 桌面版 103+）', 'warn');
+        return;
+    }
+    if (!window.isSecureContext) {
+        setLocalFontStatus('需 HTTPS 或 localhost 环境才能读取本机字体', 'warn');
+        return;
+    }
+    btn.disabled = true;
+    setLocalFontStatus('正在读取系统字体…（请在弹窗中允许访问）');
+    try {
+        const available = await window.queryLocalFonts();
+        const families = [...new Set((available || []).map(f => f && f.family).filter(Boolean))]
+            .sort((a, b) => String(a).localeCompare(String(b), 'zh-Hans-CN'));
+        const cats = { 'mono-sans': [], 'mono-serif': [], 'prop-sans': [], 'prop-serif': [] };
+        for (let i = 0; i < families.length; i++) {
+            let feat;
+            try {
+                feat = detectFontFeatures(families[i]);
+            } catch (e) {
+                feat = { mono: false, serif: false };
+            }
+            cats[(feat.mono ? 'mono' : 'prop') + '-' + (feat.serif ? 'serif' : 'sans')].push(families[i]);
+            // 大批量字体时周期性让出主线程，避免 UI 卡顿
+            if (i % 40 === 39) {
+                setLocalFontStatus(`正在分类 ${i + 1}/${families.length}…`);
+                await new Promise(r => setTimeout(r, 0));
+            }
+        }
+        localFontCategories = cats;
+        try {
+            localStorage.setItem(LOCAL_FONTS_KEY, JSON.stringify(cats));
+        } catch (e) { /* 存储失败不影响本次使用 */ }
+        repopulateAllFontSelects();
+        const monoCount = cats['mono-sans'].length + cats['mono-serif'].length;
+        const serifCount = cats['prop-serif'].length + cats['mono-serif'].length;
+        setLocalFontStatus(`已读取 ${families.length} 个字体（等宽 ${monoCount} · 衬线 ${serifCount}），已加入上方下拉列表`, 'ok');
+        btn.textContent = '重新读取本机字体';
+    } catch (err) {
+        const name = err && err.name;
+        if (name === 'NotAllowedError' || name === 'SecurityError') {
+            setLocalFontStatus('未获得授权：请在弹窗中允许访问本地字体', 'warn');
+        } else if (name === 'AbortError') {
+            setLocalFontStatus('已取消读取', 'warn');
+        } else {
+            setLocalFontStatus('读取失败：' + ((err && err.message) || err), 'warn');
+        }
+    } finally {
+        btn.disabled = false;
+    }
+}
+
+// 初始化本机字体区域：恢复缓存、能力检测（API + 安全上下文 + 权限状态）、绑定按钮
+function initLocalFontRegion() {
+    const btn = document.getElementById('font-local-btn');
+    if (!btn) return;
+
+    // 1) 恢复上次读取结果缓存（避免每次刷新都重新弹窗授权）
+    try {
+        const raw = localStorage.getItem(LOCAL_FONTS_KEY);
+        if (raw) {
+            const parsed = JSON.parse(raw);
+            if (parsed && FONT_CATEGORIES.every(c => Array.isArray(parsed[c]))) {
+                localFontCategories = parsed;
+                repopulateAllFontSelects();
+                const total = FONT_CATEGORIES.reduce((n, c) => n + parsed[c].length, 0);
+                if (total > 0) {
+                    setLocalFontStatus(`已加载 ${total} 个本机字体缓存`, 'ok');
+                    btn.textContent = '重新读取本机字体';
+                }
+            }
+        }
+    } catch (e) { /* 缓存损坏则忽略 */ }
+
+    // 2) 能力检测：浏览器支持 + 安全上下文（HTTPS 或 localhost）
+    if (!('queryLocalFonts' in window)) {
+        btn.disabled = true;
+        setLocalFontStatus('当前浏览器不支持 Local Font Access API（需 Chrome/Edge 桌面版 103+）', 'warn');
+        return;
+    }
+    if (!window.isSecureContext) {
+        btn.disabled = true;
+        setLocalFontStatus('需 HTTPS 或 localhost 环境才能读取本机字体', 'warn');
+        return;
+    }
+    // 3) 权限状态提示（仅查询状态，不弹窗）
+    if (navigator.permissions && typeof navigator.permissions.query === 'function') {
+        navigator.permissions.query({ name: 'local-fonts' }).then(p => {
+            if (p.state === 'denied') {
+                btn.disabled = true;
+                setLocalFontStatus('权限已被拒绝：请在浏览器站点设置中允许「本地字体」后刷新页面', 'warn');
+            }
+        }).catch(() => { /* 权限 API 不可用则忽略 */ });
+    }
+    if (!document.getElementById('font-local-status').textContent) {
+        setLocalFontStatus('点击按钮读取本机字体（需在弹窗中允许访问）');
+    }
+    if (btn.dataset.localFontInit !== '1') {
+        btn.dataset.localFontInit = '1';
+        btn.addEventListener('click', readLocalFonts);
+    }
 }
 
 function updatePosition() {
@@ -675,5 +890,7 @@ window.applyGlobalTableFormat = applyGlobalTableFormat;
 window.applyGlobalTableHeader = applyGlobalTableHeader;
 window.bindControls = bindControls;
 window.restoreSavedSettings = restoreSavedSettings;
+window.readLocalFonts = readLocalFonts;
+window.detectFontFeatures = detectFontFeatures;
 window.updatePosition = updatePosition;
 window.formatInlineSize = formatInlineSize;

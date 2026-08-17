@@ -283,6 +283,29 @@ body {
     background: var(--theme-control-bg);
     color: var(--theme-control-text);
 }
+
+/* 本机字体读取区域的暗色/主题适配 */
+.font-local-btn {
+    background: var(--theme-control-bg) !important;
+    color: var(--theme-control-text) !important;
+    border-color: var(--theme-control-border) !important;
+}
+.font-local-btn:hover:not(:disabled) {
+    background: var(--theme-panel-hover) !important;
+}
+.font-local-btn:active:not(:disabled) {
+    background: var(--theme-border) !important;
+}
+.font-local-hint,
+.font-local-status {
+    color: var(--theme-muted) !important;
+}
+.font-local-status.ok {
+    color: var(--theme-link) !important;
+}
+.font-local-status.warn {
+    color: #e6a23c !important;
+}
 .panel-close-btn {
     color: var(--theme-muted) !important;
 }

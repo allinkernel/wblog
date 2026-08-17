@@ -531,3 +531,49 @@
     background: var(--theme-control-bg);
     color: var(--theme-control-text);
 }
+
+/* ---- 本机字体读取（Local Font Access API） ---- */
+.font-local-hint {
+    font-size: 11px;
+    line-height: 1.5;
+    color: var(--theme-muted);
+    margin: 0;
+}
+.font-local-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.font-local-btn {
+    padding: 4px 12px;
+    border: 1px solid var(--theme-border);
+    border-radius: 4px;
+    background: var(--theme-control-bg);
+    color: var(--theme-control-text);
+    font-size: 11px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+.font-local-btn:hover:not(:disabled) {
+    background: var(--theme-panel-hover);
+    border-color: var(--theme-border);
+}
+.font-local-btn:active:not(:disabled) {
+    background: var(--theme-border);
+}
+.font-local-btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+.font-local-status {
+    font-size: 11px;
+    color: var(--theme-muted);
+    line-height: 1.4;
+}
+.font-local-status.ok {
+    color: var(--theme-link);
+}
+.font-local-status.warn {
+    color: #e6a23c;
+}
