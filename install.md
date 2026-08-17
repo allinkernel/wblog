@@ -1,13 +1,12 @@
 # 安装说明
 
 ## 编译方法
-此项目直接依赖于`wtool`，所以必须保证wtool在系统上已经正确安装好了
-在根目录下直接执行`zsh build.sh`，此脚本所做的工作如下：
-1. 调用`generate_ninja.py`读取每个子目录下的wsw_blog.xml，直接生成`build.ninja`，其中是md等类型文件翻译成html的命令；
+在根目录下直接执行`./build.sh`，此脚本所做的工作如下：
+1. 调用`generate_ninja.py`读取每个子目录下的wsw_blog.xml，直接生成`out/build.ninja`，其中是md等类型文件翻译成html的命令；
 2. 调用`ninja`执行这个`build.ninja`，生成html到`out/dist/articles`和`out/dist/manifest.json`
 3. 将当前这个模板仓库，直接软连接到`out/dist/template`
 
-编译完毕后，需要通过`nginx`启动`web`服务器，指定静态网站根目录时指定到`out/dist`的绝对路径就行了，下边会讲
+编译完毕后，需要通过`nginx`启动`web`服务器，指定静态网站根目录时指定到`out/dist`的绝对路径即可。nginx相关的配置模板可以直接查看`nginx_conf`目录下的模板文件，根据系统环境自行调整。
 
 ## 使用方法
 当前目录下的模板文件会被外层的build.sh直接软连接到out/dist/template，和同目录下的其他两项共同工作
@@ -84,43 +83,38 @@ wsw_blog的模板要配合nginx使用，nginx配置文件。重点是这个nginx
           include /etc/nginx/conf.d/*.conf;
           include /etc/nginx/sites-enabled/*;
   }
-
-
-  #mail {
-  #       # See sample authentication script at:
-  #       # http://wiki.nginx.org/ImapAuthenticateWithApachePhpScript
-  #
-  #       # auth_http localhost/auth.php;
-  #       # pop3_capabilities "TOP" "USER";
-  #       # imap_capabilities "IMAP4rev1" "UIDPLUS";
-  #
-  #       server {
-  #               listen     localhost:110;
-  #               protocol   pop3;
-  #               proxy      on;
-  #       }
-  #
-  #       server {
-  #               listen     localhost:143;
-  #               protocol   imap;
-  #               proxy      on;
-  #       }
-  #}
-  ```
+```
 
 2. 特定服务配置文件，比如我的文章和模板保存在目录`/home/mindul/self/wblog/out/dist`下，
 配置文件中的`root`就必须配置到这个目录
 ```
-$ cat /etc/nginx/conf.d/my-static-site.conf
 server {
-    listen 8888;                      # 监听 8080
-    server_name localhost;            # 可以是域名或 IP
-    root /home/mindul/self/wblog/out/dist;          # 对应目录 A
-    index index.html;
+    listen 8888;
+    server_name localhost;
+    root /home/mindul/self/wblog_new/out/dist;   # 这个路径要自行调整以适配服务器
 
-    location / {
-        try_files $uri $uri/ /template/template.html;
+    # 如果请求的是静态资源，nginx直接返回
+    location ~* \.(css|js|png|jpg|jpeg|gif|ico|svg|webp|woff2?|ttf|eot)$ {
+        expires 7d;
+        try_files $uri =404;
     }
+
+    # 剩下的请求中，只要不存在对应的文件
+    # nginx就应该返回/template/template.html
+    location / {
+        try_files $uri /template/template.html;
+    }
+    # out/dist/manifest.json是可以直接请求到的，其他的文件不会有此情况
+     
+
+    # 浏览器接受到template.html加载navigation.js后
+    # 将请求的uri前边加上articles/再次传给nginx
+    # 由于所有html都保存在out/dist/articles/目录下
+    # 所以这第二次的api间接请求文件就可以正常工作了
+    location /articles/ {
+        try_files $uri $uri.html =404;
+    }
+
 }
 ```
 
