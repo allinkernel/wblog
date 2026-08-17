@@ -24,6 +24,7 @@ window.fetch = (url) => {
             <h1>测试标题</h1><h2>小节</h2>
             <p>正文段落 <code>inline code</code> 继续</p>
             <pre><code class="language-c">int main() { return 0; }</code></pre>
+            <pre><code class="language-bash">sudo apt-get update\n# 沙箱用户 desc 与 deepseek 说明\necho "字符串 # 不误判"</code></pre>
             <blockquote><p>引用内容</p></blockquote>
             <table><thead><tr><th>列A</th><th>列B</th></tr></thead>
             <tbody><tr><td>1</td><td>2</td></tr></tbody></table>
@@ -111,14 +112,28 @@ setTimeout(() => {
     check('夜间主题无 custom 选项', ![...$('#dark-theme-select').options].some(o => o.value === 'custom'));
     check('主题 Tab 含颜色选择器', !!$('#color-text') && !!$('#color-bg'));
     check('custom 主题恢复：颜色选择器值为保存值', $('#color-text').value === '#112233' && $('#color-bg').value === '#445566');
-    check('custom 主题下拉回退默认（不空白）', ['github-light','github-dark'].includes($('#light-theme-select').value));
+    check('custom 主题下拉回退默认（不空白）', ['lightmind','lightmind-dark'].includes($('#light-theme-select').value));
+    check('日间主题默认项为 lightmind', $('#light-theme-select').options[0].value === 'lightmind' && $('#light-theme-select').options[0].textContent === 'lightmind 默认');
+    check('夜间主题默认项为 lightmind-dark', $('#dark-theme-select').options[0].value === 'lightmind-dark' && $('#dark-theme-select').options[0].textContent === 'lightmind-dark 默认');
+    check('readerThemeMap 含 lightmind 两主题', !!window.readerThemeMap && !!window.readerThemeMap['lightmind'] && !!window.readerThemeMap['lightmind-dark']);
+    // 应用 lightmind 主题验证 CSS 变量
+    window.applyReaderTheme('lightmind');
+    check('lightmind 应用后 --bg-color', document.documentElement.style.getPropertyValue('--bg-color') === '#f4f1e8');
+    check('lightmind 应用后 --theme-link', document.documentElement.style.getPropertyValue('--theme-link') === '#4a7c59');
+    window.applyReaderTheme('lightmind-dark');
+    check('lightmind-dark 应用后 --bg-color', document.documentElement.style.getPropertyValue('--bg-color') === '#161d1a');
+    // lightmind 标题装饰迁移（Typora 原样：h1/h2 横线 + h3 绿色小条）
+    const themeCss = fs.readFileSync(path.join(ROOT, 'template/css/theme.css'), 'utf8');
+    check('lightmind h1 横线（CSS）', /\[data-reader-theme="lightmind"\] h1[^{]*\{[^}]*border-bottom: 2px solid var\(--theme-accent\)/.test(themeCss));
+    check('lightmind h2 横线（CSS）', /\[data-reader-theme="lightmind"\] h2[^{]*\{[^}]*border-bottom: 1px solid color-mix/.test(themeCss));
+    check('lightmind h3 绿色小条（CSS）', /\[data-reader-theme="lightmind"\] h3::before[^{]*\{[^}]*width: 4px[^}]*background: var\(--theme-accent\)/.test(themeCss));
     check('老 codeFormat=scroll 保留选中', $('#code-format-select').value === 'scroll');
 
     // ---- 5. 字体动态区域 ----
     $('#settings-tab-bar').querySelector('[data-tab="tab-font"]').click();
     const regions = $$('.font-region');
-    check('6 个字体区域（含行内代码/代码块拆分）', regions.length === 6);
-    check('区域顺序', regions.map(r => r.dataset.fontGroup).join(',') === 'heading,body,inline-code,code-block,link,quote');
+    check('7 个字体区域（代码块拆为 代码/注释）', regions.length === 7);
+    check('区域顺序', regions.map(r => r.dataset.fontGroup).join(',') === 'heading,body,inline-code,code-block-code,code-block-comment,link,quote');
     check('字体矩阵表格已移除', !$('.font-matrix-table'));
     check('每个区域含 等宽/衬线 开关 + 下拉', regions.every(r => r.querySelector('.font-mono-toggle') && r.querySelector('.font-serif-toggle') && r.querySelector('.font-family-select')));
 
@@ -131,12 +146,14 @@ setTimeout(() => {
 
     // 迁移验证：matrix-font-code=sans-mono → 行内代码/代码块两份均 mono on + serif off
     const inlineCodeRegion = $('.font-region[data-font-group="inline-code"]');
-    const codeBlockRegion = $('.font-region[data-font-group="code-block"]');
+    const codeCodeRegion = $('.font-region[data-font-group="code-block-code"]');
+    const codeCommentRegion = $('.font-region[data-font-group="code-block-comment"]');
     check('迁移 行内代码: mono 开', inlineCodeRegion.querySelector('.font-mono-toggle').checked === true);
     check('迁移 行内代码: serif 关', inlineCodeRegion.querySelector('.font-serif-toggle').checked === false);
-    check('迁移 代码块: mono 开', codeBlockRegion.querySelector('.font-mono-toggle').checked === true);
-    check('迁移 代码块: serif 关', codeBlockRegion.querySelector('.font-serif-toggle').checked === false);
-    check('迁移写入两份 localStorage', window.localStorage.getItem('font-inline-code-mono') === 'on' && window.localStorage.getItem('font-code-block-mono') === 'on');
+    check('迁移 代码块代码: mono 开', codeCodeRegion.querySelector('.font-mono-toggle').checked === true);
+    check('迁移 代码块代码: serif 关', codeCodeRegion.querySelector('.font-serif-toggle').checked === false);
+    check('迁移写入两份 localStorage', window.localStorage.getItem('font-inline-code-mono') === 'on' && window.localStorage.getItem('font-code-block-code-mono') === 'on');
+    check('代码块注释组保留新默认（未迁移覆盖）', window.localStorage.getItem('font-code-block-comment-mono') === null);
 
     const headingRegion = $('.font-region[data-font-group="heading"]');
     check('迁移 heading(inherit): 开关全关', headingRegion.querySelector('.font-mono-toggle').checked === false && headingRegion.querySelector('.font-serif-toggle').checked === false);
@@ -165,10 +182,26 @@ setTimeout(() => {
     inlineSel.value = 'Consolas, monospace';
     inlineSel.dispatchEvent(new window.Event('change', { bubbles: true }));
     check('行内代码字体 -> --font-inline-code', document.documentElement.style.getPropertyValue('--font-inline-code') === 'Consolas, monospace');
-    const blockSel = codeBlockRegion.querySelector('.font-family-select');
+    const blockSel = codeCodeRegion.querySelector('.font-family-select');
     blockSel.value = '"DejaVu Sans Mono", monospace';
     blockSel.dispatchEvent(new window.Event('change', { bubbles: true }));
-    check('代码块字体 -> --font-code-block', document.documentElement.style.getPropertyValue('--font-code-block') === '"DejaVu Sans Mono", monospace');
+    check('代码块代码字体 -> --font-code-block-code', document.documentElement.style.getPropertyValue('--font-code-block-code') === '"DejaVu Sans Mono", monospace');
+    const commentSel = codeCommentRegion.querySelector('.font-family-select');
+    commentSel.value = 'Arial, sans-serif';
+    commentSel.dispatchEvent(new window.Event('change', { bubbles: true }));
+    check('代码块注释字体 -> --font-code-block-comment', document.documentElement.style.getPropertyValue('--font-code-block-comment') === 'Arial, sans-serif');
+
+    // ---- 注释字体分离（DOM 标记）----
+    check('markCommentSpans: # 行注释含 desc/deepseek', window.markCommentSpans('sudo apt-get update # 说明 desc deepseek', 'bash').includes('<span class="code-tok-comment"># 说明 desc deepseek</span>'));
+    check('markCommentSpans: 字符串内 # 不误判', window.markCommentSpans('echo "a#b"', 'bash') === 'echo "a#b"');
+    check('markCommentSpans: C 语言 // 注释', window.markCommentSpans('int x; // 注释', 'c').includes('code-tok-comment'));
+    check('markCommentSpans: 单引号内 # 不误判', window.markCommentSpans("echo 'a#b'", 'bash') === "echo 'a#b'");
+    // 文章中的 bash 代码块已生成注释 span
+    const tokSpans = $$('.code-tok-comment');
+    check('注释 span 已生成', tokSpans.length >= 1);
+    check('注释 span 含英文 desc/deepseek', tokSpans.some(s => s.textContent.includes('desc') && s.textContent.includes('deepseek')));
+    check('字符串行未被误判为注释', ![...document.querySelectorAll('.code-line')].some(l => l.textContent.includes('不误判') && l.querySelector('.code-tok-comment')));
+    check('注释字体 CSS 规则（CSS）', /\.line-code \.code-tok-comment[^{]*\{[^}]*font-family: var\(--font-code-block-comment\), var\(--font-code-block-code\)/.test(fs.readFileSync(path.join(ROOT, 'template/css/code.css'), 'utf8')));
 
     // 滚动条与表格修复的 CSS 规则存在性
     const baseCss = fs.readFileSync(path.join(ROOT, 'template/css/base.css'), 'utf8');
@@ -176,10 +209,11 @@ setTimeout(() => {
     check('滚动条：透明轨道 + 悬停显示（CSS）', /::-webkit-scrollbar-track[^{]*\{[^}]*transparent/s.test(baseCss) && /:hover::-webkit-scrollbar-thumb[^{]*\{[^}]*var\(--scrollbar-thumb\)/s.test(baseCss));
     check('滚动条：滑块细圆角（CSS）', /--scrollbar-size:\s*6px/.test(baseCss) && /border-radius:\s*calc\(var\(--scrollbar-size\) \/ 2\)/.test(baseCss));
     check('表格背景跟随内容宽度（CSS）', /\.table-wrapper:has\(\.table-format-scroll\) \.table-enhanced-inner[^{]*\{[^}]*width:\s*max-content[^}]*min-width:\s*100%/s.test(codeCss));
-    check('自适应表格 wrapper 跟随内容宽度（CSS）', /\.table-wrapper:has\(\.table-format-adaptive\)[^{]*\{[^}]*width:\s*fit-content[^}]*min-width:\s*100%[^}]*max-width:\s*none/s.test(codeCss));
+    check('自适应表格 wrapper 跟随内容宽度（CSS）', /\.table-wrapper:has\(\.table-format-adaptive\)[^{]*\{[^}]*width:\s*fit-content[^}]*min-width:\s*0[^}]*max-width:\s*none/s.test(codeCss));
     const codeJs = fs.readFileSync(path.join(ROOT, 'template/js/code.js'), 'utf8');
     check('表格格式切换重置 wrapper 宽度（JS）', /\.style\.width = '';[^}]*\.style\.minWidth = '';[^}]*\.style\.maxWidth = '';/s.test(codeJs));
-    check('code/pre 字体分离（CSS）', /--font-inline-code/.test(baseCss) && /--font-code-block/.test(baseCss) && /pre code[^{]*\{[^}]*var\(--font-code-block\)/.test(baseCss));
+    check('code/pre 字体分离（CSS）', /--font-inline-code/.test(baseCss) && /--font-code-block-code/.test(baseCss) && /--font-code-block-comment/.test(baseCss) && /var\(--font-code-block-code\), var\(--font-code-block-comment\)/.test(baseCss));
+    check('默认字体：行内 WenKai Mono / 代码 JetBrains / 注释 WenKai Mono（CSS）', /--font-inline-code:[^;]*LXGW WenKai Mono/.test(baseCss) && /--font-code-block-code:[^;]*JetBrains Mono/.test(baseCss) && /--font-code-block-comment:[^;]*LXGW WenKai Mono/.test(baseCss));
 
     // ---- 6. 面板按钮映射与关闭 ----
     $('#bar-settings').click();
@@ -242,6 +276,40 @@ setTimeout(() => {
         Object.defineProperty(window, 'isSecureContext', { value: false, configurable: true });
         window.restoreSavedSettings();
         check('非安全上下文时禁用并提示 HTTPS', $('#font-local-btn').disabled && /HTTPS\s*或\s*localhost/.test($('#font-local-status').textContent));
+
+        // ---- 10. 多配置方案抽屉（默认 / 用户1~3）----
+        check('抽屉结构存在（4 个配置项）', !!$('#profile-drawer') && $$('#profile-drawer .profile-item').length === 4);
+        check('初始激活 user1', window.getActiveProfile() === 'user1');
+        check('bar 按钮显示当前配置名', $('#bar-profile-label').textContent === '用户1');
+        check('抽屉当前项高亮', $('.profile-item[data-profile="user1"]').classList.contains('active'));
+
+        // 修改设置 → 切 user2（空槽 → 出厂）→ 切回 user1 恢复
+        window.localStorage.setItem('blog-width', '800');
+        window.location.reload = () => {}; // jsdom 无 reload
+        window.switchProfile('user2'); // 切换时先保存 user1 快照
+        const savedUser1 = JSON.parse(window.localStorage.getItem('wblog-profile-user1') || 'null');
+        check('切槽时保存 user1 快照', savedUser1 && savedUser1.pageWidth === 800);
+        check('切换到 user2', window.getActiveProfile() === 'user2' && $('#bar-profile-label').textContent === '用户2');
+        check('user2 空槽 → 出厂宽度', window.localStorage.getItem('blog-width') === '700');
+        window.switchProfile('user1');
+        check('切回 user1 恢复宽度', window.localStorage.getItem('blog-width') === '800');
+        check('恢复后主题 = user1 快照值', window.localStorage.getItem('blog-reader-theme') === savedUser1.readerTheme);
+
+        // 默认槽：跟随当前亮暗 + 默认主题 lightmind
+        window.localStorage.setItem('blog-theme-mode', 'dark');
+        window.switchProfile('default');
+        check('默认槽恢复出厂 + 跟随暗色（lightmind-dark）', window.localStorage.getItem('blog-reader-theme') === 'lightmind-dark' && window.localStorage.getItem('blog-width') === '700');
+        window.switchProfile('user1');
+        check('默认后再切回 user1 仍恢复', window.localStorage.getItem('blog-width') === '800');
+
+        // 抽屉开关
+        window.openProfileDrawer();
+        check('打开抽屉', $('#profile-drawer').hidden === false);
+        window.closeProfileDrawer();
+        check('关闭抽屉', $('#profile-drawer').hidden === true);
+        check('抽屉项点击切换（user2）', (() => { $('.profile-item[data-profile="user2"]').click(); return window.getActiveProfile() === 'user2'; })());
+        window.switchProfile('user1');
+
     })().then(() => {
         console.log(fail === 0 ? '\n=== 端到端测试全部通过 ===' : `\n=== ${fail} 项失败 ===`);
         process.exit(fail === 0 ? 0 : 1);

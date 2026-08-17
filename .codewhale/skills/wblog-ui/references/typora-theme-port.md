@@ -66,3 +66,38 @@ Typora 主题 CSS 开头通常有 `:root { ... }` 设计令牌区。提取：
 - **主题名含 `dark` 后缀**：`isDark = savedTheme.includes('dark')` 决定主题归入日间还是夜间，暗色主题命名必须带 `dark`。
 - **老用户兼容**：新增主题时保留旧主题定义与选项，`resolveSelectValue`/`setSelectIfValid` 会在保存值无效时回退默认，不会白屏。
 - **正文默认字体**：如需统一默认正文字体（如 LXGW WenKai），改 `base.css` 的 `--font-body` 默认值（字体栈第一个字族），所有主题的「默认（跟随全局）」选项都会生效。
+
+## 标题装饰迁移（重要）
+
+Typora 主题里 `#write h1/h2` 的 `border-bottom` 横线、`h3::before` 装饰条、`h4~h6` 的颜色层级**都是主题个性**，必须迁移，否则观感与 Typora 不一致。模板中写到 `theme.css` 的 `#article-container[data-reader-theme="主题名"]` 作用域（亮/暗都要写，`:is()` 合并选择器），要点：
+
+- 标题色用 `var(--theme-link-hover)`（= accent-deep）；h5 用 `var(--theme-muted)`；h6 用 `color-mix(in srgb, var(--theme-muted) 75%, var(--text-color))`。
+- 横线：h1 `2px solid var(--theme-accent)`；h2 `1px solid color-mix(in srgb, var(--theme-accent) 25%, transparent)`（对应 Typora 的 `rgba(accent, .25)`）。
+- 装饰条：`h3::before { content:""; display:inline-block; width:4px; height:.95em; background:var(--theme-accent); border-radius:2px; margin-right:.55em; vertical-align:-.08em; }`。
+- 覆盖 base.css 的标题 `opacity`（用 `opacity:1`）与字号（Typora 用 1.85em/1.5em/1.25em/1.1em/1em/.95em 层级）。
+
+## 全量细节清单（lightmind 实战，其余 Typora 主题照此逐项检查）
+
+除标题外，Typora 主题还有这些视觉细节需要迁移（模板中统一放 `theme.css` 的 `[data-reader-theme="主题名"]` 作用域，用 `--theme-*` 变量 + `color-mix` 适配亮暗）：
+
+- **表格**：隔行条纹 `tbody tr:nth-child(even) { background: var(--theme-surface-2) }`；表头绿底白字 `thead { background: var(--theme-accent) }` + `th { color: #faf7ef }`；2px 深绿外框 `border: 2px solid var(--theme-link-hover)`；单元格边框 `color-mix(in srgb, var(--theme-accent) 30~38%, transparent)`；`border-collapse: separate` + `border-spacing: 0` + `border-radius` + `overflow: hidden`。
+- **引用**：卡片式（bg-quote 底 + 左 4px accent 条 + 1px 边框 + 圆角）；嵌套引用（accent-soft 左条 + 半透明白底）。模板引用有 `[data-quote-style=...]` 系统，主题样式应限定在 `[data-quote-style="global"]`（继承主题）时生效，用户显式选择的样式优先。
+- **md-alert 警告块**（Typora 原生 `> [!NOTE]`，pandoc 不产生，手写 HTML 时生效）：`.md-alert` 基础样式 + 五种变体（note 蓝 / tip 绿 / important 紫 / warning 金 / caution 红），亮暗两套色值（暗色用 `rgba(accent, 0.1)` 底 + 更亮的 accent）。
+- **分隔线 hr**：渐变 `linear-gradient(to right, transparent, accent-soft 30%, accent-soft 70%, transparent)`。
+- **列表**：`ul > li::marker { color: var(--theme-accent) }`、`ol > li::marker { color: var(--theme-link-hover); font-weight: 600 }`。
+- **链接**：`text-decoration: none` + `border-bottom: 1px solid color-mix(in srgb, var(--theme-accent) 35~50%, transparent)`。
+- **代码块配色**：`[data-reader-theme=...][data-code-theme="global"] .code-block-wrapper` 覆盖 `--code-bg-color/--code-header-bg/--code-border-color/--code-header-text/--code-linenum-color/--code-text-color`（lightmind：米纸 #f4f1e8 / 暗夜海军蓝 #14181f）。
+- **行内代码底色**：`[data-reader-theme=...][data-code-inline-theme="global"] code:not(pre code)` 覆盖背景为 Typora 的行内代码蒙层色（lightmind 浅绿 #e7eee5）。
+- **图片**：圆角 + 阴影 + 块级居中。
+
+## 代码块双字体：字体栈回退方案
+
+「代码块中汉字用 A 字体、代码用 B 字体」无需 token 级高亮（当前 pandoc 未启用 `--highlight-style`，文章无 `.tok-*` 类）— 用字体栈回退天然实现：
+
+```css
+font-family: var(--font-code-block-code), var(--font-code-block-comment), monospace;
+--font-code-block-code: "JetBrains Mono", "Cascadia Code", Consolas, "Liberation Mono", monospace;
+--font-code-block-comment: "LXGW WenKai Mono", "LXGW WenKai", "Noto Sans Mono CJK SC", "Noto Serif CJK SC", serif;
+```
+
+拉丁字符由第一段渲染，汉字（注释/字符串）因第一段无字形自动回退到第二段。UI 上拆两个配置块（代码正文/注释）分别控制两段；旧 `font-code-*`/`font-code-block-*` 设置迁移到「代码正文」段，注释段保留新默认（不覆盖）。行内代码默认第一字体用 WenKai Mono（行内代码常含中文）。

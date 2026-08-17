@@ -262,8 +262,8 @@
                             </div>
                         </div>
 
-                        <div class="font-region" data-font-group="code-block">
-                            <div class="font-region-title">代码块</div>
+                        <div class="font-region" data-font-group="code-block-code">
+                            <div class="font-region-title">代码块代码</div>
                             <div class="font-region-row">
                                 <span class="font-switch-item">
                                     <span class="font-switch-label">等宽</span>
@@ -289,7 +289,38 @@
                                 </span>
                             </div>
                             <div class="font-region-row">
-                                <select class="font-family-select" data-font-family="code-block" title="字体选择"></select>
+                                <select class="font-family-select" data-font-family="code-block-code" title="字体选择（代码字形：英文/数字/符号）"></select>
+                            </div>
+                        </div>
+
+                        <div class="font-region" data-font-group="code-block-comment">
+                            <div class="font-region-title">代码块注释</div>
+                            <div class="font-region-row">
+                                <span class="font-switch-item">
+                                    <span class="font-switch-label">等宽</span>
+                                    <label class="switch">
+                                        <input type="checkbox" class="font-mono-toggle">
+                                        <span class="slider">
+                                            <span class="slider-text text-on">ON</span>
+                                            <span class="slider-text text-off">OFF</span>
+                                            <span class="knob"></span>
+                                        </span>
+                                    </label>
+                                </span>
+                                <span class="font-switch-item">
+                                    <span class="font-switch-label">衬线</span>
+                                    <label class="switch">
+                                        <input type="checkbox" class="font-serif-toggle">
+                                        <span class="slider">
+                                            <span class="slider-text text-on">ON</span>
+                                            <span class="slider-text text-off">OFF</span>
+                                            <span class="knob"></span>
+                                        </span>
+                                    </label>
+                                </span>
+                            </div>
+                            <div class="font-region-row">
+                                <select class="font-family-select" data-font-family="code-block-comment" title="字体选择（注释/中文字形：汉字与注释回退字体）"></select>
                             </div>
                         </div>
 
@@ -364,8 +395,8 @@
                         <div class="control-group">
                             <label>行内主题：</label>
                             <select id="code-inline-theme-select">
-                                <option value="global">跟随全局主题 -- default</option>
-                                <option value="default">默认灰色</option>
+                                <option value="global">继承主题</option>
+                                <option value="default">灰色</option>
                                 <option value="dark">暗黑极客</option>
                                 <option value="github">GitHub 风格</option>
                                 <option value="warm">柔和暖红</option>
@@ -389,10 +420,10 @@
                             <label>行内边距：</label>
                             <div class="slider-container">
                                 <button class="slider-btn" data-target="code-inline-pad-slider" data-step="-1">-</button>
-                                <input type="range" id="code-inline-pad-slider" min="0" max="6" step="1" value="2">
+                                <input type="range" id="code-inline-pad-slider" min="0" max="6" step="1" value="0">
                                 <button class="slider-btn" data-target="code-inline-pad-slider" data-step="1">+</button>
                             </div>
-                            <span class="val-badge" id="code-inline-pad-val">2px</span>
+                            <span class="val-badge" id="code-inline-pad-val">0px</span>
                         </div>
                     </div>
                 </div>
@@ -469,7 +500,7 @@
                         <div class="control-group">
                             <label>引用样式：</label>
                             <select id="quote-style-select">
-                                <option value="global">跟随全局主题</option>
+                                <option value="global">继承主题</option>
                                 <option value="default">默认左边框</option>
                                 <option value="accent">强调色块</option>
                                 <option value="card">卡片高亮</option>
@@ -488,7 +519,7 @@
                         <div class="control-group">
                             <label>显示格式：</label>
                             <select id="table-format-select">
-                                <option value="adaptive">自适应内容 -- default</option>
+                                <option value="adaptive">自适应（默认）</option>
                                 <option value="wrap">自动换行</option>
                                 <option value="scroll">横向滚动</option>
                             </select>
@@ -535,11 +566,31 @@
                 <span class="bar-icon">🖐️</span>
                 <span class="bar-label">小手</span>
             </button>
-            <!-- 默认恢复按钮 -->
-            <button id="bar-default" class="bar-btn" title="切换为默认配置或恢复用户配置">
-                <span class="bar-icon">⟳</span>
-                <span class="bar-label">默认</span>
+            <!-- 配置方案按钮（弹出抽屉） -->
+            <button id="bar-default" class="bar-btn" title="配置方案：默认 / 用户1~3">
+                <span class="bar-icon">📋</span>
+                <span class="bar-label" id="bar-profile-label">配置</span>
             </button>
+            <!-- 配置方案抽屉 -->
+            <div id="profile-drawer" class="profile-drawer" hidden>
+                <div class="profile-drawer-head">配置方案（当前：<span id="profile-current-name">用户1</span>）</div>
+                <button type="button" class="profile-item" data-profile="default">
+                    <span class="profile-item-name">默认</span>
+                    <span class="profile-item-desc">恢复出厂配置</span>
+                </button>
+                <button type="button" class="profile-item" data-profile="user1">
+                    <span class="profile-item-name">用户1</span>
+                    <span class="profile-item-desc" id="profile-desc-user1">出厂起点</span>
+                </button>
+                <button type="button" class="profile-item" data-profile="user2">
+                    <span class="profile-item-name">用户2</span>
+                    <span class="profile-item-desc" id="profile-desc-user2">出厂起点</span>
+                </button>
+                <button type="button" class="profile-item" data-profile="user3">
+                    <span class="profile-item-name">用户3</span>
+                    <span class="profile-item-desc" id="profile-desc-user3">出厂起点</span>
+                </button>
+            </div>
         </div>
 
         <div class="bar-divider"></div>

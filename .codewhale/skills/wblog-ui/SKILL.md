@@ -25,18 +25,23 @@ wblog_new 前端模板（`template/`）的架构地图、关键机制、验证�
 
 1. **主题系统**：颜色必须用 CSS 变量。`--theme-surface/--theme-border/--theme-muted/--theme-link/--text-color/--bg-color` 由 `theme.js` 注入 `:root`，亮/暗自动切换。派生色用 `color-mix(in srgb, var(--text-color) 25%, transparent)`（项目已依赖 color-mix，Chrome 111+）。主题模式标记 `data-reader-theme` 挂在 `#article-container` 上；全局亮/暗由 `main.js applyThemeMode` 切换。
 2. **设置面板**：Windows 属性窗口式 Tab — `.settings-tab-bar`（`flex-shrink:0` 固定）+ `.settings-pane`（`overflow-y:auto` 独立滚动，非激活 `display:none`）。面板开合状态存 `localStorage('panel-<id>')`。✕ 关闭按钮 `.panel-close-btn`。
-3. **字体配置**：6 组（heading/body/inline-code/code-block/link/quote）→ CSS 变量 `--font-heading/--font-body/--font-inline-code/--font-code-block/--font-link/--font-quote`。映射表 `fontGroupMap` 与开关→类别函数 `getFontCategory` 在 `controls.js`。`code`（行内）与 `pre/pre code`（块级）**必须分开**控制，行内代码别误改代码块。
+3. **字体配置**：7 组（heading/body/inline-code/code-block-code/code-block-comment/link/quote）→ CSS 变量 `--font-heading/--font-body/--font-inline-code/--font-code-block-code/--font-code-block-comment/--font-link/--font-quote`。映射表 `fontGroupMap` 与开关→类别函数 `getFontCategory` 在 `controls.js`。`code`（行内）与 `pre/pre code`（块级）**必须分开**控制，行内代码别误改代码块。
+   - **代码块代码/注释拆分**：代码块用**字体栈回退**实现双字体 — `font-family: var(--font-code-block-code), var(--font-code-block-comment), monospace`。第一段管英文/数字/符号（默认 JetBrains Mono），汉字（注释/字符串）自动回退到第二段（默认 LXGW WenKai Mono）。无需 token 级高亮（当前 pandoc 未启用语法高亮，无 `.tok-*` 类）。
+   - **注释字体 DOM 标记（重要）**：字体栈回退只解决「汉字回退」；注释里的**英文**在第一段有字形不会回退，会跟着代码字体变。若要求「注释（含英文）完全受注释字体控制」，需在渲染时给注释加 span：`code.js markCommentSpans(line, lang)`（行注释 `#`/`//`，带单双引号感知，未知语言默认 `#`），CSS `.line-code .code-tok-comment { font-family: var(--font-code-block-comment), var(--font-code-block-code), monospace }`。限制：只处理行注释与同行 `//`，跨行 `/* */` 不闭合不处理；HTML 实体 `&#39;` 内的 `#` 罕见误判（可接受）。灯箱 clone 正文渲染，无需重复处理。
 4. **本机字体读取**：Local Font Access API（`queryLocalFonts`），仅安全上下文（HTTPS 或 localhost）可用；Canvas 探测分类（等宽 `i`/`m` 宽度差 <1.5px；衬线用大写 `I` 顶行跨度/竖线跨度比 >1.6）；结果缓存 `localStorage('wblog-local-fonts-v1')`；不支持/非安全/拒绝时优雅降级到预置库 `FONT_LIBRARY`。
 5. **全局滚动条**：`base.css` 统一体系 — `--scrollbar-size:6px`、滑块透明 + 容器 `:hover` 显示（`--scrollbar-thumb` 用 `color-mix` 派生自动适配亮暗）。新增滚动容器时把选择器加进 base.css 的 8 组 `::-webkit-scrollbar` 列表（含 hover 变体），并配 Firefox `scrollbar-width/scrollbar-color`。
 6. **表格三种格式**（`updateTableFormat` 切换，类加在 `<table>` 上）：
    - `scroll`：`overflow-x:auto` + `.table-enhanced-inner { width:max-content; min-width:100% }` 背景跟随全宽。
-   - `adaptive`：wrapper 必须 `width:fit-content; min-width:100%`（`max-width:none !important` 覆盖 JS 内联 `max-width:100%`），否则背景被钳制在版面宽、表格右侧露白。
+   - `adaptive`：wrapper 必须 `width:fit-content; min-width:0`（`max-width:none !important` 覆盖 JS 内联 `max-width:100%`）。**短表格背景跟随表格宽度，长表格背景跟随内容宽度** — 不要加 `min-width:100%`（那会把短表格背景撑到版面宽，视觉断裂）。
    - `wrap`：`width:100%` + `table-layout:fixed` + 单元格 `break-word`。
    - `updateTableFormat` 重置段必须清理 `wrapper.style.width/minWidth/maxWidth`，防止切格式残留。
+7. **配置方案抽屉（默认 / 用户1~3）**：`main.js` 多配置系统 — 散键 = 实时状态（现有机制不变）；`wblog-active-profile` 记当前激活槽；`wblog-profile-userN` 存完整配置快照。切换时先 `saveProfile(old)`（collectUserConfig 收集散键）再 `loadProfile(new)`（default=出厂 `applyDefaultConfig`，userN 空槽=出厂起点）；默认槽只读。`applyDefaultConfig` 主题跟随当前亮/暗模式。UI：`#bar-default` 弹抽屉（`#profile-drawer` 4 项），按钮 label 显示当前配置名。
 
 ## Typora 主题移植
 
 把 `input/` 下的 Typora 主题 CSS 接入模板可选阅读主题（亮/暗各一套）：读 `references/typora-theme-port.md`（令牌映射表 → 下拉/默认值改动清单 → 验证 → 踩坑）。触发词：用户给 Typora 主题 css 要求加入可选主题、或要求改默认主题。
+
+**注意：Typora 主题的视觉细节也是主题的一部分** — 标题下方横线（h1/h2 `border-bottom`）、标题前的装饰条（`h3::before`）、标题色层级（h4/h5/h6 不同色）、列表/引用/代码块边框等，都要按原样迁移到 `theme.css` 的 `[data-reader-theme="主题名"]` 作用域下（用 `--theme-*` 变量替代硬编码色，border 半透明用 `color-mix(in srgb, var(--theme-accent) 25%, transparent)`）。不同主题允许存在这些个性化差异，这是主题的魅力。
 
 ## 验证工作流（每次 UI 调整必须走）
 

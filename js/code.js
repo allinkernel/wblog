@@ -148,6 +148,34 @@ function openCodeLightbox(lang, rawText, codeBlockWrapper) {
 }
 
 // ---------- 增强代码块（pre -> .code-block-wrapper） ----------
+// 轻量注释标注：给行注释/同行块注释包裹 <span class="code-tok-comment">，
+// 使注释（含其中的英文）完全受「代码块注释」字体控制，与代码正文字体分离。
+// 带单双引号感知（跳过字符串内的 # 与 //），避免误判。
+function markCommentSpans(line, lang) {
+    if (!line || typeof line !== 'string') return line;
+    const L = String(lang || '').toUpperCase();
+    const hashLangs = ['BASH','SH','SHELL','ZSH','FISH','PYTHON','RUBY','RB','PERL','YAML','MAKE','MAKEFILE','DOCKERFILE','DOCKER','INI','TOML','R','HASKELL','CONF','PROFILE'];
+    const slashLangs = ['C','CPP','CXX','JAVA','JS','JAVASCRIPT','TS','TYPESCRIPT','GO','RUST','PHP','SWIFT','KOTLIN','SCALA','CS','C#','DART','SQL','CSS','JSON5','OBJECTIVE-C','VALA'];
+    const style = slashLangs.includes(L) ? '//' : '#'; // 未知语言默认 #（bash/python 等最常见）
+    // 扫描：引号感知定位注释起点
+    let inS = false, inD = false, esc = false, idx = -1;
+    for (let i = 0; i < line.length; i++) {
+        const ch = line[i];
+        if (esc) { esc = false; continue; }
+        if (ch === '\\' && (inS || inD)) { esc = true; continue; }
+        if (ch === "'" && !inD) { inS = !inS; continue; }
+        if (ch === '"' && !inS) { inD = !inD; continue; }
+        if (inS || inD) continue;
+        if (style === '#') {
+            if (ch === '#') { idx = i; break; }
+        } else if (ch === '/' && line[i + 1] === '/') {
+            idx = i; break;
+        }
+    }
+    if (idx < 0) return line;
+    return line.slice(0, idx) + '<span class="code-tok-comment">' + line.slice(idx) + '</span>';
+}
+
 function enhanceCodeBlocks() {
     const article = document.getElementById('article-container');
     if (!article) return;
@@ -180,7 +208,7 @@ function enhanceCodeBlocks() {
         let linesHtml = '';
         lineContentArray.forEach((lineText, idx) => {
             const lineNum = idx + 1;
-            const content = lineText === '' ? ' ' : lineText;
+            const content = lineText === '' ? ' ' : markCommentSpans(lineText, lang);
             linesHtml += `
                 <div class="code-line">
                     <span class="line-num" contenteditable="false" style="min-width: ${numWidthPx}px; user-select: none; -webkit-user-select: none; -moz-user-select: none;">${lineNum}</span>
@@ -526,6 +554,7 @@ window.updateTableFormat = updateTableFormat;
 window.enhanceTables = enhanceTables;
 window.initTableEnhancement = initTableEnhancement;
 window.restoreColumnWidths = restoreColumnWidths;
+window.markCommentSpans = markCommentSpans;
 
 // 初始化时，确保表格设置生效（但 actual 增强由 navigation.js 在加载文章后调用）
 // 在 DOM 完全加载后，如果有表格，初始化

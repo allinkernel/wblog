@@ -23,7 +23,7 @@
     
     /* 代码相关 */
     --code-inline-size: calc(1em - 2px);
-    --code-inline-pad-y: 2px;
+    --code-inline-pad-y: 0px;
     --code-inline-pad-x: 6px;
     --code-block-size: 14px;
 }
@@ -169,8 +169,9 @@ body::-webkit-scrollbar-thumb:hover,
     --font-stack-serif-mono: "Courier New", Courier, "Iosevka Slab", monospace;
 
     --font-body: "LXGW WenKai", "LXGW WenKai GB", "Noto Serif CJK SC", "Source Han Serif SC", serif;
-    --font-inline-code: var(--font-stack-sans-mono);
-    --font-code-block: var(--font-stack-sans-mono);
+    --font-inline-code: "LXGW WenKai Mono", "JetBrains Mono", Consolas, "Noto Sans Mono CJK SC", monospace;
+    --font-code-block-code: "JetBrains Mono", "Cascadia Code", Consolas, "Liberation Mono", monospace;
+    --font-code-block-comment: "LXGW WenKai Mono", "LXGW WenKai", "Noto Sans Mono CJK SC", "Noto Serif CJK SC", serif;
     --font-heading: inherit;
     --font-link: inherit;
     --font-quote: inherit;
@@ -178,7 +179,8 @@ body::-webkit-scrollbar-thumb:hover,
 
 #article-container { font-family: var(--font-body); }
 #article-container code, #article-container kbd, #article-container samp { font-family: var(--font-inline-code) !important; }
-#article-container pre, #article-container pre code { font-family: var(--font-code-block) !important; }
+/* 代码块：代码字形用 code 字体栈，汉字（注释/字符串）自动回退到 comment 字体栈 */
+#article-container pre, #article-container pre code { font-family: var(--font-code-block-code), var(--font-code-block-comment), monospace !important; }
 #article-container h1, #article-container h2, #article-container h3, #article-container h4, #article-container h5, #article-container h6 { font-family: var(--font-heading); }
 #article-container a { 
     font-family: var(--font-link);

@@ -22,6 +22,7 @@
 
 - **必须加载 `wblog-ui` skill**（`.codewhale/skills/wblog-ui/SKILL.md`），按其架构地图、关键机制、验证工作流与踩坑记录执行。用户说「调整 UI / 改模板 / 改样式」等同义需求时默认走此流程。
 - **验证最低要求**：`node --check` 全部 JS → 运行 `wblog-ui` skill 的 `assets/e2e-ui-test.js`（jsdom 端到端）→ 有条件再做 Playwright 真机截图（`~/pw-browser`）。未做真机检查时必须在报告中明说。
+- **知识沉淀（保底约定）**：每次代码生成完毕后，将新学到的知识点按需更新到 skill（`.codewhale/skills/wblog-ui/` 的 SKILL.md 或 references/），无需用户再次提醒。例如：Typora 主题中标题下方横线、装饰条等视觉细节也属于主题的一部分，移植时必须一并迁移并记入 skill。
 - 测试脚本与截图均为一次性资产：脚本固化在 skill `assets/`（勿放 /tmp）；截图输出 `/tmp/wblog-shots`。
 
 ## 环境

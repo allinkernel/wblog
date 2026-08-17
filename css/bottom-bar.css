@@ -124,3 +124,57 @@
     background: var(--theme-link-hover);
 }
 
+
+/* ---- 配置方案抽屉 ---- */
+.profile-drawer {
+    position: absolute;
+    bottom: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: 230px;
+    background: var(--theme-surface);
+    border: 1px solid var(--theme-border);
+    border-radius: 12px;
+    box-shadow: var(--theme-shadow, 0 4px 12px rgba(0, 0, 0, 0.15));
+    padding: 8px;
+    z-index: 10001;
+    user-select: none;
+}
+.profile-drawer[hidden] {
+    display: none;
+}
+.profile-drawer-head {
+    font-size: 11px;
+    color: var(--theme-muted);
+    padding: 4px 8px 8px;
+    border-bottom: 1px dashed var(--theme-border);
+    margin-bottom: 6px;
+}
+.profile-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 7px 10px;
+    margin: 2px 0;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text-color);
+    font-size: 12px;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.15s ease;
+}
+.profile-item:hover {
+    background: var(--theme-panel-hover);
+}
+.profile-item.active {
+    background: color-mix(in srgb, var(--theme-link) 12%, transparent);
+    color: var(--theme-link);
+}
+.profile-item-desc {
+    font-size: 10px;
+    color: var(--theme-muted);
+    margin-left: 8px;
+}

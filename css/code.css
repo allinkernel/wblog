@@ -6,6 +6,9 @@
     padding: var(--code-inline-pad-y, 2px) var(--code-inline-pad-x, 6px);
     border-radius: 4px;
     transition: all 0.2s ease;
+    /* 允许在任意字符处拆分行内代码，避免长行内代码导致 justify 拉伸字间距 */
+    word-break: break-all;
+    overflow-wrap: anywhere;
 }
 
 /* 行内主题 */
@@ -145,7 +148,7 @@
     background-color: var(--code-linenum-bg, transparent);
     flex-shrink: 0;
     box-sizing: border-box;
-    font-family: var(--font-code-block) !important;
+    font-family: var(--font-code-block-code), var(--font-code-block-comment), monospace !important;
 }
 .line-code {
     flex: 1;
@@ -153,7 +156,12 @@
     padding-right: 14px;
     padding-left: 4px;
     color: var(--code-text-color, #24292e);
-    font-family: var(--font-code-block) !important;
+    font-family: var(--font-code-block-code), var(--font-code-block-comment), monospace !important;
+}
+/* 注释（含其中的英文）完全受「代码块注释」字体控制：注释优先注释字体，缺失字形再回退代码字体 */
+.line-code .code-tok-comment {
+    font-family: var(--font-code-block-comment), var(--font-code-block-code), monospace !important;
+    font-style: normal !important; /* 注释不用斜体 */
 }
 
 /* 显示格式 */
@@ -615,7 +623,7 @@
     font-size: 13px;
     font-weight: bold;
     color: var(--code-header-text, #57606a);
-    font-family: var(--font-code-block) !important;
+    font-family: var(--font-code-block-code), var(--font-code-block-comment), monospace !important;
 }
 .code-lightbox-actions {
     display: flex;
@@ -773,7 +781,7 @@ code:not(pre code)[contenteditable="true"]:focus {
 /* 修复：自适应格式下 wrapper 背景/边框跟随表格内容总宽度（不再被版面宽度截断） */
 .table-wrapper:has(.table-format-adaptive) {
     width: fit-content;
-    min-width: 100%;
+    min-width: 0; /* 表格窄时背景同样窄，跟随表格宽度 */
     max-width: none !important; /* 覆盖 JS 内联 maxWidth: 100% */
 }
 

@@ -56,12 +56,13 @@ const FONT_LIBRARY = {
     ]
 };
 
-// 六个文本元素 -> CSS 变量映射（代码拆分为「行内代码」与「代码块」）
+// 七个文本元素 -> CSS 变量映射（代码块拆分为「代码正文 / 注释·汉字」）
 const fontGroupMap = {
     'heading': '--font-heading',
     'body': '--font-body',
     'inline-code': '--font-inline-code',
-    'code-block': '--font-code-block',
+    'code-block-code': '--font-code-block-code',
+    'code-block-comment': '--font-code-block-comment',
     'link': '--font-link',
     'quote': '--font-quote'
 };
@@ -164,7 +165,7 @@ function initFontRegions() {
 }
 
 // 旧「代码」配置迁移：v1 设置（font-code-*）与旧字体矩阵（matrix-font-code）
-// → 拆分为「行内代码 / 代码块」两份（旧设置同时作用于 code 与 pre，拆分后两份保持一致以保留原效果）
+// → 行内代码 / 代码块代码（注释·汉字组保留新默认，不覆盖 LXGW WenKai Mono）
 function migrateLegacyCodeFont() {
     const legacyFamily = localStorage.getItem('font-code-family');
     const legacyMatrix = localStorage.getItem('matrix-font-code');
@@ -188,7 +189,7 @@ function migrateLegacyCodeFont() {
             family = mapped.family;
         }
     }
-    ['inline-code', 'code-block'].forEach(g => {
+    ['inline-code', 'code-block-code'].forEach(g => {
         if (localStorage.getItem(`font-${g}-family`) === null) {
             localStorage.setItem(`font-${g}-mono`, mono);
             localStorage.setItem(`font-${g}-serif`, serif);
@@ -199,10 +200,10 @@ function migrateLegacyCodeFont() {
 
 // 恢复（并迁移旧版字体矩阵设置）
 function restoreFontRegions() {
-    const groups = ['heading', 'body', 'inline-code', 'code-block', 'link', 'quote'];
+    const groups = ['heading', 'body', 'inline-code', 'code-block-code', 'code-block-comment', 'link', 'quote'];
     const hasOldMatrix = localStorage.getItem('matrix-font-body') !== null;
 
-    // 旧「代码」配置迁移（font-code-* 与 matrix-font-code → 行内代码/代码块）
+    // 旧「代码」配置迁移（font-code-* 与 matrix-font-code → 行内代码/代码块代码）
     migrateLegacyCodeFont();
 
     groups.forEach(group => {
@@ -213,7 +214,7 @@ function restoreFontRegions() {
         const familySelect = region.querySelector('.font-family-select');
 
         // 旧版字体矩阵迁移（仅对未改名的组；行内代码/代码块已由 migrateLegacyCodeFont 处理）
-        if (hasOldMatrix && group !== 'inline-code' && group !== 'code-block' && !localStorage.getItem(`font-${group}-family`)) {
+        if (hasOldMatrix && group !== 'inline-code' && group !== 'code-block-code' && group !== 'code-block-comment' && !localStorage.getItem(`font-${group}-family`)) {
             const oldVal = localStorage.getItem(`matrix-font-${group}`);
             const matrixMap = {
                 'sans-prop': { mono: 'off', serif: 'off', family: 'sans-serif' },
@@ -763,7 +764,7 @@ function restoreSavedSettings() {
     const savedCodeTheme = localStorage.getItem('blog-code-theme') || 'global';
     const savedCodeInlineTheme = localStorage.getItem('blog-code-inline-theme') || 'global';
     const savedCodeInlineOffset = localStorage.getItem('blog-code-inline-offset') ?? '-2';
-    const savedCodeInlinePad = localStorage.getItem('blog-code-inline-pad') ?? '2';
+    const savedCodeInlinePad = localStorage.getItem('blog-code-inline-pad') ?? '0';
     const savedCodeBlockSize = localStorage.getItem('blog-code-block-size');
     const savedCodeLineNumbers = localStorage.getItem('blog-code-line-numbers') || 'off'; // 默认关
     const savedCodeHeader = localStorage.getItem('blog-code-header') || 'off'; // 默认关

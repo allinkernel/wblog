@@ -306,6 +306,248 @@ body {
 .font-local-status.warn {
     color: #e6a23c !important;
 }
+
+/* ========== lightmind / lightmind-dark 标题装饰（Typora 原样迁移） ==========
+   标题下方横线（h1/h2）、h3 前绿色小条、标题色层级均属主题个性，仅本主题生效 */
+#article-container[data-reader-theme="lightmind"] h1,
+#article-container[data-reader-theme="lightmind"] h2,
+#article-container[data-reader-theme="lightmind"] h3,
+#article-container[data-reader-theme="lightmind"] h4,
+#article-container[data-reader-theme="lightmind"] h5,
+#article-container[data-reader-theme="lightmind"] h6,
+#article-container[data-reader-theme="lightmind-dark"] h1,
+#article-container[data-reader-theme="lightmind-dark"] h2,
+#article-container[data-reader-theme="lightmind-dark"] h3,
+#article-container[data-reader-theme="lightmind-dark"] h4,
+#article-container[data-reader-theme="lightmind-dark"] h5,
+#article-container[data-reader-theme="lightmind-dark"] h6 {
+    color: var(--theme-link-hover); /* accent-deep */
+    font-weight: 700;
+    line-height: 1.35;
+    margin-top: 1.6em;
+    margin-bottom: 0.6em;
+    letter-spacing: 0.005em;
+    opacity: 1;
+}
+#article-container[data-reader-theme="lightmind"] h1,
+#article-container[data-reader-theme="lightmind-dark"] h1 {
+    font-size: 1.85em;
+    border-bottom: 2px solid var(--theme-accent);
+    padding-bottom: 0.35em;
+    margin-top: 0.6em;
+}
+#article-container[data-reader-theme="lightmind"] h2,
+#article-container[data-reader-theme="lightmind-dark"] h2 {
+    font-size: 1.5em;
+    border-bottom: 1px solid color-mix(in srgb, var(--theme-accent) 25%, transparent);
+    padding-bottom: 0.3em;
+}
+#article-container[data-reader-theme="lightmind"] h3,
+#article-container[data-reader-theme="lightmind-dark"] h3 {
+    font-size: 1.25em;
+}
+#article-container[data-reader-theme="lightmind"] h3::before,
+#article-container[data-reader-theme="lightmind-dark"] h3::before {
+    content: "";
+    display: inline-block;
+    width: 4px;
+    height: 0.95em;
+    background: var(--theme-accent);
+    border-radius: 2px;
+    margin-right: 0.55em;
+    vertical-align: -0.08em;
+}
+#article-container[data-reader-theme="lightmind"] h4,
+#article-container[data-reader-theme="lightmind-dark"] h4 {
+    font-size: 1.1em;
+}
+#article-container[data-reader-theme="lightmind"] h5,
+#article-container[data-reader-theme="lightmind-dark"] h5 {
+    font-size: 1em;
+    color: var(--theme-muted);
+    letter-spacing: 0.04em;
+}
+#article-container[data-reader-theme="lightmind"] h6,
+#article-container[data-reader-theme="lightmind-dark"] h6 {
+    font-size: 0.95em;
+    color: color-mix(in srgb, var(--theme-muted) 75%, var(--text-color));
+    font-weight: 600;
+}
+
+/* ========== lightmind 主题细节（Typora 原样迁移） ==========
+   表格隔行条纹/绿底表头、引用卡片与 md-alert 警告块、渐变分隔线、
+   列表标记色、链接下划线、代码块米色配色、行内代码浅绿蒙层、图片圆角 */
+
+/* --- 表格：表头绿底白字 + 偶数行条纹 + 2px 深绿边框 --- */
+#article-container[data-reader-theme="lightmind"] .table-enhanced-inner,
+#article-container[data-reader-theme="lightmind-dark"] .table-enhanced-inner {
+    border-collapse: separate;
+    border-spacing: 0;
+    background: var(--theme-surface);
+    border: 2px solid var(--theme-link-hover);
+    border-radius: 8px;
+    overflow: hidden;
+}
+#article-container[data-reader-theme="lightmind"] .table-enhanced-inner thead,
+#article-container[data-reader-theme="lightmind-dark"] .table-enhanced-inner thead {
+    background: var(--theme-accent);
+}
+#article-container[data-reader-theme="lightmind"] .table-enhanced-inner th,
+#article-container[data-reader-theme="lightmind-dark"] .table-enhanced-inner th {
+    background: transparent;
+    color: #faf7ef;
+    border-top: none;
+    border-right: 1px solid rgba(255, 255, 255, 0.3);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+}
+#article-container[data-reader-theme="lightmind"] .table-enhanced-inner td,
+#article-container[data-reader-theme="lightmind-dark"] .table-enhanced-inner td {
+    border-top: 1px solid color-mix(in srgb, var(--theme-accent) 38%, transparent);
+    border-right: 1px solid color-mix(in srgb, var(--theme-accent) 30%, transparent);
+}
+#article-container[data-reader-theme="lightmind"] .table-enhanced-inner tr > :last-child,
+#article-container[data-reader-theme="lightmind-dark"] .table-enhanced-inner tr > :last-child {
+    border-right: none;
+}
+#article-container[data-reader-theme="lightmind"] .table-enhanced-inner tbody tr:nth-child(even),
+#article-container[data-reader-theme="lightmind-dark"] .table-enhanced-inner tbody tr:nth-child(even) {
+    background: var(--theme-surface-2);
+}
+
+/* --- 引用：卡片式（继承主题时生效，用户显式选择样式优先） --- */
+#article-container[data-reader-theme="lightmind"][data-quote-style="global"] blockquote,
+#article-container[data-reader-theme="lightmind-dark"][data-quote-style="global"] blockquote {
+    background: var(--theme-quote-bg);
+    color: var(--text-color);
+    border: 1px solid color-mix(in srgb, var(--theme-accent) 18%, transparent);
+    border-left: 4px solid var(--theme-accent);
+    border-radius: 6px;
+    padding: 14px 20px;
+}
+#article-container[data-reader-theme="lightmind"][data-quote-style="global"] blockquote blockquote,
+#article-container[data-reader-theme="lightmind-dark"][data-quote-style="global"] blockquote blockquote {
+    border-color: color-mix(in srgb, var(--theme-accent) 35%, transparent);
+    border-left: 4px solid color-mix(in srgb, var(--theme-accent) 60%, transparent);
+    background: color-mix(in srgb, var(--theme-surface) 55%, transparent);
+    margin: 0.6em 0;
+}
+
+/* --- GitHub 风格警告块 md-alert（Typora 原生，pandoc 不产生，手写 HTML 时生效） --- */
+#article-container[data-reader-theme="lightmind"] .md-alert,
+#article-container[data-reader-theme="lightmind-dark"] .md-alert {
+    border-radius: 6px;
+    padding: 14px 20px;
+    margin: 0.9em 0;
+    border: 1px solid var(--alert-border, rgba(74, 124, 89, 0.2));
+    border-left: 4px solid var(--alert-accent, var(--theme-accent)) !important;
+    background: var(--alert-bg, var(--theme-quote-bg)) !important;
+    color: var(--text-color);
+}
+#article-container[data-reader-theme="lightmind"] .md-alert .md-alert-text-container,
+#article-container[data-reader-theme="lightmind-dark"] .md-alert .md-alert-text-container {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+}
+#article-container[data-reader-theme="lightmind"] .md-alert .md-alert-text-container svg,
+#article-container[data-reader-theme="lightmind-dark"] .md-alert .md-alert-text-container svg {
+    fill: currentColor;
+    color: var(--alert-accent);
+    width: 1em;
+    height: 1em;
+}
+#article-container[data-reader-theme="lightmind"] .md-alert .md-alert-text,
+#article-container[data-reader-theme="lightmind-dark"] .md-alert .md-alert-text {
+    font-weight: 700;
+    margin: 0 !important;
+    line-height: 1.2;
+    color: var(--alert-accent) !important;
+    font-size: 0.98em;
+    letter-spacing: 0.02em;
+}
+#article-container[data-reader-theme="lightmind"] .md-alert > p:last-child,
+#article-container[data-reader-theme="lightmind-dark"] .md-alert > p:last-child {
+    margin-bottom: 0;
+}
+/* 亮色变体 */
+#article-container[data-reader-theme="lightmind"] .md-alert.md-alert-note { --alert-accent: #4a8fc4; --alert-bg: #eaf2f9; --alert-border: rgba(74, 143, 196, 0.25); }
+#article-container[data-reader-theme="lightmind"] .md-alert.md-alert-tip { --alert-accent: #4a7c59; --alert-bg: #ebf2ec; --alert-border: rgba(74, 124, 89, 0.28); }
+#article-container[data-reader-theme="lightmind"] .md-alert.md-alert-important { --alert-accent: #8b5fbf; --alert-bg: #f0eaf6; --alert-border: rgba(139, 95, 191, 0.25); }
+#article-container[data-reader-theme="lightmind"] .md-alert.md-alert-warning { --alert-accent: #c8943a; --alert-bg: #f7efde; --alert-border: rgba(200, 148, 58, 0.3); }
+#article-container[data-reader-theme="lightmind"] .md-alert.md-alert-caution { --alert-accent: #c4564a; --alert-bg: #f6e9e7; --alert-border: rgba(196, 86, 74, 0.28); }
+/* 暗色变体 */
+#article-container[data-reader-theme="lightmind-dark"] .md-alert.md-alert-note { --alert-accent: #7cb6e0; --alert-bg: rgba(74, 143, 196, 0.1); --alert-border: rgba(124, 182, 224, 0.45); }
+#article-container[data-reader-theme="lightmind-dark"] .md-alert.md-alert-tip { --alert-accent: #7fbe92; --alert-bg: rgba(127, 190, 146, 0.1); --alert-border: rgba(127, 190, 146, 0.5); }
+#article-container[data-reader-theme="lightmind-dark"] .md-alert.md-alert-important { --alert-accent: #c4a0e8; --alert-bg: rgba(170, 130, 210, 0.1); --alert-border: rgba(196, 160, 232, 0.45); }
+#article-container[data-reader-theme="lightmind-dark"] .md-alert.md-alert-warning { --alert-accent: #e8c878; --alert-bg: rgba(218, 189, 134, 0.1); --alert-border: rgba(232, 200, 120, 0.45); }
+#article-container[data-reader-theme="lightmind-dark"] .md-alert.md-alert-caution { --alert-accent: #e88a82; --alert-bg: rgba(220, 110, 100, 0.1); --alert-border: rgba(232, 138, 130, 0.45); }
+
+/* --- 分隔线：渐变雾绿 --- */
+#article-container[data-reader-theme="lightmind"] hr,
+#article-container[data-reader-theme="lightmind-dark"] hr {
+    border: none;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--theme-quote-border) 30%, var(--theme-quote-border) 70%, transparent);
+    margin: 2em 0;
+}
+
+/* --- 列表标记色 --- */
+#article-container[data-reader-theme="lightmind"] ul > li::marker,
+#article-container[data-reader-theme="lightmind-dark"] ul > li::marker {
+    color: var(--theme-accent);
+}
+#article-container[data-reader-theme="lightmind"] ol > li::marker,
+#article-container[data-reader-theme="lightmind-dark"] ol > li::marker {
+    color: var(--theme-link-hover);
+    font-weight: 600;
+}
+
+/* --- 链接：底部半透明下划线 --- */
+#article-container[data-reader-theme="lightmind"] a {
+    text-decoration: none;
+    border-bottom: 1px solid color-mix(in srgb, var(--theme-accent) 35%, transparent);
+}
+#article-container[data-reader-theme="lightmind-dark"] a {
+    text-decoration: none;
+    border-bottom: 1px solid color-mix(in srgb, var(--theme-accent) 50%, transparent);
+}
+
+/* --- 代码块：米色纸面 / 深海军蓝配色（code-theme 为 global 时生效） --- */
+#article-container[data-reader-theme="lightmind"][data-code-theme="global"] .code-block-wrapper,
+#article-container[data-reader-theme="lightmind"][data-code-theme="global"] .code-lightbox-content,
+#article-container[data-reader-theme="lightmind-dark"][data-code-theme="global"] .code-block-wrapper,
+#article-container[data-reader-theme="lightmind-dark"][data-code-theme="global"] .code-lightbox-content {
+    --code-bg-color: #f4f1e8; --code-header-bg: #e9e4d6; --code-border-color: #d5cfc0;
+    --code-header-text: #2c3a32; --code-linenum-color: #8a9a8a; --code-text-color: #2c3a32;
+}
+#article-container[data-reader-theme="lightmind-dark"][data-code-theme="global"] .code-block-wrapper,
+#article-container[data-reader-theme="lightmind-dark"][data-code-theme="global"] .code-lightbox-content {
+    --code-bg-color: #14181f; --code-header-bg: #1c2128; --code-border-color: #3a4253;
+    --code-header-text: #c8cfd9; --code-linenum-color: #6b7488; --code-text-color: #c8cfd9;
+}
+
+/* --- 行内代码：浅绿蒙层（行内主题为 global 时生效） --- */
+#article-container[data-reader-theme="lightmind"][data-code-inline-theme="global"] code:not(pre code) {
+    background: #e7eee5;
+    color: var(--text-color);
+    border: none;
+}
+#article-container[data-reader-theme="lightmind-dark"][data-code-inline-theme="global"] code:not(pre code) {
+    background: #25342c;
+    color: var(--text-color);
+    border: none;
+}
+
+/* --- 图片：圆角阴影居中 --- */
+#article-container[data-reader-theme="lightmind"] img,
+#article-container[data-reader-theme="lightmind-dark"] img {
+    max-width: 100%;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    display: block;
+    margin: 0.6em auto;
+}
 .panel-close-btn {
     color: var(--theme-muted) !important;
 }

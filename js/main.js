@@ -15,14 +15,11 @@ window.addEventListener('DOMContentLoaded', () => {
     initArticleTree();
     restoreSavedSettings();
 
-    // 初始化默认按钮状态（读取保存的 isDefaultMode）
-    const isDefaultMode = localStorage.getItem('isDefaultMode') === 'true';
-    const defaultBtn = document.getElementById('bar-default');
-    if (defaultBtn) {
-        defaultBtn.classList.toggle('active', isDefaultMode);
-        defaultBtn.querySelector('.bar-icon').textContent = isDefaultMode ? '👤' : '⟳';
-        defaultBtn.querySelector('.bar-label').textContent = isDefaultMode ? '用户' : '默认';
+    // 初始化配置方案（首次访问默认 user1，以当前散键为起点）
+    if (!localStorage.getItem(ACTIVE_PROFILE_KEY)) {
+        localStorage.setItem(ACTIVE_PROFILE_KEY, 'user1');
     }
+    updateProfileUI();
 });
 
 // ==================== 底部 Bar 初始化（含拖拽） ====================
@@ -147,15 +144,12 @@ function initBottomBar() {
         themeBtn.addEventListener('click', toggleThemeMode);
     }
 
-    // ----- 默认切换按钮 -----
+    // ----- 配置方案按钮（弹出抽屉） -----
     const defaultBtn = document.getElementById('bar-default');
     if (defaultBtn) {
-        const isDefault = localStorage.getItem('isDefaultMode') === 'true';
-        defaultBtn.classList.toggle('active', isDefault);
-        defaultBtn.querySelector('.bar-icon').textContent = isDefault ? '👤' : '⟳';
-        defaultBtn.querySelector('.bar-label').textContent = isDefault ? '用户' : '默认';
-        defaultBtn.addEventListener('click', toggleDefaultMode);
+        defaultBtn.addEventListener('click', toggleProfileDrawer);
     }
+    initProfileDrawer();
 
     // ----- 画布小手 -----
     const canvasBtn = document.getElementById('bar-canvas');
@@ -618,10 +612,18 @@ function getDefaultConfig() {
     };
 }
 
-let userConfigBackup = null;
+// ==================== 多配置方案（默认 / 用户1~3） ====================
+const ACTIVE_PROFILE_KEY = 'wblog-active-profile';
+const PROFILE_LABELS = { 'default': '默认', 'user1': '用户1', 'user2': '用户2', 'user3': '用户3' };
 
-function saveUserConfig() {
-    userConfigBackup = {
+function getActiveProfile() {
+    const v = localStorage.getItem(ACTIVE_PROFILE_KEY);
+    return (v === 'default' || v === 'user1' || v === 'user2' || v === 'user3') ? v : 'user1';
+}
+
+// 收集当前散键状态为配置对象（所有设置变更实时写散键，这里读取即为当前 UI 状态）
+function collectUserConfig() {
+    return {
         readerTheme: localStorage.getItem('blog-reader-theme') || 'lightmind',
         lightTheme: localStorage.getItem('last-light-theme') || 'lightmind',
         darkTheme: localStorage.getItem('last-dark-theme') || 'lightmind-dark',
@@ -629,7 +631,7 @@ function saveUserConfig() {
         codeTheme: localStorage.getItem('blog-code-theme') || 'global',
         codeInlineTheme: localStorage.getItem('blog-code-inline-theme') || 'global',
         codeInlineOffset: parseInt(localStorage.getItem('blog-code-inline-offset') ?? '-2'),
-        codeInlinePad: parseInt(localStorage.getItem('blog-code-inline-pad') ?? '2'),
+        codeInlinePad: parseInt(localStorage.getItem('blog-code-inline-pad') ?? '0'),
         codeBlockSize: parseInt(localStorage.getItem('blog-code-block-size') ?? '14'),
         codeLineNumbers: localStorage.getItem('blog-code-line-numbers') === 'on',
         codeHeader: localStorage.getItem('blog-code-header') === 'on',
@@ -646,12 +648,41 @@ function saveUserConfig() {
     };
 }
 
+// 把配置对象写回散键并刷新 UI
+function applyUserConfig(cfg) {
+    localStorage.setItem('blog-reader-theme', cfg.readerTheme);
+    localStorage.setItem('last-light-theme', cfg.lightTheme);
+    localStorage.setItem('last-dark-theme', cfg.darkTheme);
+    localStorage.setItem('blog-theme-mode', cfg.readerTheme.includes('dark') ? 'dark' : 'light');
+    localStorage.setItem('blog-code-format', cfg.codeFormat);
+    localStorage.setItem('blog-code-theme', cfg.codeTheme);
+    localStorage.setItem('blog-code-inline-theme', cfg.codeInlineTheme);
+    localStorage.setItem('blog-code-inline-offset', String(cfg.codeInlineOffset));
+    localStorage.setItem('blog-code-inline-pad', String(cfg.codeInlinePad));
+    localStorage.setItem('blog-code-block-size', String(cfg.codeBlockSize));
+    localStorage.setItem('blog-code-line-numbers', cfg.codeLineNumbers ? 'on' : 'off');
+    localStorage.setItem('blog-code-header', cfg.codeHeader ? 'on' : 'off');
+    localStorage.setItem('table-format', cfg.tableFormat);
+    localStorage.setItem('table-show-header', cfg.tableShowHeader ? 'true' : 'false');
+    localStorage.setItem('quote-style', cfg.quoteStyle);
+    localStorage.setItem('blog-width', String(cfg.pageWidth));
+    localStorage.setItem('blog-size', String(cfg.fontSize));
+    localStorage.setItem('blog-line', String(cfg.lineHeight));
+    localStorage.setItem('blog-pos', String(cfg.position));
+    localStorage.setItem('blog-ctext', cfg.cText);
+    localStorage.setItem('blog-cbg', cfg.cBg);
+    writeFontSettingsToStorage(cfg.fonts);
+    restoreSavedSettings();
+}
+
 function applyDefaultConfig() {
     const def = getDefaultConfig();
-    localStorage.setItem('blog-reader-theme', def.readerTheme);
+    // 主题跟随当前底部 bar 的亮/暗模式（默认主题 lightmind / lightmind-dark）
+    const mode = localStorage.getItem('blog-theme-mode') === 'dark' ? 'dark' : 'light';
+    localStorage.setItem('blog-reader-theme', mode === 'dark' ? def.darkTheme : def.readerTheme);
     localStorage.setItem('last-light-theme', def.lightTheme);
     localStorage.setItem('last-dark-theme', def.darkTheme);
-    localStorage.setItem('blog-theme-mode', 'light');
+    localStorage.setItem('blog-theme-mode', mode);
     localStorage.setItem('blog-code-format', def.codeFormat);
     localStorage.setItem('blog-code-theme', def.codeTheme);
     localStorage.setItem('blog-code-inline-theme', def.codeInlineTheme);
@@ -680,56 +711,107 @@ function applyDefaultConfig() {
     location.reload();
 }
 
-function restoreUserConfig() {
-    if (!userConfigBackup) return;
-    const cfg = userConfigBackup;
-    localStorage.setItem('blog-reader-theme', cfg.readerTheme);
-    localStorage.setItem('last-light-theme', cfg.lightTheme);
-    localStorage.setItem('last-dark-theme', cfg.darkTheme);
-    localStorage.setItem('blog-theme-mode', cfg.readerTheme.includes('dark') ? 'dark' : 'light');
-    localStorage.setItem('blog-code-format', cfg.codeFormat);
-    localStorage.setItem('blog-code-theme', cfg.codeTheme);
-    localStorage.setItem('blog-code-inline-theme', cfg.codeInlineTheme);
-    localStorage.setItem('blog-code-inline-offset', String(cfg.codeInlineOffset));
-    localStorage.setItem('blog-code-inline-pad', String(cfg.codeInlinePad));
-    localStorage.setItem('blog-code-block-size', String(cfg.codeBlockSize));
-    localStorage.setItem('blog-code-line-numbers', cfg.codeLineNumbers ? 'on' : 'off');
-    localStorage.setItem('blog-code-header', cfg.codeHeader ? 'on' : 'off');
-    localStorage.setItem('table-format', cfg.tableFormat);
-    localStorage.setItem('table-show-header', cfg.tableShowHeader ? 'true' : 'false');
-    localStorage.setItem('quote-style', cfg.quoteStyle);
-    localStorage.setItem('blog-width', String(cfg.pageWidth));
-    localStorage.setItem('blog-size', String(cfg.fontSize));
-    localStorage.setItem('blog-line', String(cfg.lineHeight));
-    localStorage.setItem('blog-pos', String(cfg.position));
-    localStorage.setItem('blog-ctext', cfg.cText);
-    localStorage.setItem('blog-cbg', cfg.cBg);
-    writeFontSettingsToStorage(cfg.fonts);
-    restoreSavedSettings();
-    location.reload();
+function profileStorageKey(profile) {
+    return profile === 'default' ? null : `wblog-profile-${profile}`;
 }
 
-function toggleDefaultMode() {
-    const isDefault = localStorage.getItem('isDefaultMode') === 'true';
-    const defaultBtn = document.getElementById('bar-default');
-    if (isDefault) {
-        restoreUserConfig();
-        localStorage.setItem('isDefaultMode', 'false');
-        if (defaultBtn) {
-            defaultBtn.classList.remove('active');
-            defaultBtn.querySelector('.bar-icon').textContent = '⟳';
-            defaultBtn.querySelector('.bar-label').textContent = '默认';
+// 保存当前状态到指定配置槽（default 为出厂只读，不保存）
+function saveProfile(profile) {
+    if (profile === 'default') return;
+    const cfg = collectUserConfig();
+    try {
+        localStorage.setItem(profileStorageKey(profile), JSON.stringify(cfg));
+    } catch (e) { /* 存储配额不足时忽略 */ }
+}
+
+// 加载配置槽：default → 出厂；userN → 槽内容（空槽 → 出厂起点）
+function loadProfile(profile) {
+    if (profile === 'default') {
+        applyDefaultConfig();
+        return;
+    }
+    let raw = null;
+    try {
+        raw = localStorage.getItem(profileStorageKey(profile));
+    } catch (e) { /* 忽略 */ }
+    if (raw) {
+        try {
+            applyUserConfig(JSON.parse(raw));
+        } catch (e) {
+            applyDefaultConfig();
         }
     } else {
-        saveUserConfig();
         applyDefaultConfig();
-        localStorage.setItem('isDefaultMode', 'true');
-        if (defaultBtn) {
-            defaultBtn.classList.add('active');
-            defaultBtn.querySelector('.bar-icon').textContent = '👤';
-            defaultBtn.querySelector('.bar-label').textContent = '用户';
-        }
     }
+}
+
+// 切换配置方案：先保存旧槽，再加载新槽
+function switchProfile(profile) {
+    const old = getActiveProfile();
+    if (old === profile) {
+        closeProfileDrawer();
+        return;
+    }
+    if (old !== 'default') saveProfile(old);
+    localStorage.setItem(ACTIVE_PROFILE_KEY, profile);
+    loadProfile(profile);
+    updateProfileUI();
+    closeProfileDrawer();
+}
+
+// ---------- 抽屉 UI ----------
+function updateProfileUI() {
+    const active = getActiveProfile();
+    const label = document.getElementById('bar-profile-label');
+    if (label) label.textContent = PROFILE_LABELS[active] || '配置';
+    const cur = document.getElementById('profile-current-name');
+    if (cur) cur.textContent = PROFILE_LABELS[active] || '配置';
+    document.querySelectorAll('.profile-item').forEach(item => {
+        const p = item.dataset.profile;
+        item.classList.toggle('active', p === active);
+        const desc = item.querySelector('.profile-item-desc');
+        if (desc && p !== 'default') {
+            const has = localStorage.getItem(profileStorageKey(p)) !== null;
+            desc.textContent = has ? '已保存' : '出厂起点';
+        }
+    });
+}
+
+function openProfileDrawer() {
+    const drawer = document.getElementById('profile-drawer');
+    if (!drawer) return;
+    updateProfileUI();
+    drawer.hidden = false;
+}
+
+function closeProfileDrawer() {
+    const drawer = document.getElementById('profile-drawer');
+    if (drawer) drawer.hidden = true;
+}
+
+function toggleProfileDrawer() {
+    const drawer = document.getElementById('profile-drawer');
+    if (!drawer) return;
+    if (drawer.hidden) {
+        openProfileDrawer();
+    } else {
+        closeProfileDrawer();
+    }
+}
+
+function initProfileDrawer() {
+    const drawer = document.getElementById('profile-drawer');
+    if (!drawer) return;
+    drawer.querySelectorAll('.profile-item').forEach(item => {
+        item.addEventListener('click', () => switchProfile(item.dataset.profile));
+    });
+    // 点击抽屉外部关闭
+    document.addEventListener('click', (e) => {
+        if (drawer.hidden) return;
+        const bar = document.getElementById('bottom-bar');
+        if (bar && bar.contains(e.target)) return;
+        closeProfileDrawer();
+    });
 }
 
 // ==================== 导出全局 ====================
@@ -748,4 +830,12 @@ window.updateBatchButtons = updateBatchButtons;
 window.toggleAllPanels = toggleAllPanels;
 window.areAllPanelsVisible = areAllPanelsVisible;
 window.getPanelIdsBySide = getPanelIdsBySide;
-window.toggleDefaultMode = toggleDefaultMode;
+window.switchProfile = switchProfile;
+window.getActiveProfile = getActiveProfile;
+window.openProfileDrawer = openProfileDrawer;
+window.closeProfileDrawer = closeProfileDrawer;
+window.toggleProfileDrawer = toggleProfileDrawer;
+window.updateProfileUI = updateProfileUI;
+window.saveProfile = saveProfile;
+window.loadProfile = loadProfile;
+window.collectUserConfig = collectUserConfig;
