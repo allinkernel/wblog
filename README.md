@@ -26,7 +26,6 @@ $ tree -L 3
 │   └── template.conf
 ├── template.html
 ├── todo.md
-├── tree.html
 ├── .codewhale
 │   ├── instructions.md
 │   ├── skills
@@ -41,7 +40,7 @@ $ tree -L 3
 ```
 
 1. nginx_conf中放的是nginx的配置，这个文件要配置js/navigation.js协同工作，处理路由逻辑
-2. `template.html`/`css`/`js`三项是前端模板文件，`tree.html`中放的是加载manifest.json后自动生成文档树视图内容的模板
+2. `template.html`/`css`/`js`三项是前端模板文件
 3. `install.md`记录了编译、安装流程
 4. `gbb`记录了一键上库执行的命令，可以通过`wtool`中的工具自行识别执行
 5. `todo.md`记录未来要实现的需求，不会一直更新
