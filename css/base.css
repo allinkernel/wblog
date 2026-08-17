@@ -38,6 +38,118 @@ body {
     transition: background-color 0.2s;
 }
 
+/* ==================== 全局滚动条：细滑块 · 透明轨道 · 悬停显示 ==================== */
+:root {
+    --scrollbar-size: 6px;
+    --scrollbar-thumb: color-mix(in srgb, var(--text-color) 25%, transparent);
+    --scrollbar-thumb-hover: color-mix(in srgb, var(--text-color) 45%, transparent);
+}
+
+/* 常见滚动容器统一瘦身（Firefox 细滚动条 + 默认透明隐藏滑块） */
+body,
+#left-dock-container,
+#right-dock-container,
+.settings-pane,
+.settings-tab-bar,
+.table-wrapper,
+.code-block-body,
+.code-block-wrapper,
+.panel-box,
+.toc-tree,
+.tree-container,
+#code-lightbox-overlay {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+}
+body:hover,
+#left-dock-container:hover,
+#right-dock-container:hover,
+.settings-pane:hover,
+.settings-tab-bar:hover,
+.table-wrapper:hover,
+.code-block-body:hover,
+.code-block-wrapper:hover,
+.panel-box:hover,
+.toc-tree:hover,
+.tree-container:hover,
+#code-lightbox-overlay:hover {
+    scrollbar-color: var(--scrollbar-thumb) transparent;
+}
+
+/* WebKit / Blink 滑块 */
+body::-webkit-scrollbar,
+#left-dock-container::-webkit-scrollbar,
+#right-dock-container::-webkit-scrollbar,
+.settings-pane::-webkit-scrollbar,
+.settings-tab-bar::-webkit-scrollbar,
+.table-wrapper::-webkit-scrollbar,
+.code-block-body::-webkit-scrollbar,
+.code-block-wrapper::-webkit-scrollbar,
+.panel-box::-webkit-scrollbar,
+.toc-tree::-webkit-scrollbar,
+.tree-container::-webkit-scrollbar,
+#code-lightbox-overlay::-webkit-scrollbar {
+    width: var(--scrollbar-size);
+    height: var(--scrollbar-size);
+}
+body::-webkit-scrollbar-track,
+#left-dock-container::-webkit-scrollbar-track,
+#right-dock-container::-webkit-scrollbar-track,
+.settings-pane::-webkit-scrollbar-track,
+.settings-tab-bar::-webkit-scrollbar-track,
+.table-wrapper::-webkit-scrollbar-track,
+.code-block-body::-webkit-scrollbar-track,
+.code-block-wrapper::-webkit-scrollbar-track,
+.panel-box::-webkit-scrollbar-track,
+.toc-tree::-webkit-scrollbar-track,
+.tree-container::-webkit-scrollbar-track,
+#code-lightbox-overlay::-webkit-scrollbar-track {
+    background: transparent; /* 去除原生白色轨道 */
+}
+body::-webkit-scrollbar-thumb,
+#left-dock-container::-webkit-scrollbar-thumb,
+#right-dock-container::-webkit-scrollbar-thumb,
+.settings-pane::-webkit-scrollbar-thumb,
+.settings-tab-bar::-webkit-scrollbar-thumb,
+.table-wrapper::-webkit-scrollbar-thumb,
+.code-block-body::-webkit-scrollbar-thumb,
+.code-block-wrapper::-webkit-scrollbar-thumb,
+.panel-box::-webkit-scrollbar-thumb,
+.toc-tree::-webkit-scrollbar-thumb,
+.tree-container::-webkit-scrollbar-thumb,
+#code-lightbox-overlay::-webkit-scrollbar-thumb {
+    background: transparent; /* 默认隐藏，悬停容器时显示 */
+    border-radius: calc(var(--scrollbar-size) / 2);
+}
+body:hover::-webkit-scrollbar-thumb,
+#left-dock-container:hover::-webkit-scrollbar-thumb,
+#right-dock-container:hover::-webkit-scrollbar-thumb,
+.settings-pane:hover::-webkit-scrollbar-thumb,
+.settings-tab-bar:hover::-webkit-scrollbar-thumb,
+.table-wrapper:hover::-webkit-scrollbar-thumb,
+.code-block-body:hover::-webkit-scrollbar-thumb,
+.code-block-wrapper:hover::-webkit-scrollbar-thumb,
+.panel-box:hover::-webkit-scrollbar-thumb,
+.toc-tree:hover::-webkit-scrollbar-thumb,
+.tree-container:hover::-webkit-scrollbar-thumb,
+#code-lightbox-overlay:hover::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb);
+}
+body::-webkit-scrollbar-thumb:hover,
+#left-dock-container::-webkit-scrollbar-thumb:hover,
+#right-dock-container::-webkit-scrollbar-thumb:hover,
+.settings-pane::-webkit-scrollbar-thumb:hover,
+.settings-tab-bar::-webkit-scrollbar-thumb:hover,
+.table-wrapper::-webkit-scrollbar-thumb:hover,
+.code-block-body::-webkit-scrollbar-thumb:hover,
+.code-block-wrapper::-webkit-scrollbar-thumb:hover,
+.panel-box::-webkit-scrollbar-thumb:hover,
+.toc-tree::-webkit-scrollbar-thumb:hover,
+.tree-container::-webkit-scrollbar-thumb:hover,
+#code-lightbox-overlay::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollbar-thumb-hover);
+}
+
 #article-wrapper {
     max-width: var(--page-width);
     margin: 0 auto;
@@ -57,14 +169,16 @@ body {
     --font-stack-serif-mono: "Courier New", Courier, "Iosevka Slab", monospace;
 
     --font-body: inherit;
-    --font-code: var(--font-stack-sans-mono);
+    --font-inline-code: var(--font-stack-sans-mono);
+    --font-code-block: var(--font-stack-sans-mono);
     --font-heading: inherit;
     --font-link: inherit;
     --font-quote: inherit;
 }
 
 #article-container { font-family: var(--font-body); }
-#article-container code, #article-container pre, #article-container kbd, #article-container samp { font-family: var(--font-code) !important; }
+#article-container code, #article-container kbd, #article-container samp { font-family: var(--font-inline-code) !important; }
+#article-container pre, #article-container pre code { font-family: var(--font-code-block) !important; }
 #article-container h1, #article-container h2, #article-container h3, #article-container h4, #article-container h5, #article-container h6 { font-family: var(--font-heading); }
 #article-container a { 
     font-family: var(--font-link);

@@ -285,6 +285,9 @@ function updateTableFormat(wrapper, format) {
     table.style.tableLayout = '';
     wrapper.style.overflowX = '';
     wrapper.style.display = '';
+    wrapper.style.width = '';
+    wrapper.style.minWidth = '';
+    wrapper.style.maxWidth = '';
     const cells = table.querySelectorAll('td, th');
     cells.forEach(cell => {
         cell.style.wordBreak = '';

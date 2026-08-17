@@ -56,11 +56,12 @@ const FONT_LIBRARY = {
     ]
 };
 
-// 五个文本元素 -> CSS 变量映射
+// 六个文本元素 -> CSS 变量映射（代码拆分为「行内代码」与「代码块」）
 const fontGroupMap = {
     'heading': '--font-heading',
     'body': '--font-body',
-    'code': '--font-code',
+    'inline-code': '--font-inline-code',
+    'code-block': '--font-code-block',
     'link': '--font-link',
     'quote': '--font-quote'
 };
@@ -162,10 +163,47 @@ function initFontRegions() {
     });
 }
 
+// 旧「代码」配置迁移：v1 设置（font-code-*）与旧字体矩阵（matrix-font-code）
+// → 拆分为「行内代码 / 代码块」两份（旧设置同时作用于 code 与 pre，拆分后两份保持一致以保留原效果）
+function migrateLegacyCodeFont() {
+    const legacyFamily = localStorage.getItem('font-code-family');
+    const legacyMatrix = localStorage.getItem('matrix-font-code');
+    if (legacyFamily === null && legacyMatrix === null) return;
+    let mono = 'off', serif = 'off', family = 'inherit';
+    if (legacyFamily !== null) {
+        mono = localStorage.getItem('font-code-mono') === 'on' ? 'on' : 'off';
+        serif = localStorage.getItem('font-code-serif') === 'on' ? 'on' : 'off';
+        family = legacyFamily;
+    } else {
+        const matrixMap = {
+            'sans-prop': { mono: 'off', serif: 'off', family: 'sans-serif' },
+            'serif-prop': { mono: 'off', serif: 'on', family: 'serif' },
+            'sans-mono': { mono: 'on', serif: 'off', family: 'monospace' },
+            'serif-mono': { mono: 'on', serif: 'on', family: '"Courier New", monospace' }
+        };
+        const mapped = matrixMap[legacyMatrix];
+        if (mapped) {
+            mono = mapped.mono;
+            serif = mapped.serif;
+            family = mapped.family;
+        }
+    }
+    ['inline-code', 'code-block'].forEach(g => {
+        if (localStorage.getItem(`font-${g}-family`) === null) {
+            localStorage.setItem(`font-${g}-mono`, mono);
+            localStorage.setItem(`font-${g}-serif`, serif);
+            localStorage.setItem(`font-${g}-family`, family);
+        }
+    });
+}
+
 // 恢复（并迁移旧版字体矩阵设置）
 function restoreFontRegions() {
-    const groups = ['heading', 'body', 'code', 'link', 'quote'];
+    const groups = ['heading', 'body', 'inline-code', 'code-block', 'link', 'quote'];
     const hasOldMatrix = localStorage.getItem('matrix-font-body') !== null;
+
+    // 旧「代码」配置迁移（font-code-* 与 matrix-font-code → 行内代码/代码块）
+    migrateLegacyCodeFont();
 
     groups.forEach(group => {
         const region = document.querySelector(`.font-region[data-font-group="${group}"]`);
@@ -174,8 +212,8 @@ function restoreFontRegions() {
         const serifToggle = region.querySelector('.font-serif-toggle');
         const familySelect = region.querySelector('.font-family-select');
 
-        // 旧版字体矩阵迁移（仅在无新版设置时执行一次）
-        if (hasOldMatrix && !localStorage.getItem(`font-${group}-family`)) {
+        // 旧版字体矩阵迁移（仅对未改名的组；行内代码/代码块已由 migrateLegacyCodeFont 处理）
+        if (hasOldMatrix && group !== 'inline-code' && group !== 'code-block' && !localStorage.getItem(`font-${group}-family`)) {
             const oldVal = localStorage.getItem(`matrix-font-${group}`);
             const matrixMap = {
                 'sans-prop': { mono: 'off', serif: 'off', family: 'sans-serif' },

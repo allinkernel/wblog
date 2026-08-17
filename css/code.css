@@ -145,7 +145,7 @@
     background-color: var(--code-linenum-bg, transparent);
     flex-shrink: 0;
     box-sizing: border-box;
-    font-family: var(--font-code) !important;
+    font-family: var(--font-code-block) !important;
 }
 .line-code {
     flex: 1;
@@ -153,7 +153,7 @@
     padding-right: 14px;
     padding-left: 4px;
     color: var(--code-text-color, #24292e);
-    font-family: var(--font-code) !important;
+    font-family: var(--font-code-block) !important;
 }
 
 /* 显示格式 */
@@ -615,7 +615,7 @@
     font-size: 13px;
     font-weight: bold;
     color: var(--code-header-text, #57606a);
-    font-family: var(--font-code) !important;
+    font-family: var(--font-code-block) !important;
 }
 .code-lightbox-actions {
     display: flex;
@@ -770,6 +770,13 @@ code:not(pre code)[contenteditable="true"]:focus {
     white-space: normal;
 }
 
+/* 修复：自适应格式下 wrapper 背景/边框跟随表格内容总宽度（不再被版面宽度截断） */
+.table-wrapper:has(.table-format-adaptive) {
+    width: fit-content;
+    min-width: 100%;
+    max-width: none !important; /* 覆盖 JS 内联 maxWidth: 100% */
+}
+
 /* 自动换行格式 */
 .table-format-wrap {
     width: 100% !important;
@@ -794,6 +801,12 @@ code:not(pre code)[contenteditable="true"]:focus {
 .table-wrapper:has(.table-format-scroll) {
     overflow-x: auto;
     display: block;
+}
+
+/* 修复：横向滚动时表格背景/边框跟随内容总宽度延伸（防止后半段背景断层） */
+.table-wrapper:has(.table-format-scroll) .table-enhanced-inner {
+    width: max-content;
+    min-width: 100%;
 }
 
 /* 列宽拖拽手柄 */

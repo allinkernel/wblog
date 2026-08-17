@@ -29,11 +29,6 @@
     padding-right: 4px;
 }
 
-#left-dock-container::-webkit-scrollbar,
-#right-dock-container::-webkit-scrollbar { width: 4px; }
-#left-dock-container::-webkit-scrollbar-thumb,
-#right-dock-container::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
-
 /* 面板盒子 - 可调整大小 */
 .panel-box {
     background: var(--theme-surface);
@@ -414,8 +409,6 @@
     overflow-x: auto;
     overflow-y: hidden;
 }
-.settings-tab-bar::-webkit-scrollbar { height: 3px; }
-.settings-tab-bar::-webkit-scrollbar-thumb { background: var(--theme-border); border-radius: 3px; }
 
 .settings-tab {
     background: transparent;
